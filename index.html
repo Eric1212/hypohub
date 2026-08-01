@@ -26,209 +26,70 @@
     }
     .legend div { display: flex; align-items: center; gap: .4rem; margin: .2rem 0; }
     .swatch { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
-    #panel {
-      position: absolute; left: 10px; bottom: 24px; z-index: 1000; max-width: 340px;
-      max-height: 45vh; overflow: auto; background: rgba(255,255,255,.96); color: #222;
-      padding: .6rem .8rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,.2);
-      font-size: .8rem;
-    }
-    #panel h2 { margin: 0 0 .35rem; font-size: .85rem; }
-    #panel li { margin: .25rem 0; line-height: 1.3; }
-    #panel .stat { font-weight: 600; }
   </style>
 </head>
 <body>
   <header>
     <h1>BilanRadarQC — Cinémomètres fixes (CINP)</h1>
-    <p id="stats">Chargement des sources officielles…</p>
+    <p id="stats">Chargement de la source officielle (MTMD)…</p>
   </header>
   <div id="map"></div>
   <div class="legend">
     <div><span class="swatch" style="background:#1f77b4"></span> Radar photo fixe</div>
   </div>
-  <div id="panel" hidden>
-    <h2>CINP désactivés — sans radar actif au MTMD</h2>
-    <p>Ces sites ont des constats cumulés (depuis 2009) mais aucun radar fixe
-       actif ne leur correspond aujourd'hui — radar retiré ou remplacé.</p>
-    <ul id="unmatched"></ul>
-  </div>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
           crossorigin=""></script>
   <script>
-    const CKAN_URL = 'https://www.donneesquebec.ca/recherche/api/3/action/package_show?id=statistiques-constats-signifies-radar-photographique';
     const WFS_URL = 'https://ws.mapserver.transports.gouv.qc.ca/swtq?service=wfs&request=getfeature&typename=ms:radars_photos&outputformat=geojson&version=2.0.0&srsname=EPSG:4326';
-    const SCORE_MIN = 0.55;
 
-    // ---------- parse CSV (guillemets + virgules dans les champs) ----------
-    function parseCSV(text) {
-      const rows = [];
-      let row = [], field = '', inQ = false;
-      for (let i = 0; i < text.length; i++) {
-        const c = text[i];
-        if (inQ) {
-          if (c === '"') {
-            if (text[i + 1] === '"') { field += '"'; i++; } else inQ = false;
-          } else field += c;
-        } else if (c === '"') inQ = true;
-        else if (c === ',') { row.push(field); field = ''; }
-        else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
-        else if (c !== '\r') field += c;
-      }
-      if (field.length || row.length) { row.push(field); rows.push(row); }
-      return rows;
-    }
-
-    // ---------- normalisation + tokens pour la jointure ----------
-    const STOP = new Set(['a','de','du','des','au','aux','sur','en','la','le','les','l','et','d','ou','dans','avec','entre','que','qui','est','sont','ce','cette','direction','dir']);
     const norm = s => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9 ]/g, ' ');
-    const tokens = s => norm(s).split(/\s+/).filter(t => t.length > 1 && !STOP.has(t));
-
-    function matchScore(siteMJQ, descMTMD, muniMTMD) {
-      const a = tokens(siteMJQ), b = tokens(descMTMD);
-      const sb = new Set(b);
-      const common = a.filter(t => sb.has(t));
-      const union = new Set([...a, ...b]).size;
-      let s = union ? common.length / union : 0;
-      const nm = norm(muniMTMD).trim();
-      if (nm && norm(siteMJQ).includes(nm)) s += 0.3;
-      const numA = (siteMJQ.match(/\b(?:autoroute|aut|route|rt)[.\s-]*(\d{1,3})/i) || [])[1];
-      const numB = (descMTMD.match(/\b(?:autoroute|aut|route|rt)[.\s-]*(\d{1,3})/i) || [])[1];
-      if (numA && numA === numB) s += 0.2;
-      return s;
-    }
-
-    // ---------- sources officielles ----------
-    async function loadConstats() {
-      const pkg = await (await fetch(CKAN_URL)).json();
-      const res = pkg.result.resources
-        .filter(r => (r.format || '').toUpperCase() === 'CSV')
-        .sort((x, y) => (y.last_modified || '').localeCompare(x.last_modified || ''));
-      const latest = res[0];
-      const buf = await (await fetch(latest.url)).arrayBuffer();
-      const text = new TextDecoder('iso-8859-1').decode(buf);
-      const rows = parseCSV(text);
-      const header = rows[0];
-      const iMoyen = header.indexOf('Moyen'), iSite = header.indexOf('Site');
-      const iNombre = header.indexOf('Nombre'), iMontant = header.indexOf('Montant');
-      const cinp = [];
-      for (const r of rows.slice(1)) {
-        if (r[iMoyen] !== 'CINP') continue;
-        cinp.push({ site: r[iSite], nombre: +r[iNombre] || 0, montant: +r[iMontant] || 0 });
-      }
-      return { cinp, date: latest.name.match(/\d{4}-\d{2}-\d{2}/)?.[0] || '' };
-    }
 
     async function loadRadars() {
       const fc = await (await fetch(WFS_URL)).json();
-      return fc.features.filter(f => /fixe/.test(f.properties.typeAppareil));
+      return fc.features.filter(f => f.properties.typeAppareil === 'Radar photo fixe');
     }
 
-    // ---------- jointure + carte ----------
     const map = L.map('map');
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(map);
 
-    const colors = {
-      'Radar photo fixe': '#1f77b4',
-      'Radar photo fixe et surveillance au feu rouge': '#2ca02c'
-    };
-    const colorFor = t => colors[t] || '#ff7f0e';
-    const fmt = n => Math.round(n).toLocaleString('fr-CA');
+    const fmtDate = iso => (iso || '').slice(0, 10) || '—';
 
-    Promise.all([loadConstats(), loadRadars()]).then(([{ cinp, date }, radars]) => {
-      // meilleur match par site CINP
-      const byRadar = new Map(); // index feature -> {id, type, desc, muni, region, latlng, sites:[], scores:[], nombre, montant}
-      const unmatched = [];
-      for (const c of cinp) {
-        let best = null;
-        for (let i = 0; i < radars.length; i++) {
-          const r = radars[i].properties;
-          const s = matchScore(c.site, r.description, r.municipalite);
-          if (!best || s > best.s) best = { i, s };
-        }
-        if (best.s >= SCORE_MIN) {
-          const g = radars[best.i];
-          const p = g.properties;
-          // Hors périmètre : « fixe et surveillance au feu rouge » = intersection,
-          // accidentogène par nature — exclu du bilan (0 affiché).
-          if (p.typeAppareil !== 'Radar photo fixe') continue;
-          // Hors périmètre : fixe pur situé À une intersection (ex. Saint-Georges,
-          // boul. Lacroix / 114e Rue) — même logique accidentogène.
-          if (norm(p.description).includes('a l intersection')) continue;
-          let e = byRadar.get(best.i);
-          if (!e) {
-            const id = (p.urlImage.match(/idSite=(\d+)/) || [])[1];
-            e = {
-              id, type: p.typeAppareil, desc: p.description,
-              muni: p.municipalite, region: p.region,
-              latlng: [g.geometry.coordinates[1], g.geometry.coordinates[0]],
-              sites: [], scores: [], nombre: 0, montant: 0
-            };
-            byRadar.set(best.i, e);
-          }
-          e.sites.push(c.site);
-          e.scores.push(best.s);
-          e.nombre += c.nombre;
-          e.montant += c.montant;
-        } else {
-          unmatched.push(c);
-        }
-      }
-
+    loadRadars().then(radars => {
       const pts = [];
-      for (const e of byRadar.values()) {
-        const mk = L.circleMarker(e.latlng, {
+      let n = 0;
+      for (const f of radars) {
+        const p = f.properties;
+        // Hors périmètre : fixe pur situé À une intersection (ex. Saint-Georges,
+        // boul. Lacroix / 114e Rue) — accidentogène par nature, exclu.
+        if (norm(p.description).includes('a l intersection')) continue;
+        n++;
+        const id = (p.urlImage.match(/idSite=(\d+)/) || [])[1] || '?';
+        const latlng = [f.geometry.coordinates[1], f.geometry.coordinates[0]];
+        const mk = L.circleMarker(latlng, {
           radius: 10, color: '#fff', weight: 1.5,
-          fillColor: colorFor(e.type), fillOpacity: .85
+          fillColor: '#1f77b4', fillOpacity: .85
         });
-        const sitesHtml = e.sites.map((s, i) =>
-          `<li><em>${s}</em> <span style="color:#777">(score ${Math.round(e.scores[i] * 100)}%)</span></li>`
-        ).join('');
         mk.bindPopup(`
           <div style="font-size:.82rem; line-height:1.35; max-width:320px;">
-            <strong>${e.desc}</strong>
-            <div style="margin-top:.3rem"><strong>Région / Municipalité (MTMD) :</strong> ${e.region} / ${e.muni}</div>
-            <div><strong>Type :</strong> ${e.type} <span style="color:#777">(idSite ${e.id})</span></div>
-            <hr style="margin:.4rem 0">
-            <div><strong>Site(s) des constats (MJQ) :</strong></div>
-            <ul style="margin:.25rem 0 .4rem; padding-left:1.1rem;">${sitesHtml}</ul>
-            <div>Constats (cumul) : <strong>${fmt(e.nombre)}</strong></div>
-            <div>Montant : <strong>${fmt(e.montant)} $</strong></div>
+            <strong>${p.description}</strong>
+            <div style="margin-top:.3rem"><strong>Région / Municipalité (MTMD) :</strong> ${p.region} / ${p.municipalite}</div>
+            <div><strong>Type :</strong> ${p.typeAppareil} <span style="color:#777">(idSite ${id})</span></div>
+            <div><strong>En service depuis :</strong> ${fmtDate(p.dateDebutService)}</div>
           </div>`);
         mk.addTo(map);
-        pts.push(e.latlng);
+        pts.push(latlng);
       }
-
-      // panneau CINP sans correspondance
-      if (unmatched.length) {
-        const ul = document.getElementById('unmatched');
-        for (const u of unmatched) {
-          const li = document.createElement('li');
-          li.innerHTML = `<em>${u.site}</em><br>constats : <span class="stat">${fmt(u.nombre)}</span> — <span class="stat">${fmt(u.montant)} $</span>`;
-          ul.appendChild(li);
-        }
-        document.getElementById('panel').hidden = false;
-      }
-
-      const matchedN = [...byRadar.values()].reduce((a, e) => a + e.nombre, 0);
-      const matchedM = [...byRadar.values()].reduce((a, e) => a + e.montant, 0);
-      const unmatchedN = unmatched.reduce((a, c) => a + c.nombre, 0);
-      const totN = matchedN + unmatchedN;
-      const totM = matchedM + unmatched.reduce((a, c) => a + c.montant, 0);
       document.getElementById('stats').textContent =
-        `${byRadar.size + unmatched.length} CINP fixes purs (cumul 2009→${date}) — ` +
-        `${byRadar.size} sur carte, ${unmatched.length} désactivés — ` +
-        `${fmt(totN)} constats / ${fmt(totM)} $`;
-
+        `${n} radars photo fixes en service (hors intersections) — Source : MTMD (WFS)`;
       if (pts.length) map.fitBounds(L.latLngBounds(pts).pad(0.2));
       else map.setView([46.5, -72.0], 6);
     }).catch(err => {
       document.getElementById('stats').textContent = 'Erreur de chargement : ' + err.message;
       map.setView([46.5, -72.0], 6);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
     });
   </script>
 </body>
