@@ -169,7 +169,8 @@
       }
 
       cells.forEach((c, i) => {
-        L.polygon(c.ring, {
+        // Leaflet attend [lat, lon] — les rings (GeoJSON ESRI) sont en [lon, lat]
+        L.polygon(c.ring.map(([lon, lat]) => [lat, lon]), {
           color: '#333', weight: 1.2, fillColor: COLORS[i % COLORS.length], fillOpacity: .45
         }).bindPopup(`
           <div style="font-size:.82rem; line-height:1.35; max-width:320px;">
