@@ -1,0 +1,499 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "properties": {
+    "site": "à Boucherville, à 200 m de la bretelle du boulevard de Mortagne sur l'autoroute 20 Ouest",
+    "region": "Montérégie",
+    "municipalite": "Boucherville",
+    "typeAppareil": "Radar photo fixe",
+    "descriptionMTMD": "Autoroute 20 en direction ouest, environ 200 m avant la bretelle du boulevard de Mortagne",
+    "nombre": 250017,
+    "montant": 26058713.0
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -73.4422,
+     45.5714
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "site": "À Boucherville, à 200 mètres de la bretelle du boulevard Mortagne sur l'autoroute ouest sur un chantier de construction.",
+    "region": "Montérégie",
+    "municipalite": "Boucherville",
+    "typeAppareil": "Radar photo fixe",
+    "descriptionMTMD": "Autoroute 20 en direction ouest, environ 200 m avant la bretelle du boulevard de Mortagne",
+    "nombre": 13013,
+    "montant": 4054059.0
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -73.4422,
+     45.5714
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "site": "À Brossard, à l'intersection du boulevard Taschereau et de l'avenue Panama, sur le boulevard Taschereau en direction sud",
+    "region": "Montérégie",
+    "municipalite": "Longueuil",
+    "typeAppareil": "Radar photo mobile",
+    "descriptionMTMD": "Boulevard Taschereau, entre le chemin Saint-Charles et l'intersection de la rue Lawrence et de l'avenue Auguste",
+    "nombre": 90372,
+    "montant": 9484473.0
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -73.476843,
+     45.491796
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "site": "À Charlemagne, à 150 m de l'autoroute 640 sur l'autoroute 40 Est",
+    "region": "Montérégie",
+    "municipalite": "Boucherville",
+    "typeAppareil": "Radar photo fixe",
+    "descriptionMTMD": "Autoroute 20 en direction ouest, environ 200 m avant la bretelle du boulevard de Mortagne",
+    "nombre": 184986,
+    "montant": 23485227.0
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -73.4422,
+     45.5714
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "site": "À Gatineau, à l'intersection du boulevard Maisonneuve et du boulevard Sacré-Coeur, sur le boulevard Maisonneuve en direction nord",
+    "region": "Outaouais",
+    "municipalite": "Gatineau",
+    "typeAppareil": "Radar photo fixe et surveillance au feu rouge",
+    "descriptionMTMD": "Boulevard Maisonneuve, à l'intersection du boulevard Sacré-Coeur",
+    "nombre": 113344,
+    "montant": 10795101.0
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.71196,
+     45.43691
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "site": "À L'Ange-Gardien, à l'intersection de la route 138 et de la rue Casgrain, sur la route 138 en direction nord-est",
+    "region": "Chaudière-Appalaches",
+    "municipalite": "Thetford Mines",
+    "typeAppareil": "Appareil de surveillance au feu rouge",
+    "descriptionMTMD": "Route 112 en direction nord-est, dénommée boulevard Frontenac Est, à l'intersection du boulevard Ouellet",
+    "nombre": 89275,
+    "montant": 8718129.0
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -71.3026,
+     46.1103
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "site": "À Laval, à 210 m du boulevard Ste-Rose sur l'autoroute 15 Nord",
+    "region": "Capitale-Nationale",
+    "municipalite": "Québec",
+    "typeAppareil": "Radar photo fixe",
+    "descriptionMTMD": "Autoroute 440 en direction est, environ 200 m avant l'intersection avec le boulevard François-De Laval",
+    "nombre": 145287,
+    "montant": 18044626.0
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -71.20058,
+     46.85028
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "site": "À Laval, sur le boulevard Saint-Martin, à l'intersection de la route 335, dénommée boulevard des Laurentides, en direction sud-ouest",
+    "region": "Laval",
+    "municipalite": "Laval",
+    "typeAppareil": "Radar photo fixe et surveillance au feu rouge",
+    "descriptionMTMD": "Boulevard Saint-Martin Est, à l'intersection du boulevard des Laurentides, en direction sud-ouest",
+    "nombre": 4780,
+    "montant": 448311.0
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -73.70487,
+     45.58212
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "site": "à Laval, sur le boul. Saint-Martin, à l'intersection de la route 335, dénommée boul. des Laurentides, dir. sud-ouest",
+    "region": "Laval",
+    "municipalite": "Laval",
+    "typeAppareil": "Radar photo fixe et surveillance au feu rouge",
+    "descriptionMTMD": "Boulevard Saint-Martin Est, à l'intersection du boulevard des Laurentides, en direction sud-ouest",
+    "nombre": 1086,
+    "montant": 142677.0
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -73.70487,
+     45.58212
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "site": "à Lévis, à 1 km de la sortie pour le pont Pierre Laporte sur le collecteur de l'autoroute 20",
+    "region": "Chaudière-Appalaches",
+    "municipalite": "Lévis",
+    "typeAppareil": "Radar photo fixe",
+    "descriptionMTMD": "Collecteur de l'autoroute 20 en direction ouest, environ 1 km avant la sortie en direction du pont Pierre-Laporte",
+    "nombre": 100536,
+    "montant": 11832046.0
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -71.26332,
+     46.7278
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "site": "À Mirabel, à 320 m du chemin de la Côte Nord sur l'autoroute 15 Sud",
+    "region": "Capitale-Nationale",
+    "municipalite": "Québec",
+    "typeAppareil": "Radar photo mobile",
+    "descriptionMTMD": "Chemins publics composant le secteur Moreau délimité par l'autoroute 740, le chemin Sainte-Foy, l'avenue du Chanoine-Scott et le boulevard du Versant-Nord.",
+    "nombre": 387452,
+    "montant": 50782485.0
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -71.298037,
+     46.784493
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "site": "à Montréal, à 300 m de la sortie Atwater sur l'autoroute 15 Sud",
+    "region": "Chaudière-Appalaches",
+    "municipalite": "Lévis",
+    "typeAppareil": "Radar photo fixe",
+    "descriptionMTMD": "Collecteur de l'autoroute 20 en direction ouest, environ 1 km avant la sortie en direction du pont Pierre-Laporte",
+    "nombre": 139797,
+    "montant": 25220122.0
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -71.26332,
+     46.7278
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "site": "À Montréal, à 350 m de la rue Airlie sur le route 138 Est",
+    "region": "Outaouais",
+    "municipalite": "Gatineau",
+    "typeAppareil": "Radar photo mobile",
+    "descriptionMTMD": "Chemin de Montréal Est (route 148), entre le chemin Wilfrid-Lépine et la limite municipale du canton de Lochaber-Partie-Ouest",
+    "nombre": 95537,
+    "montant": 12297441.0
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -75.367726,
+     45.555205
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "site": "A Montréal, à l'intersection de la rue Berri et du boulevard Henri-Bourassa Est",
+    "region": "Montréal",
+    "municipalite": "Montréal",
+    "typeAppareil": "Radar photo fixe et surveillance au feu rouge",
+    "descriptionMTMD": "Rue Berri, à l'intersection du boulevard Henri-Bourassa Est",
+    "nombre": 15491,
+    "montant": 1592975.0
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -73.668969,
+     45.554517
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "site": "À Montréal, à l'intersection de la rue Berri et du boulevard Henri-Bourassa Est, sur la rue Berri",
+    "region": "Montréal",
+    "municipalite": "Montréal",
+    "typeAppareil": "Radar photo fixe et surveillance au feu rouge",
+    "descriptionMTMD": "Rue Berri, à l'intersection du boulevard Henri-Bourassa Est",
+    "nombre": 7575,
+    "montant": 762663.0
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -73.668969,
+     45.554517
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "site": "à Montréal, entre Le Boulevard et l'avenue Cedar sur le chemin McDougall",
+    "region": "Montréal",
+    "municipalite": "Montréal",
+    "typeAppareil": "Radar photo fixe",
+    "descriptionMTMD": "Chemin McDougall en direction est, entre Le Boulevard et l'avenue Cedar",
+    "nombre": 11384,
+    "montant": 1148896.0
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -73.595,
+     45.49459
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "site": "à Pincourt, à 350 m à l'ouest du boulevard de l'Île sur l'autoroute 20 Est",
+    "region": "Montérégie",
+    "municipalite": "Boucherville",
+    "typeAppareil": "Radar photo fixe",
+    "descriptionMTMD": "Autoroute 20 en direction ouest, environ 200 m avant la bretelle du boulevard de Mortagne",
+    "nombre": 156081,
+    "montant": 18003329.0
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -73.4422,
+     45.5714
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "site": "à Québec, à 150 mètres du boulevard François-De Laval sur l'autoroute 440 Est",
+    "region": "Capitale-Nationale",
+    "municipalite": "Québec",
+    "typeAppareil": "Radar photo fixe",
+    "descriptionMTMD": "Autoroute 440 en direction est, environ 200 m avant l'intersection avec le boulevard François-De Laval",
+    "nombre": 136463,
+    "montant": 19835351.0
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -71.20058,
+     46.85028
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "site": "À Québec, à 330 m de l'avenue D'Estimauville sur l'autoroute 40 Ouest",
+    "region": "Capitale-Nationale",
+    "municipalite": "Québec",
+    "typeAppareil": "Radar photo fixe",
+    "descriptionMTMD": "Autoroute 40 en direction ouest, environ 330 m après le pont de l'avenue D'Estimauville  ",
+    "nombre": 83859,
+    "montant": 10544694.0
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -71.2313,
+     46.85186
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "site": "À Québec, à 450 m du boulevard Hochelaga sur l'autoroute 73 Nord",
+    "region": "Capitale-Nationale",
+    "municipalite": "Québec",
+    "typeAppareil": "Radar photo mobile",
+    "descriptionMTMD": "Chemins publics composant le secteur Moreau délimité par l'autoroute 740, le chemin Sainte-Foy, l'avenue du Chanoine-Scott et le boulevard du Versant-Nord.",
+    "nombre": 64234,
+    "montant": 7831361.0
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -71.298037,
+     46.784493
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "site": "À Québec, à l'intersection de l'autoroute 573 et de l'avenue Industrielle, sur l'autoroute 573 en direction nord-ouest",
+    "region": "Capitale-Nationale",
+    "municipalite": "Québec",
+    "typeAppareil": "Radar photo fixe et surveillance au feu rouge",
+    "descriptionMTMD": "Autoroute 573, à l'intersection de l'avenue Industrielle",
+    "nombre": 14484,
+    "montant": 1464004.0
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -71.40697,
+     46.85799
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "site": "À Québec, à l'intersection du boulevard Charest ouest et de l'avenue Saint-Sacrement, sur le boulevard Charest en direction nord-est",
+    "region": "Capitale-Nationale",
+    "municipalite": "Québec",
+    "typeAppareil": "Radar photo fixe et surveillance au feu rouge",
+    "descriptionMTMD": "Boulevard Charest Ouest, à l'intersection de l'avenue Saint-Sacrement",
+    "nombre": 230253,
+    "montant": 26128770.0
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -71.257939,
+     46.798854
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "site": "À Saint-Esprit, à l'intersection de la route 158 et de la route 125, sur la route 158 en direction nord",
+    "region": "Chaudière-Appalaches",
+    "municipalite": "Vallée-Jonction",
+    "typeAppareil": "Radar photo mobile",
+    "descriptionMTMD": "Route 112 en direction ouest, entre les limites de Saint-Frédéric et l'intersection des routes 112 et 173",
+    "nombre": 17167,
+    "montant": 1845623.0
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -70.941143,
+     46.370212
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "site": "à Saint-Georges, à la hauteur de l'intersection de la 114e Rue sur le boulevard Lacroix (route 173)",
+    "region": "Chaudière-Appalaches",
+    "municipalite": "Saint-Georges",
+    "typeAppareil": "Radar photo fixe",
+    "descriptionMTMD": "Boulevard Lacroix (route 173) en direction sud, à l'intersection de la 114e Rue",
+    "nombre": 50380,
+    "montant": 4516919.0
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -70.6731,
+     46.1244
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "site": "À Saint-Hyacinthe, à l'intersection du boulevard Laframboise et du boulevard Casavant ouest, sur le boulevard Laframboise en direction sud-est",
+    "region": "Laval",
+    "municipalite": "Laval",
+    "typeAppareil": "Radar photo fixe et surveillance au feu rouge",
+    "descriptionMTMD": "Boulevard Saint-Martin Est, à l'intersection du boulevard des Laurentides, en direction sud-ouest",
+    "nombre": 35360,
+    "montant": 3348525.0
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -73.70487,
+     45.58212
+    ]
+   }
+  },
+  {
+   "type": "Feature",
+   "properties": {
+    "site": "À Salaberry-de-Valleyfield, à l'intersection de la route 201 et de l'avenue de Grande-Île, sur la route 201 en direction sud-ouest",
+    "region": "Laval",
+    "municipalite": "Laval",
+    "typeAppareil": "Appareil de surveillance au feu rouge",
+    "descriptionMTMD": "Boulevard de la Concorde Ouest, à l'intersection de la 12e Avenue, en direction nord-est",
+    "nombre": 57703,
+    "montant": 5656655.0
+   },
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     -73.70197,
+     45.56505
+    ]
+   }
+  }
+ ]
+}

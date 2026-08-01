@@ -3,35 +3,99 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>BilanRadarQC — stub</title>
+  <title>BilanRadarQC — Carte des CINP</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin="">
   <style>
     :root { color-scheme: light dark; }
-    body {
-      margin: 0;
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      font-family: system-ui, sans-serif;
-      background: #f4f4f4;
+    html, body { margin: 0; height: 100%; font-family: system-ui, sans-serif; }
+    #map { position: absolute; inset: 0; }
+    header {
+      position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+      z-index: 1000; background: rgba(255,255,255,.95); color: #222;
+      padding: .5rem 1rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,.2);
+      font-size: .85rem; text-align: center; max-width: 90vw;
     }
-    main {
-      text-align: center;
-      padding: 2rem;
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,.1);
+    header h1 { margin: 0; font-size: 1rem; }
+    header p { margin: .15rem 0 0; color: #555; }
+    .legend {
+      position: absolute; bottom: 24px; right: 10px; z-index: 1000;
+      background: rgba(255,255,255,.95); color: #222; padding: .5rem .75rem;
+      border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,.2); font-size: .8rem;
     }
-    h1 { margin: 0 0 .5rem; font-size: 1.5rem; }
-    p  { margin: 0; color: #555; }
-    code { font-size: .9rem; }
+    .legend div { display: flex; align-items: center; gap: .4rem; margin: .2rem 0; }
+    .swatch { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
   </style>
 </head>
 <body>
-  <main>
-    <h1>BilanRadarQC</h1>
-    <p>Stub de validation — GitHub Pages fonctionne.</p>
-    <p><code>v0.1-stub</code></p>
-  </main>
+  <header>
+    <h1>BilanRadarQC — Validation des emplacements CINP</h1>
+    <p id="stats">Chargement…</p>
+  </header>
+  <div id="map"></div>
+  <div class="legend">
+    <div><span class="swatch" style="background:#1f77b4"></span> Radar photo fixe</div>
+    <div><span class="swatch" style="background:#2ca02c"></span> Fixe + feu rouge</div>
+    <div><span class="swatch" style="background:#ff7f0e"></span> Autre</div>
+  </div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+          crossorigin=""></script>
+  <script>
+    const map = L.map('map');
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+    const colors = {
+      'Radar photo fixe': '#1f77b4',
+      'Radar photo fixe et surveillance au feu rouge': '#2ca02c'
+    };
+    const colorFor = t => colors[t] || '#ff7f0e';
+    const fmt = n => Math.round(n).toLocaleString('fr-CA');
+
+    fetch('data/cinp.geojson')
+      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(fc => {
+        const pts = [];
+        const layer = L.geoJSON(fc, {
+          pointToLayer: (f, latlng) => L.circleMarker(latlng, {
+            radius: 9, color: '#fff', weight: 1.5,
+            fillColor: colorFor(f.properties.typeAppareil), fillOpacity: .85
+          }),
+          onEachFeature: (f, layer) => {
+            const p = f.properties;
+            layer.bindPopup(`
+              <div style="font-size:.85rem; line-height:1.35; max-width:320px;">
+                <strong>${p.site || '—'}</strong>
+                <hr style="margin:.4rem 0">
+                <div><strong>Emplacement MTMD :</strong><br>${p.descriptionMTMD || '—'}</div>
+                <div style="margin-top:.3rem"><strong>Région / Municipalité (MTMD) :</strong><br>${p.region || '—'} / ${p.municipalite || '—'}</div>
+                <div style="margin-top:.3rem"><strong>Type :</strong> ${p.typeAppareil || '—'}</div>
+                <hr style="margin:.4rem 0">
+                <div>Constats (cumul) : <strong>${fmt(p.nombre)}</strong></div>
+                <div>Montant : <strong>${fmt(p.montant)} $</strong></div>
+              </div>`);
+            pts.push(latlng);
+          }
+        }).addTo(map);
+
+        const n = fc.features.length;
+        const tot = fc.features.reduce((a, f) => a + (f.properties.nombre || 0), 0);
+        const mont = fc.features.reduce((a, f) => a + (f.properties.montant || 0), 0);
+        document.getElementById('stats').textContent =
+          `${n} sites CINP chargés — ${fmt(tot)} constats — ${fmt(mont)} $`;
+
+        if (pts.length) map.fitBounds(L.latLngBounds(pts).pad(0.2));
+        else map.setView([46.5, -72.0], 6);
+      })
+      .catch(err => {
+        document.getElementById('stats').textContent = 'Erreur de chargement : ' + err.message;
+        map.setView([46.5, -72.0], 6);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+      });
+  </script>
 </body>
 </html>
