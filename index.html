@@ -155,6 +155,9 @@
           // Hors périmètre : « fixe et surveillance au feu rouge » = intersection,
           // accidentogène par nature — exclu du bilan (0 affiché).
           if (p.typeAppareil !== 'Radar photo fixe') continue;
+          // Hors périmètre : fixe pur situé À une intersection (ex. Saint-Georges,
+          // boul. Lacroix / 114e Rue) — même logique accidentogène.
+          if (norm(p.description).includes('a l intersection')) continue;
           let e = byRadar.get(best.i);
           if (!e) {
             const id = (p.urlImage.match(/idSite=(\d+)/) || [])[1];
