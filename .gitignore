@@ -7,3 +7,6 @@
 
 # Logs
 *.log
+
+# Config locale générée par config.php (contient les identifiants MySQL)
+lib/config.local.php
