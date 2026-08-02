@@ -1,4 +1,4 @@
-# CLAUDE.md — BilanRadarQC
+# CLAUDE.md — Hypohub
 
 Règles de travail applicables à ce dépôt. Elles prévalent sur toute autre considération.
 
@@ -20,38 +20,33 @@ Règles de travail applicables à ce dépôt. Elles prévalent sur toute autre c
 
 ## Projet
 
-Bilan + simulation des radars photo (systèmes de détection) au Québec, sur
-plus de 10 ans de données réelles (2009 → aujourd'hui).
+Hypohub — guichet unique de référencement de financements hypothécaires privés au Québec.
 
-- **Bilan** : état des lieux radar par radar — limites, types (fixe / mobile /
-  zone scolaire / chantier), seuils de déclenchement, constats réels.
-- **Simulation** : à partir des données réelles, modéliser l'impact de limites
-  alternatives (100, 110, 120, 130, 140, 150 km/h…) — constats, revenus, impacts.
-- **Public cible** : citoyens curieux, data scientists, décideurs politiques.
+- **Métier** : mise en relation entre emprunteurs (1er/2e rang, cas refusés par
+  les banques) et prêteurs privés / courtiers hypothécaires.
+- **Monétisation** : commission de 25 pdb (0,25 %) sur la valeur de l'hypothèque
+  (pas le solde ni la valeur de la propriété), facturée au créancier/courtier au
+  moment de l'enregistrement au Registre foncier.
+- **Véhicule** : Financière B&A Inc. (dormante, NEQ 1177249589) — domaine corporate
+  `bafinanciere.ca`. Domaine de la plateforme : `hypohub.ca` (à réserver).
+- **Benchmark** : PADS Financial (fr.padsfinancial.com) — fintech montréalaise de
+  prêts hypothécaires privés, analysée en profondeur.
+- **Marché** : Québec. Prêteurs hypothécaires privés (alternatifs) et courtiers.
 
 ## Stack
 
-- Web statique (HTML/JS), hébergé sur GitHub Pages.
-- Open source, licence MIT.
-
-## Données sources (à inventorier)
-
-- Rapports d'accès à l'information du ministère de la Justice du Québec
-  (constats signifiés depuis 2009).
-- Listes des sites fixes / mobiles désignés.
-- Grille officielle des amendes (SAAQ).
-- Seuils de déclenchement des systèmes de détection.
+À définir — pas de GitHub Pages.
 
 ## Conventions
 
-- Stub initial — aucune structure de code encore en place.
-- Documentation technique uniquement si demandée.
+- Référentiel du modèle d'affaires : courriel Éric (SADC Shawinigan, commission
+  25 pdb, MVP 5 000 $).
 
 ## Memory & Personal Context
 
 La mémoire persistante vit hors du repo, dans
-`~/.claude/projects/-home-eric-dev-bilanradarqc/memory/` (index `MEMORY.md`).
+`~/.claude/projects/-home-eric-dev-hypohub/memory/` (index `MEMORY.md`).
 Lire ce fichier avant d'assumer une convention ou une préférence d'Éric.
 
-You MUST LOAD `~/.claude/projects/-home-eric-dev-bilanradarqc/memory/MEMORY.md`
+You MUST LOAD `~/.claude/projects/-home-eric-dev-hypohub/memory/MEMORY.md`
 PERMANENTLY.

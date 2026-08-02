@@ -1,37 +1,18 @@
-# BilanRadarQC
+# Hypohub
 
-**Le Québec, mesuré radar par radar.**
+**Le guichet unique du financement hypothécaire privé au Québec.**
 
-Bilan + simulation des radars photo (systèmes de détection) au Québec.
-Profite de plus de 10 ans de données réelles d'implémentation (2009 → aujourd'hui)
-pour documenter la situation, puis simuler des régimes de limite alternatifs
-(100, 110, 120, 130, 140, 150 km/h…) et leurs impacts.
+Hypohub met en relation les emprunteurs que les banques refusent avec des
+prêteurs privés et des courtiers hypothécaires.
 
 ## Concept
 
-- **Bilan** : état des lieux factuel, radar par radar — limites, types (fixe /
-  mobile / zone scolaire / chantier), seuils de déclenchement, constats réels.
-- **Simulation** : à partir des données réelles, modéliser ce que produirait un
-  changement de limite ou de tolérance — constats, revenus, impacts.
-- **Public cible** : citoyens curieux, data scientists, décideurs politiques.
-
-## Données sources (à inventorier)
-
-- Rapports d'accès à l'information du ministère de la Justice du Québec
-  (constats signifiés depuis 2009)
-- Listes des sites fixes / mobiles désignés
-- Grille officielle des amendes (SAAQ)
-- Seuils de déclenchement des systèmes de détection
-
-## Stack
-
-- Web statique (HTML/JS), hébergé sur GitHub Pages
-- Open source
+- **Référencement** : les emprunteurs déposent leur demande sur la plateforme,
+  les prêteurs/courtiers la prennent en charge.
+- **Monétisation** : 25 pdb (0,25 %) sur la valeur de l'hypothèque, facturée au
+  créancier/courtier à l'enregistrement.
+- **Marché** : financement hypothécaire privé au Québec (1er/2e rang).
 
 ## Statut
 
-Stub initial — structure à venir.
-
-## Licence
-
-MIT
+Projet en démarrage — nom et domaine choisis (hypohub.ca à réserver).
