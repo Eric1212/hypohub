@@ -91,6 +91,9 @@ function initPage() {
         });
     });
 
+    // Modales de création (espace membre) : ouverture, fermeture, soumission.
+    initCreate();
+
     // Défilement fluide vers les ancres internes.
     document.querySelectorAll('a[href^="#"]').forEach(function (a) {
         a.addEventListener('click', function (e) {
@@ -209,10 +212,17 @@ function initAuth() {
 
 /** Soumet un formulaire de la modale en JSON ; recharge la page en cas de succès. */
 function attachAuthForm(form, url) {
+    attachJsonForm(form, url, function () {
+        window.location.href = 'index.php?page=espace';
+    });
+}
+
+/** Soumet un formulaire en JSON ; onSuccess est appelée si le serveur répond {ok:true}. */
+function attachJsonForm(form, url, onSuccess) {
     form.addEventListener('submit', function (e) {
         e.preventDefault();
-        var errEl = form.querySelector('[data-auth-error]');
-        errEl.hidden = true;
+        var errEl = form.querySelector('[data-auth-error],[data-create-error]');
+        if (errEl) errEl.hidden = true;
 
         var data = {};
         new FormData(form).forEach(function (v, k) { data[k] = v; });
@@ -232,20 +242,74 @@ function attachAuthForm(form, url) {
             btn.disabled = false;
             btn.textContent = original;
             if (res.ok) {
-                // Redirection vers l'espace membre (le serveur rend le footer connecté).
-                window.location.href = 'index.php?page=espace';
+                onSuccess();
             } else {
-                errEl.textContent = res.error || form.getAttribute('data-err-network');
-                errEl.hidden = false;
+                if (errEl) {
+                    errEl.textContent = res.error || form.getAttribute('data-err-network');
+                    errEl.hidden = false;
+                }
             }
         })
         .catch(function () {
             btn.disabled = false;
             btn.textContent = original;
-            errEl.textContent = form.getAttribute('data-err-network');
-            errEl.hidden = false;
+            if (errEl) {
+                errEl.textContent = form.getAttribute('data-err-network');
+                errEl.hidden = false;
+            }
         });
     });
+}
+
+/**
+ * Modales de création d'items (espace membre).
+ * Une modale unique (#create_modal) contient un formulaire par type
+ * (profil / propriete / dossier / creancier) ; le bouton cliqué
+ * ([data-create-open]) montre le formulaire correspondant.
+ */
+function initCreate() {
+    var modal = document.getElementById('create_modal');
+    if (!modal) return;
+
+    document.querySelectorAll('[data-create-open]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            openCreateModal(btn.getAttribute('data-create-open'));
+        });
+    });
+
+    modal.querySelectorAll('[data-create-close]').forEach(function (el) {
+        el.addEventListener('click', closeCreateModal);
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeCreateModal();
+    });
+
+    modal.querySelectorAll('form[data-create-type]').forEach(function (form) {
+        var type = form.getAttribute('data-create-type');
+        attachJsonForm(form, 'api/create_' + type + '.php', function () {
+            window.location.href = 'index.php?page=espace';
+        });
+    });
+}
+
+function openCreateModal(type) {
+    var modal = document.getElementById('create_modal');
+    if (!modal) return;
+    modal.querySelectorAll('form[data-create-type]').forEach(function (f) {
+        f.hidden = f.getAttribute('data-create-type') !== type;
+    });
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+    var first = modal.querySelector('form[data-create-type="' + type + '"] input, form[data-create-type="' + type + '"] select');
+    if (first) first.focus();
+}
+
+function closeCreateModal() {
+    var modal = document.getElementById('create_modal');
+    if (!modal) return;
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
 }
 
 /** Intercepte les clics sur les liens internes pour naviguer en AJAX. */

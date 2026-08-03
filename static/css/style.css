@@ -472,6 +472,34 @@ a:hover { color: #3180BC; }
 
 .auth-error { color: #b00020; font-size: 0.85rem; margin: 0.5rem 0; }
 
+/* Modale de création : champs additionnels (select, nombre, zone de texte). */
+.auth-form select,
+.auth-form input[type=number],
+.auth-form textarea {
+    width: 100%;
+    padding: 0.5rem 0.6rem;
+    border: 1px solid #98bfdd;
+    border-radius: 0.25rem;
+    font-family: inherit;
+    font-size: 0.9rem;
+    background: #fff;
+}
+
+.create-title {
+    font-size: 1.1rem;
+    color: #303030;
+    margin: 0 0 0.9rem;
+    font-weight: 500;
+}
+
+/* Bouton « + Ajouter » des sections de l'espace membre (toujours visible). */
+.btn-add {
+    display: inline-block;
+    margin-top: 0.6rem;
+    font-size: 0.75rem;
+    padding: 0.35rem 0.9rem;
+}
+
 /* ---------- Espace membre ---------- */
 
 /* Accordéons imbriqués (règle d'Éric : H3 ET H4 pliables).

@@ -101,6 +101,7 @@ function espace_detail($label, $value) {
                                 <?php else: ?>
                                     <p class="note"><?php echo htmlspecialchars(t('space.empty'), ENT_QUOTES, 'UTF-8'); ?></p>
                                 <?php endif; ?>
+                                <button type="button" class="btn btn-outline btn-add" data-create-open="profil"><?php echo htmlspecialchars(t('create.btn.profil'), ENT_QUOTES, 'UTF-8'); ?></button>
                             </div>
                         </div>
                     </li>
@@ -127,6 +128,7 @@ function espace_detail($label, $value) {
                                 <?php else: ?>
                                     <p class="note"><?php echo htmlspecialchars(t('space.empty'), ENT_QUOTES, 'UTF-8'); ?></p>
                                 <?php endif; ?>
+                                <button type="button" class="btn btn-outline btn-add" data-create-open="propriete"><?php echo htmlspecialchars(t('create.btn.propriete'), ENT_QUOTES, 'UTF-8'); ?></button>
                             </div>
                         </div>
                     </li>
@@ -153,6 +155,7 @@ function espace_detail($label, $value) {
                                 <?php else: ?>
                                     <p class="note"><?php echo htmlspecialchars(t('space.empty'), ENT_QUOTES, 'UTF-8'); ?></p>
                                 <?php endif; ?>
+                                <button type="button" class="btn btn-outline btn-add" data-create-open="dossier"><?php echo htmlspecialchars(t('create.btn.dossier'), ENT_QUOTES, 'UTF-8'); ?></button>
                             </div>
                         </div>
                     </li>
@@ -188,6 +191,7 @@ function espace_detail($label, $value) {
                                 <?php else: ?>
                                     <p class="note"><?php echo htmlspecialchars(t('space.empty'), ENT_QUOTES, 'UTF-8'); ?></p>
                                 <?php endif; ?>
+                                <button type="button" class="btn btn-outline btn-add" data-create-open="creancier"><?php echo htmlspecialchars(t('create.btn.creancier'), ENT_QUOTES, 'UTF-8'); ?></button>
                             </div>
                         </div>
                     </li>
@@ -223,3 +227,9 @@ function espace_detail($label, $value) {
         </div>
     </div>
 </section>
+
+<?php
+$create_profils    = isset($profils) ? $profils : array();
+$create_proprietes = isset($proprietes) ? $proprietes : array();
+include __DIR__ . '/partials/create_modal.php';
+?>
