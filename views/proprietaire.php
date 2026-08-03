@@ -1,5 +1,5 @@
 <?php
-/** Hypohub — page Emprunter (profil emprunteur, pleine hauteur). */
+/** Hypohub — page Je suis propriétaire (profil propriétaire, pleine hauteur). */
 ?>
 <section class="page-banner">
     <div class="page-banner-inner">
