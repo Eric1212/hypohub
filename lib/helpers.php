@@ -59,8 +59,10 @@ function redirect($url) {
  * - proprietaires: propriétaires seuls + courtiers (= comptes à accès
  *                  propriétaire). Le courtier figure dans les DEUX stats
  *                  (accès créancier ET propriétaire), sans compter double.
- * - total        : somme des montants demandés des mêmes 3 catégories
- *                  (nouveau/accepte/finalise), pour affichage en K$.
+ * - total        : somme des montants demandés (3 catégories) de la fenêtre
+ *                  retenue par la stat 1 — le volume montré avec les demandes.
+ * - total_global : même somme mais toutes dates confondues (cumul) ; l'accueil
+ *                  affiche « total / total_global » en K$.
  *
  * Base indisponible → repli minimal (jamais de 0 affiché, page jamais cassée).
  */
@@ -71,6 +73,7 @@ function home_stats() {
         'creanciers'    => 1,
         'proprietaires' => 1,
         'total'         => 0,
+        'total_global'  => 0,
     );
 
     try {
@@ -93,6 +96,7 @@ function home_stats() {
         }
 
         $base = 'jour';
+        $repli = false;
         foreach ($periods as $p => $info) {
             if ($ratios[$p] > $ratios[$base]) {
                 $base = $p;
@@ -103,6 +107,7 @@ function home_stats() {
             // Ratio < 1 partout (activité trop faible ou absente) : repli.
             $stats['demandes'] = 1;
             $stats['periode']  = 'jour';
+            $repli = true;
         } else {
             // Cascade : seuils ×1,98 vers la droite ; recalcul après montée.
             $keys = array_keys($periods);
@@ -134,10 +139,18 @@ function home_stats() {
         // stat 2 — il apparaît dans les deux stats, sans compter double).
         $stats['proprietaires'] = (int) $pdo->query('SELECT COUNT(*) FROM users WHERE acces_proprietaire = 1')->fetchColumn();
 
-        // Stat 4 — total des demandes de financement (mêmes 3 catégories que
-        // la stat 1 : nouveau/accepte/finalise — les refusés et retirés
-        // n'apparaissent pas).
-        $stats['total'] = (float) $pdo->query("SELECT COALESCE(SUM(montant_demande), 0) FROM dossiers_emprunt WHERE statut IN ('nouveau', 'accepte', 'finance')")->fetchColumn();
+        // Stat 4 — total en demandes de financement (3 catégories) :
+        //   - total        : somme des montants de la fenêtre retenue par la
+        //                    stat 1 (le volume que montre la stat 1) ;
+        //   - total_global : somme cumulée toutes dates.
+        // Affichage « X K$ / Y K$ » (option d'Éric). Au repli de la stat 1,
+        // la fenêtre jour est vide → on montre le cumul des deux côtés.
+        $stats['total_global'] = (float) $pdo->query("SELECT COALESCE(SUM(montant_demande), 0) FROM dossiers_emprunt WHERE statut IN ('nouveau', 'accepte', 'finance')")->fetchColumn();
+        if ($repli) {
+            $stats['total'] = $stats['total_global'];
+        } else {
+            $stats['total'] = (float) $pdo->query("SELECT COALESCE(SUM(montant_demande), 0) FROM dossiers_emprunt WHERE statut IN ('nouveau', 'accepte', 'finance') AND " . $periods[$base][1])->fetchColumn();
+        }
 
         // Plancher « jamais 0 » sur les compteurs (base vide ou toute neuve).
         if ($stats['creanciers'] < 1) {

@@ -6,6 +6,10 @@
  */
 $__st = home_stats();
 $__demandes = $__st['demandes'] == 1 ? 'one' : 'many';
+$__fmt_k = function ($v) {
+    // Format « X K$ » (arrondi au millier, séparateur d'espace).
+    return number_format(round($v / 1000), 0, ',', ' ') . ' K$';
+};
 ?>
 <section class="section home-proof">
     <div class="section-inner wide">
@@ -25,7 +29,7 @@ $__demandes = $__st['demandes'] == 1 ? 'one' : 'many';
                     <span class="stat-label"><?php echo htmlspecialchars(t('stats.proprietaires.label'), ENT_QUOTES, 'UTF-8'); ?></span>
                 </div>
                 <div class="stat">
-                    <span class="stat-value"><?php echo htmlspecialchars(number_format(round($__st['total'] / 1000), 0, ',', ' ') . ' K$', ENT_QUOTES, 'UTF-8'); ?></span>
+                    <span class="stat-value"><?php echo htmlspecialchars($__fmt_k($__st['total']) . ' / ' . $__fmt_k($__st['total_global']), ENT_QUOTES, 'UTF-8'); ?></span>
                     <span class="stat-label"><?php echo htmlspecialchars(t('stats.total.label'), ENT_QUOTES, 'UTF-8'); ?></span>
                 </div>
             </div>
