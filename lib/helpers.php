@@ -42,8 +42,9 @@ function redirect($url) {
 /**
  * Statistiques du bandeau de preuve de l'accueil, calculées depuis la base.
  *
- * - demandes     : nombre de dossiers d'emprunt ACTIFS (statut 'nouveau' ou
- *                  'accepte') affiché par la logique de palier d'Éric :
+ * - demandes     : nombre de dossiers d'emprunt ACTIFS — statut 'nouveau',
+ *                  'accepte' ou 'finance' (les dossiers finalisés comptent
+ *                  aussi) — affiché par la logique de palier d'Éric :
  *                    1. base = fenêtre au ratio/j le plus élevé ;
  *                    2. ratio < 1 partout → repli « 1 aujourd'hui » ;
  *                    3. cascade : chaque fenêtre à droite de la base a un
@@ -74,7 +75,7 @@ function home_stats() {
     try {
         $pdo = db();
 
-        // Stat 1 — demandes ACTIVES (nouveau/accepte), logique de palier.
+        // Stat 1 — demandes ACTIVES (nouveau/accepte/finalise), logique de palier.
         $periods = array(
             'jour'      => array(1,   'date_creation >= CURDATE()'),
             'semaine'   => array(7,   'date_creation >= (CURDATE() - INTERVAL 7 DAY)'),
@@ -86,7 +87,7 @@ function home_stats() {
         $counts = array();
         $ratios = array();
         foreach ($periods as $p => $info) {
-            $counts[$p] = (int) $pdo->query("SELECT COUNT(*) FROM dossiers_emprunt WHERE statut IN ('nouveau', 'accepte') AND " . $info[1])->fetchColumn();
+            $counts[$p] = (int) $pdo->query("SELECT COUNT(*) FROM dossiers_emprunt WHERE statut IN ('nouveau', 'accepte', 'finance') AND " . $info[1])->fetchColumn();
             $ratios[$p] = $counts[$p] / $info[0];
         }
 
