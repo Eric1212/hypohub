@@ -14,17 +14,17 @@
             <div class="card who-card">
                 <h3><?php echo htmlspecialchars(t('who.borrower.title'), ENT_QUOTES, 'UTF-8'); ?></h3>
                 <p><?php echo htmlspecialchars(t('who.borrower.body'), ENT_QUOTES, 'UTF-8'); ?></p>
-                <a class="btn btn-primary" href="index.php?page=emprunter"><?php echo htmlspecialchars(t('who.borrower.cta'), ENT_QUOTES, 'UTF-8'); ?></a>
+                <a class="btn btn-primary" href="index.php?page=proprietaire"><?php echo htmlspecialchars(t('who.borrower.cta'), ENT_QUOTES, 'UTF-8'); ?></a>
             </div>
             <div class="card who-card">
                 <h3><?php echo htmlspecialchars(t('who.broker.title'), ENT_QUOTES, 'UTF-8'); ?></h3>
                 <p><?php echo htmlspecialchars(t('who.broker.body'), ENT_QUOTES, 'UTF-8'); ?></p>
-                <a class="btn btn-alt" href="index.php?page=courtiers"><?php echo htmlspecialchars(t('who.broker.cta'), ENT_QUOTES, 'UTF-8'); ?></a>
+                <a class="btn btn-alt" href="index.php?page=courtier"><?php echo htmlspecialchars(t('who.broker.cta'), ENT_QUOTES, 'UTF-8'); ?></a>
             </div>
             <div class="card who-card">
                 <h3><?php echo htmlspecialchars(t('who.lender.title'), ENT_QUOTES, 'UTF-8'); ?></h3>
                 <p><?php echo htmlspecialchars(t('who.lender.body'), ENT_QUOTES, 'UTF-8'); ?></p>
-                <a class="btn btn-outline" href="index.php?page=creanciers"><?php echo htmlspecialchars(t('who.lender.cta'), ENT_QUOTES, 'UTF-8'); ?></a>
+                <a class="btn btn-outline" href="index.php?page=creancier"><?php echo htmlspecialchars(t('who.lender.cta'), ENT_QUOTES, 'UTF-8'); ?></a>
             </div>
         </div>
     </div>

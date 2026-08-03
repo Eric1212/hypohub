@@ -2,8 +2,8 @@
 /**
  * Hypohub — point d'entrée principal (multi-pages).
  *
- * Routage : ?page=<slug> → vue. Slugs : accueil (défaut), emprunter,
- * courtiers, creanciers, a-propos, contact.
+ * Routage : ?page=<slug> → vue. Slugs : accueil (défaut), proprietaire,
+ * courtier, creancier, a-propos, contact.
  *
  * 1. Si la configuration MySQL n'est pas en place → redirige vers config.php
  *    (l'assistant d'installation).
@@ -38,9 +38,9 @@ require_once __DIR__ . '/lib/auth.php'; // session + connexion/inscription
 // Table de routage : slug → (vue, clé de titre)
 $pages = array(
     'accueil'    => array('view' => 'home.php',        'title' => 'nav.home'),
-    'emprunter'  => array('view' => 'emprunter.php',   'title' => 'nav.borrow'),
-    'courtiers'  => array('view' => 'courtiers.php',   'title' => 'nav.brokers'),
-    'creanciers' => array('view' => 'creanciers.php',  'title' => 'nav.lenders'),
+    'proprietaire' => array('view' => 'proprietaire.php', 'title' => 'nav.borrow'),
+    'courtier'     => array('view' => 'courtier.php',     'title' => 'nav.brokers'),
+    'creancier'    => array('view' => 'creancier.php',    'title' => 'nav.lenders'),
     'a-propos'   => array('view' => 'apropos.php',     'title' => 'nav.about'),
     'contact'    => array('view' => 'contact.php',     'title' => 'nav.contact'),
     'espace'     => array('view' => 'espace.php',      'title' => 'nav.space'),

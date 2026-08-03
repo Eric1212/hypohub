@@ -7,9 +7,9 @@ if (!isset($__title_key)) { $__title_key = 'nav.home'; }
 // Navigation (ordre : comme sur le site B&A)
 $__nav = array(
     'accueil'    => 'nav.home',
-    'emprunter'  => 'nav.borrow',
-    'courtiers'  => 'nav.brokers',
-    'creanciers' => 'nav.lenders',
+    'proprietaire' => 'nav.borrow',
+    'courtier'     => 'nav.brokers',
+    'creancier'    => 'nav.lenders',
     'a-propos'   => 'nav.about',
     'contact'    => 'nav.contact',
 );
