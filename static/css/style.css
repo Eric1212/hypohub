@@ -571,16 +571,6 @@ ul.accords .block h4:not(.toggle-title) {
     color: #0073AE;
 }
 
-/* Listes plates de H4 (pages publiques : cas, avantages, FAQ) :
-   barre de fin alignée sur le texte H4 (2.2rem) et contenu indenté
-   (2.6rem) comme la source de l'espace (ul.accords ul.accords). */
-ul.accords > li:has(> h4.toggle-title)::after {
-    margin-left: 2.2rem;
-}
-ul.accords > li:has(> h4.toggle-title) .block {
-    padding-left: 2.6rem;
-}
-
 /* ---------- Installateur (config.php) ---------- */
 .install-form label {
     display: block;
