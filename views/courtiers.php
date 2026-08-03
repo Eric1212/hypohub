@@ -41,7 +41,11 @@
     <div class="section-inner">
         <div class="card contact cta-row">
             <p><?php echo htmlspecialchars(t('bro.cta.body'), ENT_QUOTES, 'UTF-8'); ?></p>
-            <a class="btn btn-alt btn-xl" href="index.php?page=contact"><?php echo htmlspecialchars(t('bro.cta.btn'), ENT_QUOTES, 'UTF-8'); ?></a>
+            <?php if (auth_user()): ?>
+                <a class="btn btn-alt btn-xl" href="index.php?page=espace"><?php echo htmlspecialchars(t('space.go'), ENT_QUOTES, 'UTF-8'); ?></a>
+            <?php else: ?>
+                <a class="btn btn-alt btn-xl" href="#" data-auth-open data-auth-acces="courtier"><?php echo htmlspecialchars(t('bro.cta.btn'), ENT_QUOTES, 'UTF-8'); ?></a>
+            <?php endif; ?>
         </div>
     </div>
 </section>

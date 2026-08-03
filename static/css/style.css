@@ -472,6 +472,75 @@ a:hover { color: #3180BC; }
 
 .auth-error { color: #b00020; font-size: 0.85rem; margin: 0.5rem 0; }
 
+/* ---------- Espace membre ---------- */
+
+/* Accordéons imbriqués (règle d'Éric : H3 ET H4 pliables).
+   Barres sans fond : texte #303030 → #3180BC au survol/actif. */
+ul.accords { list-style: none; margin: 0.6rem 0 0; padding: 0; }
+
+/* Barre de fin de zone de texte, DANS LE FLUX (jamais masquée) :
+   une sous chaque panneau H4, et sous chaque H3 UNIQUEMENT quand il est
+   replié (quand il est déplié, ce sont les H4 qui délimitent). */
+ul.accords > li { padding-bottom: 0.3rem; }
+ul.accords > li::after {
+    content: '';
+    display: block;
+    height: 1px;
+    margin: 0.3rem 0.7rem 0;
+    background: rgba(125, 162, 41, 0.45); /* vert olive non fluo #7da229 (financiereba) */
+}
+ul.accords > li.active::after { display: none; } /* H3 déplié : pas de barre */
+
+ul.accords ul.accords > li { padding-bottom: 0.3rem; }
+ul.accords ul.accords > li::after {
+    content: '';
+    display: block;
+    height: 1px;
+    margin: 0.3rem 1.4rem 0; /* alignée avec le texte des H4 */
+    background: rgba(125, 162, 41, 0.45); /* vert olive non fluo #7da229 (financiereba) */
+}
+
+ul.accords h3.toggle-title {
+    cursor: pointer;
+    color: #303030;
+    font-family: inherit;
+    font-weight: 400;
+    font-size: 1.125rem; /* 18 px (source) */
+    line-height: 2em;
+    margin: 0;
+    padding: 0.15rem 0 0.05rem 0.7rem; /* ~3 px 0 1 px 11 px (source) */
+}
+ul.accords h3.toggle-title:hover,
+ul.accords h3.toggle-title.active {
+    color: #3180BC;
+}
+
+ul.accords h4.toggle-title {
+    cursor: pointer;
+    color: #3e3e3f;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 0.9rem;
+    line-height: 1.8em;
+    margin: 0;
+    padding: 0.1rem 0 0 1.4rem;
+}
+ul.accords h4.toggle-title:hover,
+ul.accords h4.toggle-title.active {
+    color: #3180BC;
+}
+
+ul.accords .block {
+    padding: 1.25rem 1.9rem 1.25rem 1.1rem; /* 20 px 30 px 20 px (source) */
+}
+ul.accords ul.accords .block {
+    padding: 1.25rem 1.9rem 1.25rem 2.6rem;
+}
+ul.accords .block p {
+    margin: 0.2rem 0;
+    font-size: 0.88rem;
+}
+
 /* ---------- Installateur (config.php) ---------- */
 .install-form label {
     display: block;

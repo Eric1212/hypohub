@@ -56,6 +56,41 @@ function initPage() {
         });
     });
 
+    // Accordéons de l'espace membre (règle d'Éric : H3 ET H4) :
+    // clic sur .toggle-title → replie/déplie le .toggle-content suivant.
+    // Un seul panneau ouvert à la fois dans une série (un ul.accords donné).
+    document.querySelectorAll('.toggle-title').forEach(function (h) {
+        var content = h.nextElementSibling;
+        if (!content || !content.classList.contains('toggle-content')) return;
+        h.addEventListener('click', function () {
+            var list = h.closest('ul.accords');
+            var wasClosed = content.style.display === 'none';
+
+            // Fermer les autres panneaux de la même série.
+            if (list) {
+                list.querySelectorAll(':scope > li > .toggle-content').forEach(function (other) {
+                    if (other === content) return;
+                    other.style.display = 'none';
+                    var t = other.previousElementSibling;
+                    if (t) {
+                        t.classList.remove('active');
+                        if (t.tagName === 'H3') t.parentElement.classList.remove('active');
+                    }
+                });
+            }
+
+            content.style.display = wasClosed ? 'block' : 'none';
+            h.classList.toggle('active', wasClosed);
+            if (h.tagName === 'H3') {
+                // La barre du H3 est masquée seulement s'il contient des H4
+                // (qui portent leurs propres barres). Un H3 sans H4 garde
+                // sa barre de fin même ouvert.
+                var hasH4 = !!content.querySelector('.toggle-title');
+                h.parentElement.classList.toggle('active', wasClosed && hasH4);
+            }
+        });
+    });
+
     // Défilement fluide vers les ancres internes.
     document.querySelectorAll('a[href^="#"]').forEach(function (a) {
         a.addEventListener('click', function (e) {
@@ -90,11 +125,25 @@ function initPage() {
  * La modale vit dans le DOM global (jamais rechargée par la nav AJAX) :
  * ses écouteurs ne sont attachés qu'une fois, au chargement initial.
  */
-function openAuthModal() {
+function openAuthModal(acces) {
     var modal = document.getElementById('auth_modal');
     if (!modal) return;
     modal.classList.add('open');
     modal.setAttribute('aria-hidden', 'false');
+
+    if (acces) {
+        // Présélection : onglet création + carte du profil choisi (ex. CTA des pages profils).
+        var loginForm = document.getElementById('auth_login_form');
+        var registerForm = document.getElementById('auth_register_form');
+        loginForm.hidden = true;
+        registerForm.hidden = false;
+        modal.querySelectorAll('.auth-tab').forEach(function (o) {
+            o.classList.toggle('active', o.getAttribute('data-auth-tab') === 'register');
+        });
+        var card = registerForm.querySelector('.auth-card[data-acces="' + acces + '"]');
+        if (card) card.click();
+    }
+
     var email = modal.querySelector('#auth_login_form input[name=email]');
     if (email) email.focus();
 }
@@ -115,7 +164,7 @@ function initAuth() {
         var el = e.target.closest('[data-auth-open]');
         if (el) {
             e.preventDefault();
-            openAuthModal();
+            openAuthModal(el.getAttribute('data-auth-acces') || null);
         }
     });
 
@@ -183,8 +232,8 @@ function attachAuthForm(form, url) {
             btn.disabled = false;
             btn.textContent = original;
             if (res.ok) {
-                // Rechargement complet : le serveur rend le footer connecté.
-                window.location.href = window.location.pathname + window.location.search;
+                // Redirection vers l'espace membre (le serveur rend le footer connecté).
+                window.location.href = 'index.php?page=espace';
             } else {
                 errEl.textContent = res.error || form.getAttribute('data-err-network');
                 errEl.hidden = false;

@@ -121,17 +121,18 @@ function db_schema() {
         CONSTRAINT fk_de_propriete FOREIGN KEY (profil_propriete_id) REFERENCES profils_propriete(id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
-    // 5. Profils créancier — un par compte ayant l'accès créancier
+    // 5. Profils créancier — plusieurs par compte (société, véhicules de capital...)
     $pdo->exec("CREATE TABLE IF NOT EXISTS profils_creancier (
         id                 INT UNSIGNED NOT NULL AUTO_INCREMENT,
         user_id            INT UNSIGNED NOT NULL,
+        nom                VARCHAR(150) NOT NULL DEFAULT '',
         type               ENUM('individu','societe') NOT NULL DEFAULT 'individu',
         capital_disponible DECIMAL(12,2) DEFAULT NULL,
         criteres           TEXT,
         permis_opc         VARCHAR(30)  DEFAULT NULL,
         date_creation      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (id),
-        UNIQUE KEY uq_pc_user (user_id),
+        KEY idx_pc_user (user_id),
         CONSTRAINT fk_pc_user FOREIGN KEY (user_id) REFERENCES users(id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
@@ -173,10 +174,29 @@ function db_schema() {
         PRIMARY KEY (email, ip)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
+    // Migration : plusieurs profils créancier par compte
+    // (l'index unique « un profil par compte » devient un index simple)
+    $has_unique = (int) $pdo->query(
+        "SELECT COUNT(*) FROM information_schema.STATISTICS
+          WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'profils_creancier' AND INDEX_NAME = 'uq_pc_user'"
+    )->fetchColumn();
+    if ($has_unique) {
+        $pdo->exec('ALTER TABLE profils_creancier DROP INDEX uq_pc_user, ADD INDEX idx_pc_user (user_id)');
+    }
+
+    // Migration : le profil créancier a besoin d'un nom (société ou prêteur)
+    $has_nom = (int) $pdo->query(
+        "SELECT COUNT(*) FROM information_schema.COLUMNS
+          WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'profils_creancier' AND COLUMN_NAME = 'nom'"
+    )->fetchColumn();
+    if (!$has_nom) {
+        $pdo->exec("ALTER TABLE profils_creancier ADD COLUMN nom VARCHAR(150) NOT NULL DEFAULT '' AFTER user_id");
+    }
+
     // Version du schéma (bump à chaque évolution de la structure)
     $st = $pdo->prepare(
-        "INSERT INTO app_meta (meta_key, meta_value) VALUES ('schema_version', '3')
-         ON DUPLICATE KEY UPDATE meta_value = '3'"
+        "INSERT INTO app_meta (meta_key, meta_value) VALUES ('schema_version', '5')
+         ON DUPLICATE KEY UPDATE meta_value = '5'"
     );
     $st->execute();
 }

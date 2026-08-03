@@ -11,6 +11,7 @@
             <?php $__auth = auth_user(); ?>
             <?php if ($__auth): ?>
                 <?php echo htmlspecialchars(t('auth.footer.hello', array('name' => $__auth['nom_complet'])), ENT_QUOTES, 'UTF-8'); ?>
+                · <a href="index.php?page=espace"><?php echo htmlspecialchars(t('nav.space'), ENT_QUOTES, 'UTF-8'); ?></a>
                 · <a href="index.php?page=deconnexion" data-ajax="off"><?php echo htmlspecialchars(t('auth.footer.logout'), ENT_QUOTES, 'UTF-8'); ?></a>
             <?php else: ?>
                 <a href="#" data-auth-open><?php echo htmlspecialchars(t('auth.footer.link'), ENT_QUOTES, 'UTF-8'); ?></a>

@@ -43,6 +43,7 @@ $pages = array(
     'creanciers' => array('view' => 'creanciers.php',  'title' => 'nav.lenders'),
     'a-propos'   => array('view' => 'apropos.php',     'title' => 'nav.about'),
     'contact'    => array('view' => 'contact.php',     'title' => 'nav.contact'),
+    'espace'     => array('view' => 'espace.php',      'title' => 'nav.space'),
 );
 
 $page = isset($_GET['page']) ? preg_replace('/[^a-z-]/', '', (string) $_GET['page']) : 'accueil';
