@@ -39,8 +39,7 @@ Hypohub — guichet unique de référencement de financements hypothécaires pri
 
 ## Conventions
 
-- Référentiel du modèle d'affaires : courriel Éric (SADC Shawinigan, commission
-  25 pdb, MVP 5 000 $).
+- Référentiel du modèle d'affaires : courriel Éric (SADC Shawinigan, commission 25 pdb).
 
 ## Memory & Personal Context
 

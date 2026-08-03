@@ -38,7 +38,13 @@ function db() {
 
 /**
  * Crée les tables si elles n'existent pas.
- * Table témoin pour l'instant : app_meta (version du schéma, réglages...).
+ *
+ * Modèle : un compte unique (users) avec deux accès cochés (proprietaire /
+ * creancier — le courtier a les deux). L'accès propriétaire crée des profils
+ * propriétaire/propriété et des dossiers d'emprunt ; l'accès créancier crée
+ * son profil et visualise les dossiers (les profils restent masqués tant
+ * qu'il n'y a pas d'acceptation). La facturation 25 pdb est gérée en interne,
+ * hors de cette base.
  */
 function db_schema() {
     $pdo = db();
@@ -48,8 +54,119 @@ function db_schema() {
         meta_value TEXT         NOT NULL
     )");
 
+    // 1. Compte unique — 2 accès : acces_proprietaire, acces_creancier
+    $pdo->exec("CREATE TABLE IF NOT EXISTS users (
+        id                INT UNSIGNED NOT NULL AUTO_INCREMENT,
+        email             VARCHAR(190) NOT NULL,
+        mot_de_passe      VARCHAR(255) NOT NULL,
+        nom_complet       VARCHAR(150) NOT NULL,
+        telephone         VARCHAR(40)  DEFAULT NULL,
+        adresse           TEXT,
+        acces_proprietaire TINYINT(1)  NOT NULL DEFAULT 0,
+        acces_creancier   TINYINT(1)   NOT NULL DEFAULT 0,
+        actif             TINYINT(1)   NOT NULL DEFAULT 1,
+        date_creation     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        UNIQUE KEY uq_users_email (email)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    // 2. Profils propriétaire — plusieurs par compte (soi, père, sœur...)
+    $pdo->exec("CREATE TABLE IF NOT EXISTS profils_proprietaire (
+        id               INT UNSIGNED NOT NULL AUTO_INCREMENT,
+        cree_par         INT UNSIGNED NOT NULL,
+        nom_complet      VARCHAR(150) NOT NULL,
+        telephone        VARCHAR(40)  DEFAULT NULL,
+        courriel         VARCHAR(190) DEFAULT NULL,
+        situation_emploi ENUM('salaire','travailleur_autonome','autre') NOT NULL DEFAULT 'salaire',
+        revenu_annuel    DECIMAL(12,2) DEFAULT NULL,
+        notes            TEXT,
+        date_creation    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY idx_pp_cree_par (cree_par),
+        CONSTRAINT fk_pp_cree_par FOREIGN KEY (cree_par) REFERENCES users(id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    // 3. Profils propriété — l'immeuble donné en garantie
+    $pdo->exec("CREATE TABLE IF NOT EXISTS profils_propriete (
+        id             INT UNSIGNED NOT NULL AUTO_INCREMENT,
+        cree_par       INT UNSIGNED NOT NULL,
+        adresse        VARCHAR(255) NOT NULL,
+        ville          VARCHAR(100) NOT NULL,
+        code_postal    VARCHAR(7)   DEFAULT NULL,
+        valeur_estimee DECIMAL(12,2) DEFAULT NULL,
+        valeur_nette   DECIMAL(12,2) DEFAULT NULL,
+        date_creation  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY idx_ppe_cree_par (cree_par),
+        CONSTRAINT fk_ppe_cree_par FOREIGN KEY (cree_par) REFERENCES users(id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    // 4. Dossiers d'emprunt — le lead central (1 dossier = 1 emprunteur + 1 propriété)
+    $pdo->exec("CREATE TABLE IF NOT EXISTS dossiers_emprunt (
+        id                      INT UNSIGNED NOT NULL AUTO_INCREMENT,
+        cree_par                INT UNSIGNED NOT NULL,
+        profil_proprietaire_id  INT UNSIGNED NOT NULL,
+        profil_propriete_id     INT UNSIGNED NOT NULL,
+        montant_demande         DECIMAL(12,2) NOT NULL,
+        rang                    ENUM('premier','deuxieme') NOT NULL DEFAULT 'premier',
+        type_financement        ENUM('travailleur_autonome','consolidation','deuxieme_rang','delai_serre') NOT NULL DEFAULT 'travailleur_autonome',
+        statut                  ENUM('nouveau','accepte','finance','refuse','retire') NOT NULL DEFAULT 'nouveau',
+        date_financement        DATETIME DEFAULT NULL,
+        date_creation           DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY idx_de_cree_par (cree_par),
+        KEY idx_de_statut (statut),
+        CONSTRAINT fk_de_cree_par FOREIGN KEY (cree_par) REFERENCES users(id),
+        CONSTRAINT fk_de_proprietaire FOREIGN KEY (profil_proprietaire_id) REFERENCES profils_proprietaire(id),
+        CONSTRAINT fk_de_propriete FOREIGN KEY (profil_propriete_id) REFERENCES profils_propriete(id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    // 5. Profils créancier — un par compte ayant l'accès créancier
+    $pdo->exec("CREATE TABLE IF NOT EXISTS profils_creancier (
+        id                 INT UNSIGNED NOT NULL AUTO_INCREMENT,
+        user_id            INT UNSIGNED NOT NULL,
+        type               ENUM('individu','societe') NOT NULL DEFAULT 'individu',
+        capital_disponible DECIMAL(12,2) DEFAULT NULL,
+        criteres           TEXT,
+        permis_opc         VARCHAR(30)  DEFAULT NULL,
+        date_creation      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        UNIQUE KEY uq_pc_user (user_id),
+        CONSTRAINT fk_pc_user FOREIGN KEY (user_id) REFERENCES users(id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    // 6. Offres de financement — transmises au sein du dossier (document du notaire)
+    $pdo->exec("CREATE TABLE IF NOT EXISTS offres_financement (
+        id               INT UNSIGNED NOT NULL AUTO_INCREMENT,
+        dossier_id       INT UNSIGNED NOT NULL,
+        professionnel_id INT UNSIGNED NOT NULL,
+        taux_interet     DECIMAL(6,3) DEFAULT NULL,
+        echeances        VARCHAR(100) DEFAULT NULL,
+        conditions       TEXT,
+        statut           ENUM('proposee','acceptee','declinee') NOT NULL DEFAULT 'proposee',
+        date_creation    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY idx_of_dossier (dossier_id),
+        CONSTRAINT fk_of_dossier FOREIGN KEY (dossier_id) REFERENCES dossiers_emprunt(id),
+        CONSTRAINT fk_of_professionnel FOREIGN KEY (professionnel_id) REFERENCES users(id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    // 7. Acceptations — engagement 25 pdb + déblocage d'accès aux profils (fusionnés)
+    $pdo->exec("CREATE TABLE IF NOT EXISTS acceptations (
+        id                INT UNSIGNED NOT NULL AUTO_INCREMENT,
+        dossier_id        INT UNSIGNED NOT NULL,
+        professionnel_id  INT UNSIGNED NOT NULL,
+        date_acceptation  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        UNIQUE KEY uq_acc_dossier_prof (dossier_id, professionnel_id),
+        CONSTRAINT fk_acc_dossier FOREIGN KEY (dossier_id) REFERENCES dossiers_emprunt(id),
+        CONSTRAINT fk_acc_professionnel FOREIGN KEY (professionnel_id) REFERENCES users(id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    // Version du schéma (bump à chaque évolution de la structure)
     $st = $pdo->prepare(
-        "INSERT IGNORE INTO app_meta (meta_key, meta_value) VALUES ('schema_version', '1')"
+        "INSERT INTO app_meta (meta_key, meta_value) VALUES ('schema_version', '2')
+         ON DUPLICATE KEY UPDATE meta_value = '2'"
     );
     $st->execute();
 }
