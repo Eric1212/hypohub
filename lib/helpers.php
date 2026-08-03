@@ -59,7 +59,8 @@ function redirect($url) {
  * - proprietaires: propriétaires seuls + courtiers (= comptes à accès
  *                  propriétaire). Le courtier figure dans les DEUX stats
  *                  (accès créancier ET propriétaire), sans compter double.
- * - total        : somme des montants demandés (pour affichage en K$).
+ * - total        : somme des montants demandés des mêmes 3 catégories
+ *                  (nouveau/accepte/finalise), pour affichage en K$.
  *
  * Base indisponible → repli minimal (jamais de 0 affiché, page jamais cassée).
  */
@@ -133,8 +134,10 @@ function home_stats() {
         // stat 2 — il apparaît dans les deux stats, sans compter double).
         $stats['proprietaires'] = (int) $pdo->query('SELECT COUNT(*) FROM users WHERE acces_proprietaire = 1')->fetchColumn();
 
-        // Stat 4 — total des demandes de financement.
-        $stats['total'] = (float) $pdo->query('SELECT COALESCE(SUM(montant_demande), 0) FROM dossiers_emprunt')->fetchColumn();
+        // Stat 4 — total des demandes de financement (mêmes 3 catégories que
+        // la stat 1 : nouveau/accepte/finalise — les refusés et retirés
+        // n'apparaissent pas).
+        $stats['total'] = (float) $pdo->query("SELECT COALESCE(SUM(montant_demande), 0) FROM dossiers_emprunt WHERE statut IN ('nouveau', 'accepte', 'finance')")->fetchColumn();
 
         // Plancher « jamais 0 » sur les compteurs (base vide ou toute neuve).
         if ($stats['creanciers'] < 1) {
