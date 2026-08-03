@@ -45,7 +45,9 @@ il refusera de s'exécuter tant que la configuration est valide.
   Modifie une phrase, sauvegarde, c'est en ligne.
 - **L'apparence** : les couleurs et la mise en page sont dans
   `static/css/style.css`.
-- **Les pages** : chaque page est un fichier dans `views/`.
+- **Les pages** : chaque page est un fichier dans `views/`, routé par
+  `index.php?page=<slug>` (accueil, emprunter, courtiers, creanciers,
+  a-propos, contact).
 - **Les actions** : chaque action (endpoint AJAX) est un fichier dans `api/`
   qui répond en JSON, appelé par le JavaScript dans `static/js/`.
 

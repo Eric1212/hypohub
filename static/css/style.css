@@ -1,88 +1,384 @@
-/* Hypohub — style de base. Personnalise librement. */
+/* =========================================================
+   Hypohub — feuille de style
+   Identité visuelle : Financière B&A Inc.
+   Architecture B&A : logo + menu sur fond pâle, bandeau bleu
+   #0F78A1, boîtes blanches bordure #7CAED4, footer discret.
+   Accents : vert #7da229, vert fluo #d8ff00.
+   Fond : #E7F2F8, texte : #3e3e3f / #555758.
+   Police : Inter (variable 100-900, OFL, autohébergée).
+   Graisses (2026-08-02) : logo 700 · h1 500 · h2 500 ·
+   sous-titre 300 · corps 250 · légende 150 · bouton 500.
+   ========================================================= */
+
+@font-face {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 100 900;
+    src: url('../fonts/InterVariable.woff2') format('woff2');
+}
+
 * { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
 
 body {
     margin: 0;
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    line-height: 1.6;
-    color: #1f2937;
-    background: #f3f4f6;
+    font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-weight: 250;
+    line-height: 1.55;
+    color: #3e3e3f;
+    background: #E7F2F8;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
+h1, h2, h3 { font-weight: 500; line-height: 1.2; color: #0073AE; margin: 0 0 0.45rem; }
+h1 { font-size: 2.6rem; color: #3e3e3f; }
+h2 { font-size: 1.5rem; color: #3e3e3f; }
+h3 { font-size: 1.1rem; }
+
+p { margin: 0 0 0.75rem; }
+
+a { color: #0073AE; }
+a:hover { color: #3180BC; }
+
+/* ---------- En-tête (logo + menu, sur fond pâle) ---------- */
 .site-header {
-    background: #0f766e; /* vert — thème provisoire */
-    color: #fff;
+    background: transparent;
+    color: #3e3e3f;
+    padding: 1.25rem 1rem 0;
 }
 
 .site-header-inner {
-    max-width: 960px;
+    max-width: 62.25rem; /* 996px à la taille racine de base */
     margin: 0 auto;
-    padding: 0.75rem 1rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
 }
 
 .logo {
-    color: #fff;
+    color: #0073AE;
     text-decoration: none;
     font-weight: 700;
-    font-size: 1.25rem;
+    font-size: 1.4rem;
+    letter-spacing: 0.02em;
 }
 
-.lang-switch a { color: #d1fae5; text-decoration: none; margin: 0 0.25rem; }
-.lang-switch a.active { color: #fff; font-weight: 700; text-decoration: underline; }
-.lang-switch .sep { color: #5eead4; }
-
-.site-main {
-    max-width: 960px;
-    margin: 0 auto;
-    padding: 2rem 1rem;
+.site-nav {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
 }
+
+.site-nav a { color: #555758; text-decoration: none; font-weight: 400; font-size: 0.98rem; }
+.site-nav a:hover { color: #3180BC; text-decoration: underline; }
+.site-nav a.active { color: #3180BC; font-weight: 700; text-decoration: underline; }
+
+.lang-switch a { color: #7da229; text-decoration: none; margin: 0 0.25rem; font-size: 0.9rem; }
+.lang-switch a.active { color: #3180BC; font-weight: 700; text-decoration: underline; }
+.lang-switch .sep { color: #98bfdd; }
+
+/* ---------- Structure générale ---------- */
+.site-main { flex: 1 0 auto; width: 100%; max-width: 62.25rem; margin: 0 auto; padding: 0 1rem; }
+
+/* Accueil : remplit 100 % de la hauteur d'écran (tient en 720p → jamais de scroll en 1080p). */
+.site-main--home {
+    display: flex;
+    flex-direction: column;
+}
+
+.site-main--home .page-banner { flex: 0 0 auto; }
+
+.site-main--home .home-profiles {
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
+.home-note { text-align: center; margin: 1rem 0 0; }
+
+/* Bandeau statistique de l'accueil : compact. */
+.home-proof { padding-top: 0; padding-bottom: 1rem; }
+
+/* Pages internes : remplissent aussi 100 % de la hauteur (pas de scroll en 720p). */
+.site-main--page {
+    display: flex;
+    flex-direction: column;
+}
+
+.site-main--page .page-banner { flex: 0 0 auto; }
+.site-main--page .page-content { flex: 1 0 auto; display: flex; flex-direction: column; justify-content: center; }
+.site-main--page .page-content > .section-inner { width: 100%; }
+
+.section { padding: 1.25rem 0; }
+.section-inner { max-width: 53.75rem; margin: 0 auto; }
+.section-inner.wide { max-width: 62.25rem; }
 
 .card {
     background: #fff;
-    border: 1px solid #e5e7eb;
+    border: 1px solid #7CAED4;
     border-radius: 0.5rem;
-    padding: 1.5rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    padding: 1.15rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.card h2 { margin-top: 0; }
+/* Grille 2 colonnes des pages internes (économie de hauteur). */
+.two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    align-items: stretch;
+}
 
-.checks { list-style: none; padding: 0; }
-.checks li { padding: 0.35rem 0; }
-.checks .ok::before { content: "✓ "; color: #059669; font-weight: 700; }
+.note {
+    font-weight: 150;
+    font-size: 0.9rem;
+    color: #555758;
+}
 
+/* ---------- Bandeau titre (TOUTES les pages, même taille) ----------
+   Le bandeau bleu ne change jamais de taille : l'accueil et les pages
+   internes utilisent exactement la même classe. */
+.page-banner {
+    background: linear-gradient(180deg, #0F78A1 0%, #0073AE 100%);
+    color: #fff;
+    padding: 1.25rem 1.5rem;
+    text-align: center;
+    border: 1px solid #7CAED4;
+    border-radius: 0.5rem;
+    margin-top: 1.25rem;
+}
+
+.page-banner h1 { color: #d8ff00; font-size: 1.5rem; margin-bottom: 0.3rem; }
+
+.page-banner-sub {
+    font-weight: 300;
+    font-size: 0.95rem;
+    color: #e3f1fa;
+    max-width: 38.75rem; /* 620px */
+    margin: 0 auto;
+}
+
+/* Accueil : boîtes compacts pour tenir en 720p. */
+.site-main--home .who-grid { gap: 0.75rem; }
+.site-main--home .card { padding: 1.1rem; }
+.site-main--home .who-card h3 { font-size: 1.15rem; margin-bottom: 0.4rem; }
+.site-main--home .who-card p { font-size: 0.92rem; margin-bottom: 0.6rem; }
+
+/* ---------- Boutons ---------- */
 .btn {
-    background: #0f766e;
+    display: inline-block;
+    background: #3180BC;
     color: #fff;
     border: 0;
-    border-radius: 0.375rem;
-    padding: 0.6rem 1.2rem;
-    font-size: 1rem;
+    border-radius: 0.25rem;
+    padding: 0.5rem 1.1rem;
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    text-decoration: none;
     cursor: pointer;
+    transition: background 0.15s;
 }
-.btn:hover { background: #115e59; }
+.btn:hover { background: #0F78A1; color: #fff; }
 
-.error {
-    background: #fee2e2;
-    color: #991b1b;
-    border: 1px solid #fecaca;
-    border-radius: 0.375rem;
-    padding: 0.75rem;
+.btn-alt { background: #7da229; }
+.btn-alt:hover { background: #6b8c22; }
+
+.btn-outline {
+    background: transparent;
+    color: #3180BC;
+    border: 1px solid #3180BC;
+}
+.btn-outline:hover { background: rgba(49, 128, 188, 0.08); }
+
+/* ---------- CTA de fin de page (ligne compacte) ---------- */
+.cta-big { flex: 0 0 auto; }
+.cta-big .contact p { font-size: 0.95rem; margin: 0; }
+.cta-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 0.6rem;
+}
+.cta-row .btn { margin-top: 0; }
+
+.btn-xl {
+    font-size: 0.9rem;
+    padding: 0.6rem 1.4rem;
+    letter-spacing: 0.06em;
 }
 
-.ajax-result { font-weight: 600; color: #0f766e; }
+/* ---------- Boîtes d'entrée (Pour qui + Preuve) ---------- */
+.who-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+    align-items: stretch;
+}
 
-.site-footer {
-    max-width: 960px;
-    margin: 0 auto;
-    padding: 1rem;
-    color: #6b7280;
+.who-card { display: flex; flex-direction: column; }
+.who-card h3 { font-size: 1.3rem; }
+.who-card .btn { margin-top: auto; align-self: flex-start; }
+
+/* Bandeau statistique : 3 colonnes en ligne (accueil + À propos). */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    text-align: center;
+}
+.stat-value { display: block; font-size: 1.5rem; font-weight: 500; color: #0F78A1; }
+.stat-label { display: block; font-weight: 150; font-size: 0.85rem; color: #555758; }
+
+/* ---------- Comment ça marche ---------- */
+.steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25rem;
+}
+
+.step { position: relative; padding-top: 2.75rem; }
+
+.step-num {
+    position: absolute;
+    top: 1rem;
+    left: 1.25rem;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: #3180BC;
+    color: #fff;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-size: 0.9rem;
 }
 
+/* Étapes verticales compactes (page Emprunter, 2 colonnes). */
+.steps-compact { display: flex; flex-direction: column; gap: 0.6rem; }
+.steps-compact .step { position: relative; padding: 0 0 0 2.4rem; }
+.steps-compact .step-num {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1.6rem;
+    height: 1.6rem;
+    font-size: 0.75rem;
+}
+.steps-compact h3 { font-size: 0.95rem; margin: 0 0 0.1rem; }
+.steps-compact p { font-size: 0.85rem; margin: 0; }
+
+/* ---------- FAQ ---------- */
+.faq-item {
+    background: #fff;
+    border: 1px solid #7CAED4;
+    border-radius: 0.5rem;
+    padding: 0.1rem 1.25rem;
+    margin-bottom: 0.75rem;
+}
+
+.faq-item summary {
+    cursor: pointer;
+    font-weight: 500;
+    color: #303030;
+    padding: 0.45rem 0;
+    list-style: none;
+}
+
+.faq-item summary:hover { color: #3180bc; }
+
+.faq-item summary::-webkit-details-marker { display: none; }
+
+.faq-item summary::before {
+    content: "+ ";
+    color: #7da229;
+    font-weight: 700;
+}
+
+.faq-item[open] summary::before { content: "– "; }
+
+.faq-item p { font-size: 0.9rem; margin: 0 0 0.5rem; }
+
+/* ---------- Contact ---------- */
+.contact { text-align: center; }
+.contact .btn { margin-top: 0.5rem; }
+
+.contact-grid {
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+    gap: 1.25rem;
+    align-items: start;
+}
+
+.contact-form label { display: block; margin-bottom: 0.6rem; text-align: left; }
+.contact-form span { display: block; font-weight: 400; font-size: 0.85rem; color: #555758; margin-bottom: 0.2rem; }
+.contact-form input,
+.contact-form select,
+.contact-form textarea {
+    width: 100%;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid #7CAED4;
+    border-radius: 0.25rem;
+    font-family: inherit;
+    font-size: 0.9rem;
+    background: #fff;
+}
+
+.coords .line2 {
+    height: 2px;
+    border-top: 1px solid #98bfdd;
+    border-bottom: 1px solid #98bfdd;
+    margin: 0.6rem 0;
+}
+
+.coords h3 { font-size: 1rem; color: #303030; margin: 0; }
+
+/* ---------- Signature (À propos) ---------- */
+.signature {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #98bfdd;
+}
+.sig-name { font-size: 1.05rem; color: #0073AE; margin: 0; }
+
+/* ---------- Pied de page (discret, style B&A) ---------- */
+.site-footer {
+    background: transparent;
+    color: #555758;
+    margin-top: 1rem;
+    padding: 1.5rem 1rem;
+    border-top: 1px solid #98bfdd;
+}
+
+.site-footer-inner {
+    max-width: 62.25rem;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.site-footer .brand { font-weight: 400; margin: 0; font-size: 0.9rem; }
+.site-footer .brand a { color: #0073AE; }
+.site-footer .founder { font-weight: 250; font-size: 0.85rem; margin: 0.25rem 0 0; color: #555758; }
+.site-footer .mit { font-weight: 150; font-size: 0.8rem; margin: 0; color: #555758; }
+
+/* ---------- Installateur (config.php) ---------- */
 .install-form label {
     display: block;
     margin-bottom: 1rem;
@@ -94,4 +390,21 @@ body {
     border: 1px solid #d1d5db;
     border-radius: 0.375rem;
     font-size: 1rem;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 860px) {
+    .who-grid { grid-template-columns: 1fr 1fr; }
+    .steps { grid-template-columns: repeat(2, 1fr); }
+    .two-col { grid-template-columns: 1fr; }
+    .contact-grid { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 2.1rem; }
+    h2 { font-size: 1.4rem; }
+}
+
+@media (max-width: 520px) {
+    .who-grid, .steps { grid-template-columns: 1fr; }
+    .site-nav { display: none; }
+    .hero { padding: 2.5rem 1rem; }
+    .hero h1 { font-size: 1.8rem; }
 }

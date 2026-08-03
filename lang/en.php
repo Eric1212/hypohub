@@ -1,29 +1,160 @@
 <?php
 /**
  * Hypohub — English translations.
- * Edit the phrases here to customize the site text.
+ * Edit the strings here to customize the text displayed on the site.
  */
 return array(
-    'app.name'   => 'Hypohub',
-    'app.tagline' => 'The single gateway for private mortgage financing in Quebec.',
-
-    // Home
-    'home.title'          => 'Hypohub is installed and working!',
-    'home.db_ok'          => 'Database connection: OK',
-    'home.schema_version' => 'Schema version',
-    'home.db_check'       => 'Check the database (AJAX)',
+    'app.name'    => 'Hypohub',
+    'app.tagline' => 'The single window for private mortgage financing in Quebec.',
 
     // Installation
     'install.title'   => 'Hypohub installation',
-    'install.intro'   => 'Welcome! Fill in your MySQL database details to install Hypohub.',
+    'install.intro'   => 'Welcome! Fill in your MySQL database information to install Hypohub.',
     'install.db_host' => 'Server address (host)',
     'install.db_name' => 'Database name',
     'install.db_user' => 'MySQL user',
     'install.db_pass' => 'MySQL password',
     'install.submit'  => 'Install Hypohub',
-    'install.error'   => 'Unable to connect to the database. Check your details and try again.',
+    'install.error'   => 'Unable to connect to the database. Check your information and try again.',
     'install.already' => 'Hypohub is already configured.',
 
+    // Navigation — persona logic: one profile = "I am ..." everywhere
+    'nav.home'    => 'Home',
+    'nav.borrow'  => 'I am a homeowner',
+    'nav.brokers' => 'I am a broker',
+    'nav.lenders' => 'I am a lender',
+    'nav.about'   => 'About',
+    'nav.contact' => 'Contact',
+
+    // Home banner (welcome, no call to action)
+    'hero.title'    => 'Welcome to Hypohub',
+    'hero.subtitle' => 'The single window for private mortgage financing in Quebec.',
+
+    // Problem
+    'problem.title' => 'Did your bank say no?',
+    'problem.body'  => 'Self-employed, consolidated file, tight deadline or second mortgage: institutions often say no, but private financing can respond. Hypohub refers your request to private lenders and mortgage brokers in Quebec.',
+    'problem.note'  => 'No fees for the borrower.',
+
+    // How it works (Borrow page)
+    'how.title'       => 'How it works',
+    'how.step1.title' => 'Submit your request',
+    'how.step1.body'  => 'Amount, rank, property and situation. A few minutes is all it takes.',
+    'how.step2.title' => 'We refer it',
+    'how.step2.body'  => 'Your file is offered to the private lenders and brokers in the network.',
+    'how.step3.title' => 'A lender takes the file',
+    'how.step3.body'  => 'They assess it, contact you and negotiate with you.',
+    'how.step4.title' => 'Financing',
+    'how.step4.body'  => 'The mortgage is closed and registered at the Land Registry.',
+
+    // Who — 3 distinct profiles (home), "the single window" logic
+    'who.borrower.title' => 'I am a homeowner',
+    'who.borrower.body'  => 'The single window sends my request to the private lenders and brokers of Quebec.',
+    'who.borrower.cta'   => 'Learn more',
+    'who.broker.title'   => 'I am a broker',
+    'who.broker.body'    => 'The single window brings me homeowners and connects me with private lenders in Quebec.',
+    'who.broker.cta'     => 'Learn more',
+    'who.lender.title'   => 'I am a lender',
+    'who.lender.body'    => 'The single window sends me financing requests from homeowners and brokers.',
+    'who.lender.cta'     => 'Learn more',
+
+    // Transparency (commission)
+    'transparency.title' => 'A simple and transparent commission',
+    'transparency.body'  => 'Hypohub is paid by the lender or the broker when the mortgage is registered: 25 basis points (0.25%) of the mortgage value. Never by the borrower.',
+    'transparency.note'  => 'Financière B&A Inc.',
+
+    // Proof (home)
+    'proof.title'       => 'A real request, real results',
+    'proof.stat1.value' => '6 requests',
+    'proof.stat1.label' => 'in a single day',
+    'proof.stat2.value' => '$22,500',
+    'proof.stat2.label' => 'in potential commission',
+    'proof.stat3.value' => '$150K → $6.5M',
+    'proof.stat3.label' => 'in target mortgage values',
+
+    // I am a homeowner page
+    'emp.banner'      => 'I am a homeowner',
+    'emp.intro'       => 'Private mortgage financing, even when the bank said no.',
+    'emp.cases.title' => 'Cases we refer',
+    'emp.case1.t'     => 'Self-employed',
+    'emp.case1.b'     => 'Non-conventional income, particular tax filings: institutions hesitate, private lenders assess ability to pay.',
+    'emp.case2.t'     => 'Debt consolidation',
+    'emp.case2.b'     => 'Consolidate your debts into a single mortgage and free up your financial capacity.',
+    'emp.case3.t'     => 'Second mortgage',
+    'emp.case3.b'     => 'Does your property have equity? A second mortgage can unlock that capital.',
+    'emp.case4.t'     => 'Tight deadline',
+    'emp.case4.b'     => 'The banking circuit is slow. Private financing responds faster.',
+    'emp.cta.body'    => 'A stable income and ability to pay are enough to discuss.',
+    'emp.cta.btn'     => 'I am a homeowner!',
+
+    // I am a broker page
+    'bro.banner'    => 'I am a broker',
+    'bro.intro'     => 'A network of private lenders to place your clients\' files.',
+    'bro.adv.title' => 'Why join the network',
+    'bro.adv1.t'    => 'Qualified files',
+    'bro.adv1.b'    => 'Receive structured, ready-to-assess requests with fast referral.',
+    'bro.adv2.t'    => 'Trailing commission',
+    'bro.adv2.b'    => 'A percentage-based trailing compensation, paid periodically, per agreement.',
+    'bro.adv3.t'    => 'Flexibility',
+    'bro.adv3.b'    => 'Great flexibility for you and your clients: we adapt to every file.',
+    'bro.note'      => 'Network currently being developed.',
+    'bro.cta.body'  => 'Let us talk about your practice and your needs.',
+    'bro.cta.btn'   => 'I am a broker!',
+
+    // I am a lender page
+    'len.banner'    => 'I am a lender',
+    'len.intro'     => 'Private lender: put your capital to work, secured by a mortgage.',
+    'len.adv.title' => 'Why lend through Hypohub',
+    'len.adv1.t'    => 'Mortgage security',
+    'len.adv1.b'    => 'First or second position, your capital is secured by a mortgage on the property.',
+    'len.adv2.t'    => 'Land Registry registration',
+    'len.adv2.b'    => 'Every financing is officially registered, within a legal framework recognized in Quebec.',
+    'len.adv3.t'    => 'Selected files',
+    'len.adv3.b'    => 'Qualified requests with demonstrated ability to pay by the borrower.',
+    'len.note'      => 'Rates vary according to the OPC license and the file profile.',
+    'len.cta.body'  => 'Present your capital and criteria, we propose files to you.',
+    'len.cta.btn'   => 'I am a lender!',
+
+    // About page
+    'ab.banner'    => 'Boucher & Associés, Financière',
+    'ab.intro'     => 'A vision for the future of private mortgage financing in Quebec.',
+    'ab.accord'    => 'Boucher & Associés, Financière: A forward-looking vision',
+    'ab.vision.t'  => 'Vision',
+    'ab.vision.b'  => 'Boucher et Associés has the vision of a solid economic future for Quebec and being the heart of this movement.',
+    'ab.mission.t' => 'Mission',
+    'ab.mission.b' => 'Build a portfolio of assets and liabilities for the group, enter into loans to individuals and/or businesses.',
+    'ab.orient.t'  => 'Strategic direction',
+    'ab.orient.b'  => 'B&A aims to repatriate Canadian and international funds to Quebec and promote cash flows between Quebecers and itself.',
+    'ab.entity.t'  => 'The entity',
+    'ab.entity.b'  => 'Hypohub is the single window for private mortgage financing in Quebec, powered by Financière B&A Inc., a company registered in Quebec (NEQ 1177249589).',
+
+    // FAQ
+    'faq.title' => 'Frequently asked questions',
+    'faq.q1'    => 'Who pays the commission?',
+    'faq.a1'    => 'The lender or the broker, when the mortgage is registered at the Land Registry. Never the borrower.',
+    'faq.q4'    => 'Who are the lenders?',
+    'faq.a4'    => 'Our network brings together private lenders and mortgage brokers from Quebec.',
+    'faq.q5'    => 'Is it legal and regulated?',
+    'faq.a5'    => 'Private mortgage lending is a recognized practice in Quebec. Hypohub matches parties; it does not lend itself and does not make credit decisions.',
+
+    // Contact page
+    'ct.title'          => 'Questions or just want to get in touch? Go ahead!',
+    'ct.body'           => 'Borrower, broker or lender: write to us, we will answer.',
+    'ct.form.t'         => 'Contact form',
+    'ct.form.name'      => 'First and last name',
+    'ct.form.email'     => 'Email',
+    'ct.form.subject'   => 'Subject',
+    'ct.subject.borrow' => 'I am a homeowner',
+    'ct.subject.broker' => 'I am a broker',
+    'ct.subject.lender' => 'I am a lender',
+    'ct.subject.other'  => 'Other...',
+    'ct.form.message'   => 'Message',
+    'ct.form.send'      => 'Send',
+    'ct.coords.founder' => 'Founder contact details',
+    'ct.coords.company' => 'Company contact details',
+    'ct.coords.address' => "1411 Rue Principale\nSaint-Étienne-des-Grès (Quebec) Canada\nG0X 2P0",
+
     // Footer
-    'footer.built' => 'Hypohub — free software (MIT license)',
+    'footer.brand'   => 'The single window for private mortgage financing in Quebec.',
+    'footer.founder' => 'Éric Boucher — President / Founder',
+    'footer.mit'     => 'Free software — MIT license',
 );
