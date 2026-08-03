@@ -562,8 +562,9 @@ ul.accords .block p {
     font-size: 0.88rem;
 }
 
-/* Sous-titres H4 du contenu (ex. À propos : vision / mission / orientation). */
-ul.accords .block h4 {
+/* Sous-titres H4 du contenu (ex. À propos : vision / mission / orientation).
+   :not(.toggle-title) — ne jamais surcharger les H4 pliables (espace). */
+ul.accords .block h4:not(.toggle-title) {
     margin: 0.8rem 0 0.15rem;
     font-size: 1rem;
     font-weight: 500;
