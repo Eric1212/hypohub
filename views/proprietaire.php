@@ -39,22 +39,40 @@
 
             <div class="card">
                 <h2><?php echo htmlspecialchars(t('emp.cases.title'), ENT_QUOTES, 'UTF-8'); ?></h2>
-                <details class="faq-item">
-                    <summary><?php echo htmlspecialchars(t('emp.case1.t'), ENT_QUOTES, 'UTF-8'); ?></summary>
-                    <p><?php echo htmlspecialchars(t('emp.case1.b'), ENT_QUOTES, 'UTF-8'); ?></p>
-                </details>
-                <details class="faq-item">
-                    <summary><?php echo htmlspecialchars(t('emp.case2.t'), ENT_QUOTES, 'UTF-8'); ?></summary>
-                    <p><?php echo htmlspecialchars(t('emp.case2.b'), ENT_QUOTES, 'UTF-8'); ?></p>
-                </details>
-                <details class="faq-item">
-                    <summary><?php echo htmlspecialchars(t('emp.case3.t'), ENT_QUOTES, 'UTF-8'); ?></summary>
-                    <p><?php echo htmlspecialchars(t('emp.case3.b'), ENT_QUOTES, 'UTF-8'); ?></p>
-                </details>
-                <details class="faq-item">
-                    <summary><?php echo htmlspecialchars(t('emp.case4.t'), ENT_QUOTES, 'UTF-8'); ?></summary>
-                    <p><?php echo htmlspecialchars(t('emp.case4.b'), ENT_QUOTES, 'UTF-8'); ?></p>
-                </details>
+                <ul class="accords">
+                    <li>
+                        <h4 class="toggle-title"><?php echo htmlspecialchars(t('emp.case1.t'), ENT_QUOTES, 'UTF-8'); ?></h4>
+                        <div class="toggle-content" style="display: none;">
+                            <div class="block">
+                                <p><?php echo htmlspecialchars(t('emp.case1.b'), ENT_QUOTES, 'UTF-8'); ?></p>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <h4 class="toggle-title"><?php echo htmlspecialchars(t('emp.case2.t'), ENT_QUOTES, 'UTF-8'); ?></h4>
+                        <div class="toggle-content" style="display: none;">
+                            <div class="block">
+                                <p><?php echo htmlspecialchars(t('emp.case2.b'), ENT_QUOTES, 'UTF-8'); ?></p>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <h4 class="toggle-title"><?php echo htmlspecialchars(t('emp.case3.t'), ENT_QUOTES, 'UTF-8'); ?></h4>
+                        <div class="toggle-content" style="display: none;">
+                            <div class="block">
+                                <p><?php echo htmlspecialchars(t('emp.case3.b'), ENT_QUOTES, 'UTF-8'); ?></p>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <h4 class="toggle-title"><?php echo htmlspecialchars(t('emp.case4.t'), ENT_QUOTES, 'UTF-8'); ?></h4>
+                        <div class="toggle-content" style="display: none;">
+                            <div class="block">
+                                <p><?php echo htmlspecialchars(t('emp.case4.b'), ENT_QUOTES, 'UTF-8'); ?></p>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
                 <p class="note"><?php echo htmlspecialchars(t('problem.note'), ENT_QUOTES, 'UTF-8'); ?></p>
             </div>
         </div>

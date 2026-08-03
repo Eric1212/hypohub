@@ -13,18 +13,32 @@
         <div class="two-col">
             <div class="card">
                 <h2><?php echo htmlspecialchars(t('len.adv.title'), ENT_QUOTES, 'UTF-8'); ?></h2>
-                <details class="faq-item">
-                    <summary><?php echo htmlspecialchars(t('len.adv1.t'), ENT_QUOTES, 'UTF-8'); ?></summary>
-                    <p><?php echo htmlspecialchars(t('len.adv1.b'), ENT_QUOTES, 'UTF-8'); ?></p>
-                </details>
-                <details class="faq-item">
-                    <summary><?php echo htmlspecialchars(t('len.adv2.t'), ENT_QUOTES, 'UTF-8'); ?></summary>
-                    <p><?php echo htmlspecialchars(t('len.adv2.b'), ENT_QUOTES, 'UTF-8'); ?></p>
-                </details>
-                <details class="faq-item">
-                    <summary><?php echo htmlspecialchars(t('len.adv3.t'), ENT_QUOTES, 'UTF-8'); ?></summary>
-                    <p><?php echo htmlspecialchars(t('len.adv3.b'), ENT_QUOTES, 'UTF-8'); ?></p>
-                </details>
+                <ul class="accords">
+                    <li>
+                        <h4 class="toggle-title"><?php echo htmlspecialchars(t('len.adv1.t'), ENT_QUOTES, 'UTF-8'); ?></h4>
+                        <div class="toggle-content" style="display: none;">
+                            <div class="block">
+                                <p><?php echo htmlspecialchars(t('len.adv1.b'), ENT_QUOTES, 'UTF-8'); ?></p>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <h4 class="toggle-title"><?php echo htmlspecialchars(t('len.adv2.t'), ENT_QUOTES, 'UTF-8'); ?></h4>
+                        <div class="toggle-content" style="display: none;">
+                            <div class="block">
+                                <p><?php echo htmlspecialchars(t('len.adv2.b'), ENT_QUOTES, 'UTF-8'); ?></p>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <h4 class="toggle-title"><?php echo htmlspecialchars(t('len.adv3.t'), ENT_QUOTES, 'UTF-8'); ?></h4>
+                        <div class="toggle-content" style="display: none;">
+                            <div class="block">
+                                <p><?php echo htmlspecialchars(t('len.adv3.b'), ENT_QUOTES, 'UTF-8'); ?></p>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
                 <p class="note"><?php echo htmlspecialchars(t('len.note'), ENT_QUOTES, 'UTF-8'); ?></p>
             </div>
 

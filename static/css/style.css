@@ -281,37 +281,6 @@ a:hover { color: #3180BC; }
 .steps-compact h3 { font-size: 0.95rem; margin: 0 0 0.1rem; }
 .steps-compact p { font-size: 0.85rem; margin: 0; }
 
-/* ---------- FAQ ---------- */
-.faq-item {
-    background: #fff;
-    border: 1px solid #7CAED4;
-    border-radius: 0.5rem;
-    padding: 0.1rem 1.25rem;
-    margin-bottom: 0.75rem;
-}
-
-.faq-item summary {
-    cursor: pointer;
-    font-weight: 500;
-    color: #303030;
-    padding: 0.45rem 0;
-    list-style: none;
-}
-
-.faq-item summary:hover { color: #3180bc; }
-
-.faq-item summary::-webkit-details-marker { display: none; }
-
-.faq-item summary::before {
-    content: "+ ";
-    color: #7da229;
-    font-weight: 700;
-}
-
-.faq-item[open] summary::before { content: "– "; }
-
-.faq-item p { font-size: 0.9rem; margin: 0 0 0.5rem; }
-
 /* ---------- Contact ---------- */
 .contact { text-align: center; }
 .contact .btn { margin-top: 0.5rem; }
@@ -591,6 +560,20 @@ ul.accords ul.accords .block {
 ul.accords .block p {
     margin: 0.2rem 0;
     font-size: 0.88rem;
+}
+
+/* Sous-titres H4 du contenu (ex. À propos : vision / mission / orientation). */
+ul.accords .block h4 {
+    margin: 0.8rem 0 0.15rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #0073AE;
+}
+
+/* Listes plates de H4 (pages publiques : cas, avantages, FAQ) :
+   barre de fin alignée sur le texte H4 (2.2rem), comme dans l'espace. */
+ul.accords > li:has(> h4.toggle-title)::after {
+    margin-left: 2.2rem;
 }
 
 /* ---------- Installateur (config.php) ---------- */
