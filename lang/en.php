@@ -82,7 +82,7 @@ return array(
     'stats.label.annee'         => 'this year',
     'stats.creanciers.one'      => '{n} lender',
     'stats.creanciers.many'     => '{n} lenders',
-    'stats.creanciers.label'    => 'lenders and brokers',
+    'stats.creanciers.label'    => 'and brokers at your service',
     'stats.proprietaires.one'   => '{n} homeowner',
     'stats.proprietaires.many'  => '{n} homeowners',
     'stats.proprietaires.label' => 'homeowners helped',

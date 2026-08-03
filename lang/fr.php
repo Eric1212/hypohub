@@ -82,7 +82,7 @@ return array(
     'stats.label.annee'         => 'cette année',
     'stats.creanciers.one'      => '{n} créancier',
     'stats.creanciers.many'     => '{n} créanciers',
-    'stats.creanciers.label'    => 'créanciers seuls et courtiers',
+    'stats.creanciers.label'    => 'et courtiers à votre service',
     'stats.proprietaires.one'   => '{n} propriétaire',
     'stats.proprietaires.many'  => '{n} propriétaires',
     'stats.proprietaires.label' => 'propriétaires aidés',
