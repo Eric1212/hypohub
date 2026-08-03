@@ -232,10 +232,10 @@ a:hover { color: #3180BC; }
 .who-card h3 { font-size: 1.3rem; }
 .who-card .btn { margin-top: auto; align-self: flex-start; }
 
-/* Bandeau statistique : 3 colonnes en ligne (accueil + À propos). */
+/* Bandeau statistique : 4 colonnes en ligne (accueil). */
 .stats {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 1rem;
     text-align: center;
 }

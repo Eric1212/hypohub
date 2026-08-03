@@ -71,6 +71,23 @@ return array(
     'proof.stat3.value' => '$150K → $6.5M',
     'proof.stat3.label' => 'in target mortgage values',
 
+    // Dynamic statistics band (home, proof.php partial)
+    'stats.demandes.one'        => '{n} active request',
+    'stats.demandes.many'       => '{n} active requests',
+    'stats.label.jour'          => 'today',
+    'stats.label.semaine'       => 'this week',
+    'stats.label.mois'          => 'this month',
+    'stats.label.trimestre'     => 'this quarter',
+    'stats.label.semestre'      => 'this half-year',
+    'stats.label.annee'         => 'this year',
+    'stats.creanciers.one'      => '{n} lender',
+    'stats.creanciers.many'     => '{n} lenders',
+    'stats.creanciers.label'    => 'lenders and brokers',
+    'stats.proprietaires.one'   => '{n} homeowner',
+    'stats.proprietaires.many'  => '{n} homeowners',
+    'stats.proprietaires.label' => 'homeowners helped',
+    'stats.total.label'         => 'in financing requests',
+
     // I am a homeowner page
     'emp.banner'      => 'I am a homeowner',
     'emp.intro'       => 'Private mortgage financing, even when the bank said no.',

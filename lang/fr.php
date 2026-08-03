@@ -71,6 +71,23 @@ return array(
     'proof.stat3.value' => '150 K$ → 6,5 M$',
     'proof.stat3.label' => 'valeurs d\'hypothèques visées',
 
+    // Statistiques dynamiques du bandeau (accueil, partial proof.php)
+    'stats.demandes.one'        => '{n} demande active',
+    'stats.demandes.many'       => '{n} demandes actives',
+    'stats.label.jour'          => 'aujourd\'hui',
+    'stats.label.semaine'       => 'cette semaine',
+    'stats.label.mois'          => 'ce mois',
+    'stats.label.trimestre'     => 'ce trimestre',
+    'stats.label.semestre'      => 'ce semestre',
+    'stats.label.annee'         => 'cette année',
+    'stats.creanciers.one'      => '{n} créancier',
+    'stats.creanciers.many'     => '{n} créanciers',
+    'stats.creanciers.label'    => 'créanciers seuls et courtiers',
+    'stats.proprietaires.one'   => '{n} propriétaire',
+    'stats.proprietaires.many'  => '{n} propriétaires',
+    'stats.proprietaires.label' => 'propriétaires aidés',
+    'stats.total.label'         => 'en demandes de financement',
+
     // Page Je suis propriétaire (emprunteur)
     'emp.banner'     => 'Je suis propriétaire',
     'emp.intro'      => 'Un financement hypothécaire privé, même quand la banque a dit non.',
