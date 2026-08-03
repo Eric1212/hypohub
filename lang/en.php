@@ -63,15 +63,8 @@ return array(
     'transparency.note'  => 'Financière B&A Inc.',
 
     // Proof (home)
-    'proof.title'       => 'A real request, real results',
-    'proof.stat1.value' => '6 requests',
-    'proof.stat1.label' => 'in a single day',
-    'proof.stat2.value' => '$22,500',
-    'proof.stat2.label' => 'in potential commission',
-    'proof.stat3.value' => '$150K → $6.5M',
-    'proof.stat3.label' => 'in target mortgage values',
-
     // Dynamic statistics band (home, proof.php partial)
+    'stats.title'               => 'A real request, real results',
     'stats.demandes.one'        => '{n} active request',
     'stats.demandes.many'       => '{n} active requests',
     'stats.label.jour'          => 'today',

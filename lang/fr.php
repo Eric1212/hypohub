@@ -62,16 +62,8 @@ return array(
     'transparency.body'  => 'Hypohub est rémunéré par le créancier ou le courtier, au moment de l\'enregistrement de l\'hypothèque : 25 points de base (0,25 %) sur la valeur de l\'hypothèque. Jamais à l\'emprunteur.',
     'transparency.note'  => 'Financière B&A Inc.',
 
-    // Preuve (accueil)
-    'proof.title'       => 'Une demande réelle, des résultats',
-    'proof.stat1.value' => '6 demandes',
-    'proof.stat1.label' => 'en une seule journée',
-    'proof.stat2.value' => '22 500 $',
-    'proof.stat2.label' => 'de commission potentielle',
-    'proof.stat3.value' => '150 K$ → 6,5 M$',
-    'proof.stat3.label' => 'valeurs d\'hypothèques visées',
-
     // Statistiques dynamiques du bandeau (accueil, partial proof.php)
+    'stats.title'               => 'Une demande réelle, des résultats',
     'stats.demandes.one'        => '{n} demande active',
     'stats.demandes.many'       => '{n} demandes actives',
     'stats.label.jour'          => 'aujourd\'hui',

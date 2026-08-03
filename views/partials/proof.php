@@ -14,7 +14,7 @@ $__fmt_k = function ($v) {
 <section class="section home-proof">
     <div class="section-inner wide">
         <div class="card">
-            <h2><?php echo htmlspecialchars(t('proof.title'), ENT_QUOTES, 'UTF-8'); ?></h2>
+            <h2><?php echo htmlspecialchars(t('stats.title'), ENT_QUOTES, 'UTF-8'); ?></h2>
             <div class="stats">
                 <div class="stat">
                     <span class="stat-value"><?php echo htmlspecialchars(t('stats.demandes.' . $__demandes, array('n' => $__st['demandes'])), ENT_QUOTES, 'UTF-8'); ?></span>
