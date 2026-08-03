@@ -33,6 +33,7 @@ if (!config_ok()) {
 }
 
 require_once __DIR__ . '/lib/db.php';
+require_once __DIR__ . '/lib/auth.php'; // session + connexion/inscription
 
 // Table de routage : slug → (vue, clé de titre)
 $pages = array(
@@ -45,6 +46,13 @@ $pages = array(
 );
 
 $page = isset($_GET['page']) ? preg_replace('/[^a-z-]/', '', (string) $_GET['page']) : 'accueil';
+
+// Action : déconnexion (avant le fallback — ce n'est pas une page, un saut d'état)
+if ($page === 'deconnexion') {
+    auth_logout();
+    redirect('index.php');
+}
+
 if (!isset($pages[$page])) {
     $page = 'accueil';
 }

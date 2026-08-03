@@ -12,6 +12,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     applyZoom();
     initPage();
+    initAuth();
     initNav();
     window.addEventListener('popstate', function () {
         navigate(location.pathname + location.search);
@@ -84,6 +85,120 @@ function initPage() {
     }
 }
 
+/**
+ * Modale de connexion / création de compte.
+ * La modale vit dans le DOM global (jamais rechargée par la nav AJAX) :
+ * ses écouteurs ne sont attachés qu'une fois, au chargement initial.
+ */
+function openAuthModal() {
+    var modal = document.getElementById('auth_modal');
+    if (!modal) return;
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+    var email = modal.querySelector('#auth_login_form input[name=email]');
+    if (email) email.focus();
+}
+
+function closeAuthModal() {
+    var modal = document.getElementById('auth_modal');
+    if (!modal) return;
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+}
+
+function initAuth() {
+    var modal = document.getElementById('auth_modal');
+    if (!modal) return;
+
+    // Ouverture (délégation : fonctionne même pour du contenu chargé en AJAX).
+    document.addEventListener('click', function (e) {
+        var el = e.target.closest('[data-auth-open]');
+        if (el) {
+            e.preventDefault();
+            openAuthModal();
+        }
+    });
+
+    // Fermeture : croix + clic sur le voile + touche Échap.
+    modal.querySelectorAll('[data-auth-close]').forEach(function (el) {
+        el.addEventListener('click', closeAuthModal);
+    });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeAuthModal();
+    });
+
+    var loginForm = document.getElementById('auth_login_form');
+    var registerForm = document.getElementById('auth_register_form');
+
+    // Onglets Connexion / Créer un compte.
+    modal.querySelectorAll('.auth-tab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            modal.querySelectorAll('.auth-tab').forEach(function (o) { o.classList.remove('active'); });
+            tab.classList.add('active');
+            var target = tab.getAttribute('data-auth-tab');
+            loginForm.hidden = target !== 'login';
+            registerForm.hidden = target !== 'register';
+        });
+    });
+
+    // Cartes de profil : « Je suis courtier » coche les deux accès.
+    var accesProp = registerForm.querySelector('input[name=acces_proprietaire]');
+    var accesCre = registerForm.querySelector('input[name=acces_creancier]');
+    registerForm.querySelectorAll('.auth-card').forEach(function (card) {
+        card.addEventListener('click', function () {
+            registerForm.querySelectorAll('.auth-card').forEach(function (c) { c.classList.remove('active'); });
+            card.classList.add('active');
+            var acces = card.getAttribute('data-acces');
+            accesProp.value = (acces === 'proprietaire' || acces === 'courtier') ? '1' : '0';
+            accesCre.value = (acces === 'creancier' || acces === 'courtier') ? '1' : '0';
+        });
+    });
+
+    attachAuthForm(loginForm, 'api/auth_login.php');
+    attachAuthForm(registerForm, 'api/auth_register.php');
+}
+
+/** Soumet un formulaire de la modale en JSON ; recharge la page en cas de succès. */
+function attachAuthForm(form, url) {
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var errEl = form.querySelector('[data-auth-error]');
+        errEl.hidden = true;
+
+        var data = {};
+        new FormData(form).forEach(function (v, k) { data[k] = v; });
+
+        var btn = form.querySelector('button[type=submit]');
+        var original = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = '…';
+
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (res) {
+            btn.disabled = false;
+            btn.textContent = original;
+            if (res.ok) {
+                // Rechargement complet : le serveur rend le footer connecté.
+                window.location.href = window.location.pathname + window.location.search;
+            } else {
+                errEl.textContent = res.error || form.getAttribute('data-err-network');
+                errEl.hidden = false;
+            }
+        })
+        .catch(function () {
+            btn.disabled = false;
+            btn.textContent = original;
+            errEl.textContent = form.getAttribute('data-err-network');
+            errEl.hidden = false;
+        });
+    });
+}
+
 /** Intercepte les clics sur les liens internes pour naviguer en AJAX. */
 function initNav() {
     document.addEventListener('click', function (e) {
@@ -93,6 +208,7 @@ function initNav() {
         var href = a.getAttribute('href');
         if (!href) return;
         if (href.charAt(0) === '#' || href.indexOf('mailto:') === 0) return;
+        if (a.getAttribute('data-ajax') === 'off') return; // navigation classique (ex. déconnexion)
         if (a.target) return; // liens avec target (ex. nouvelle fenêtre)
 
         var url;

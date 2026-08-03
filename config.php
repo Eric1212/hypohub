@@ -12,6 +12,7 @@
 require_once __DIR__ . '/lib/config.php';
 require_once __DIR__ . '/lib/helpers.php';
 require_once __DIR__ . '/lib/i18n.php';
+require_once __DIR__ . '/lib/auth.php'; // session + état connecté (footer)
 
 // Déjà configuré ? On refuse de s'exécuter.
 if (config_ok()) {

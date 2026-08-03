@@ -163,10 +163,20 @@ function db_schema() {
         CONSTRAINT fk_acc_professionnel FOREIGN KEY (professionnel_id) REFERENCES users(id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
+    // Compteur anti brute-force : 5 échecs → 15 min (par email + IP)
+    $pdo->exec("CREATE TABLE IF NOT EXISTS login_tentatives (
+        email        VARCHAR(190) NOT NULL,
+        ip           VARCHAR(45)  NOT NULL,
+        compteur     INT UNSIGNED NOT NULL DEFAULT 0,
+        bloque_jusqua DATETIME    DEFAULT NULL,
+        date_maj     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (email, ip)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
     // Version du schéma (bump à chaque évolution de la structure)
     $st = $pdo->prepare(
-        "INSERT INTO app_meta (meta_key, meta_value) VALUES ('schema_version', '2')
-         ON DUPLICATE KEY UPDATE meta_value = '2'"
+        "INSERT INTO app_meta (meta_key, meta_value) VALUES ('schema_version', '3')
+         ON DUPLICATE KEY UPDATE meta_value = '3'"
     );
     $st->execute();
 }

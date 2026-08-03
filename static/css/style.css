@@ -376,7 +376,101 @@ a:hover { color: #3180BC; }
 .site-footer .brand { font-weight: 400; margin: 0; font-size: 0.9rem; }
 .site-footer .brand a { color: #0073AE; }
 .site-footer .founder { font-weight: 250; font-size: 0.85rem; margin: 0.25rem 0 0; color: #555758; }
-.site-footer .mit { font-weight: 150; font-size: 0.8rem; margin: 0; color: #555758; }
+.footer-auth { font-weight: 250; font-size: 0.8rem; margin: 0; color: #555758; }
+.footer-auth a { color: #3180BC; text-decoration: none; }
+.footer-auth a:hover { color: #0073AE; text-decoration: underline; }
+
+/* ---------- Authentification (modale connexion / création) ---------- */
+.auth-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+}
+.auth-modal.open { display: flex; }
+
+.auth-modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(20, 35, 50, 0.55);
+}
+
+.auth-modal-box {
+    position: relative;
+    background: #fff;
+    width: min(24rem, calc(100vw - 2rem));
+    max-height: 90vh;
+    overflow-y: auto;
+    border-radius: 0.5rem;
+    padding: 1.25rem;
+    box-shadow: 0 10px 40px rgba(0, 40, 70, 0.25);
+}
+
+.auth-modal-close {
+    position: absolute;
+    top: 0.4rem;
+    right: 0.7rem;
+    border: 0;
+    background: transparent;
+    color: #555758;
+    font-size: 1.6rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.auth-tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+
+.auth-tab {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid #7CAED4;
+    background: transparent;
+    color: #3180BC;
+    border-radius: 0.25rem;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+.auth-tab.active { background: #0F78A1; border-color: #0F78A1; color: #fff; }
+
+.auth-form label { display: block; margin-bottom: 0.75rem; }
+.auth-form label span { display: block; font-size: 0.8rem; font-weight: 500; color: #555758; margin-bottom: 0.25rem; }
+.auth-form input[type=email],
+.auth-form input[type=password],
+.auth-form input[type=text] {
+    width: 100%;
+    padding: 0.5rem 0.6rem;
+    border: 1px solid #98bfdd;
+    border-radius: 0.25rem;
+    font-family: inherit;
+    font-size: 0.9rem;
+}
+
+.btn-primary { background: #3180BC; }
+.btn-block { display: block; width: 100%; margin-top: 0.5rem; }
+
+.auth-cards { display: grid; gap: 0.5rem; margin-bottom: 0.5rem; }
+.auth-card {
+    padding: 0.6rem;
+    border: 1px solid #7CAED4;
+    border-radius: 0.25rem;
+    background: transparent;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #3180BC;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.auth-card.active { background: #E7F2F8; border-color: #0F78A1; color: #0073AE; }
+
+.auth-hint { font-size: 0.78rem; color: #555758; margin: 0 0 0.9rem; }
+
+.auth-error { color: #b00020; font-size: 0.85rem; margin: 0.5rem 0; }
 
 /* ---------- Installateur (config.php) ---------- */
 .install-form label {
