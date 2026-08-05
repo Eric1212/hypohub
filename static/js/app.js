@@ -287,8 +287,19 @@ function initCreate() {
 
     modal.querySelectorAll('form[data-create-type]').forEach(function (form) {
         var type = form.getAttribute('data-create-type');
-        attachJsonForm(form, 'api/create_' + type + '.php', function () {
-            window.location.href = 'index.php?page=espace';
+        attachJsonForm(form, 'api/create_' + type + '.php', function (res) {
+            // Profil : après la création, uploader les documents sélectionnés
+            // (multipart) puis recharger — la modale profil seule a des fichiers.
+            var filesInput = form.querySelector('input[type=file][name="doc_fichiers[]"]');
+            if (type === 'profil' && filesInput && filesInput.files.length > 0 && res && res.id) {
+                var typeId = form.querySelector('select[name="doc_type_id"]').value;
+                var csrf = form.querySelector('input[name="csrf"]').value;
+                uploadDocuments(res.id, typeId, csrf, filesInput.files, function () {
+                    window.location.href = 'index.php?page=espace';
+                });
+            } else {
+                window.location.href = 'index.php?page=espace';
+            }
         });
     });
 }
@@ -369,4 +380,27 @@ function updateActiveNav(url) {
         var linkTarget = linkUrl.pathname + linkUrl.search;
         a.classList.toggle('active', linkTarget === url);
     });
+}
+
+/**
+ * Upload séquentiel des documents d'un profil (multipart vers upload_document.php).
+ * En cas d'échec d'un fichier, on continue quand même (documents indépendants).
+ */
+function uploadDocuments(profilId, typeId, csrf, files, done) {
+    var queue = Array.prototype.slice.call(files);
+    var i = 0;
+    function next() {
+        if (i >= queue.length) { done(); return; }
+        var fd = new FormData();
+        fd.append('csrf', csrf);
+        fd.append('profil_id', profilId);
+        fd.append('type_id', typeId);
+        fd.append('fichier', queue[i]);
+        i++;
+        fetch('api/upload_document.php', { method: 'POST', body: fd })
+            .then(function (r) { return r.json(); })
+            .then(function () { next(); })
+            .catch(function () { next(); });
+    }
+    next();
 }

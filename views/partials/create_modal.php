@@ -20,30 +20,94 @@
         <form id="create_form_profil" class="auth-form" data-create-type="profil" data-err-network="<?php echo htmlspecialchars(t('auth.error.network'), ENT_QUOTES, 'UTF-8'); ?>" hidden novalidate>
             <h2 class="create-title"><?php echo htmlspecialchars(t('create.profil.title'), ENT_QUOTES, 'UTF-8'); ?></h2>
             <input type="hidden" name="csrf" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
-            <label>
-                <span><?php echo htmlspecialchars(t('auth.name'), ENT_QUOTES, 'UTF-8'); ?></span>
-                <input type="text" name="nom_complet" required>
-            </label>
-            <label>
-                <span><?php echo htmlspecialchars(t('field.phone'), ENT_QUOTES, 'UTF-8'); ?></span>
-                <input type="text" name="telephone">
-            </label>
-            <label>
-                <span><?php echo htmlspecialchars(t('field.email'), ENT_QUOTES, 'UTF-8'); ?></span>
-                <input type="email" name="courriel">
-            </label>
-            <label>
-                <span><?php echo htmlspecialchars(t('field.emploi'), ENT_QUOTES, 'UTF-8'); ?></span>
-                <select name="situation_emploi">
-                    <option value="salaire"><?php echo htmlspecialchars(t('type.emploi.salaire'), ENT_QUOTES, 'UTF-8'); ?></option>
-                    <option value="travailleur_autonome"><?php echo htmlspecialchars(t('type.emploi.travailleur_autonome'), ENT_QUOTES, 'UTF-8'); ?></option>
-                    <option value="autre"><?php echo htmlspecialchars(t('type.emploi.autre'), ENT_QUOTES, 'UTF-8'); ?></option>
-                </select>
-            </label>
-            <label>
-                <span><?php echo htmlspecialchars(t('field.revenu'), ENT_QUOTES, 'UTF-8'); ?></span>
-                <input type="number" name="revenu_annuel" step="0.01" min="0" placeholder="0,00">
-            </label>
+
+            <details class="create-details">
+                <summary><?php echo htmlspecialchars(t('create.profil.identification'), ENT_QUOTES, 'UTF-8'); ?></summary>
+                <div class="create-grid-2">
+                    <label>
+                        <span><?php echo htmlspecialchars(t('field.prenom'), ENT_QUOTES, 'UTF-8'); ?></span>
+                        <input type="text" name="prenom" required>
+                    </label>
+                    <label>
+                        <span><?php echo htmlspecialchars(t('field.nom'), ENT_QUOTES, 'UTF-8'); ?></span>
+                        <input type="text" name="nom" required>
+                    </label>
+                </div>
+                <label>
+                    <span><?php echo htmlspecialchars(t('field.naissance'), ENT_QUOTES, 'UTF-8'); ?></span>
+                    <input type="date" name="date_naissance" required>
+                </label>
+            </details>
+
+            <details class="create-details">
+                <summary><?php echo htmlspecialchars(t('create.profil.coordonnees'), ENT_QUOTES, 'UTF-8'); ?></summary>
+                <div class="create-grid-2">
+                    <label>
+                        <span><?php echo htmlspecialchars(t('field.email'), ENT_QUOTES, 'UTF-8'); ?></span>
+                        <input type="email" name="courriel" required>
+                    </label>
+                    <label>
+                        <span><?php echo htmlspecialchars(t('field.phone'), ENT_QUOTES, 'UTF-8'); ?></span>
+                        <input type="tel" name="telephone" required>
+                    </label>
+                </div>
+                <div class="create-grid-2">
+                    <label>
+                        <span><?php echo htmlspecialchars(t('field.app'), ENT_QUOTES, 'UTF-8'); ?></span>
+                        <input type="text" name="app">
+                    </label>
+                    <label>
+                        <span><?php echo htmlspecialchars(t('field.province'), ENT_QUOTES, 'UTF-8'); ?></span>
+                        <input type="text" name="province" value="QC" maxlength="2" required>
+                    </label>
+                </div>
+                <label>
+                    <span><?php echo htmlspecialchars(t('field.adresse'), ENT_QUOTES, 'UTF-8'); ?></span>
+                    <input type="text" name="adresse" placeholder="<?php echo htmlspecialchars(t('field.adresse.placeholder'), ENT_QUOTES, 'UTF-8'); ?>" required>
+                </label>
+                <div class="create-grid-2">
+                    <label>
+                        <span><?php echo htmlspecialchars(t('field.ville'), ENT_QUOTES, 'UTF-8'); ?></span>
+                        <input type="text" name="ville" required>
+                    </label>
+                    <label>
+                        <span><?php echo htmlspecialchars(t('field.code'), ENT_QUOTES, 'UTF-8'); ?></span>
+                        <input type="text" name="code_postal" placeholder="A1A 1A1" required>
+                    </label>
+                </div>
+            </details>
+
+            <details class="create-details">
+                <summary><?php echo htmlspecialchars(t('create.profil.societe'), ENT_QUOTES, 'UTF-8'); ?></summary>
+                <label>
+                    <span><?php echo htmlspecialchars(t('field.compagnie'), ENT_QUOTES, 'UTF-8'); ?></span>
+                    <input type="text" name="nom_compagnie">
+                </label>
+                <label>
+                    <span><?php echo htmlspecialchars(t('field.neq'), ENT_QUOTES, 'UTF-8'); ?></span>
+                    <input type="text" name="neq" placeholder="XXXXXXXXXX">
+                </label>
+            </details>
+
+            <details class="create-details">
+                <summary><?php echo htmlspecialchars(t('create.profil.documents'), ENT_QUOTES, 'UTF-8'); ?></summary>
+                <div class="create-grid-2">
+                    <label>
+                        <span><?php echo htmlspecialchars(t('create.select.type'), ENT_QUOTES, 'UTF-8'); ?></span>
+                        <select name="doc_type_id">
+                            <?php foreach ($create_doc_types as $dt): ?>
+                            <option value="<?php echo (int) $dt['id']; ?>"><?php echo htmlspecialchars($dt['nom_fr'], ENT_QUOTES, 'UTF-8'); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </label>
+                    <label>
+                        <span><?php echo htmlspecialchars(t('doc.select'), ENT_QUOTES, 'UTF-8'); ?></span>
+                        <input type="file" name="doc_fichiers[]" accept=".pdf,.jpg,.jpeg,.png" multiple>
+                    </label>
+                </div>
+                <p class="note"><?php echo htmlspecialchars(t('doc.max'), ENT_QUOTES, 'UTF-8'); ?></p>
+            </details>
+
             <p class="auth-error" data-create-error hidden></p>
             <button type="submit" class="btn btn-primary btn-block"><?php echo htmlspecialchars(t('create.submit'), ENT_QUOTES, 'UTF-8'); ?></button>
         </form>
@@ -85,7 +149,7 @@
                 <span><?php echo htmlspecialchars(t('create.select.profil'), ENT_QUOTES, 'UTF-8'); ?></span>
                 <select name="profil_proprietaire_id" required>
                     <?php foreach ($create_profils as $cp): ?>
-                    <option value="<?php echo (int) $cp['id']; ?>"><?php echo htmlspecialchars($cp['nom_complet'], ENT_QUOTES, 'UTF-8'); ?></option>
+                    <option value="<?php echo (int) $cp['id']; ?>"><?php echo htmlspecialchars($cp['prenom'] . ' ' . $cp['nom'], ENT_QUOTES, 'UTF-8'); ?></option>
                     <?php endforeach; ?>
                 </select>
             </label>

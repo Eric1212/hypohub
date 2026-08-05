@@ -2,9 +2,10 @@
 /**
  * Hypohub — API : création d'un profil propriétaire.
  *
- * POST JSON {nom_complet, telephone, courriel, situation_emploi,
- *            revenu_annuel, csrf} → 200 {ok:true} | {ok:false, error}
- * Session requise.
+ * POST JSON {prenom, nom, date_naissance, courriel, telephone, app, adresse,
+ *            ville, code_postal, province, nom_compagnie, neq, statut, csrf}
+ * → 200 {ok:true} | {ok:false, error}
+ * Session requise + accès propriétaire.
  */
 require_once __DIR__ . '/../lib/config.php';
 require_once __DIR__ . '/../lib/helpers.php';
@@ -32,32 +33,81 @@ if (empty($u['acces_proprietaire'])) {
     json_response(array('ok' => false, 'error' => t('create.error.access')), 403);
 }
 
-$nom_complet = trim(isset($in['nom_complet']) ? $in['nom_complet'] : '');
-if ($nom_complet === '') {
+// --- Champs requis ---
+$prenom = trim(isset($in['prenom']) ? $in['prenom'] : '');
+$nom    = trim(isset($in['nom']) ? $in['nom'] : '');
+$naissance = trim(isset($in['date_naissance']) ? $in['date_naissance'] : '');
+$courriel  = trim(isset($in['courriel']) ? $in['courriel'] : '');
+$telephone = trim(isset($in['telephone']) ? $in['telephone'] : '');
+$adresse   = trim(isset($in['adresse']) ? $in['adresse'] : '');
+$ville     = trim(isset($in['ville']) ? $in['ville'] : '');
+$code_postal = trim(isset($in['code_postal']) ? $in['code_postal'] : '');
+$province    = trim(isset($in['province']) ? $in['province'] : 'QC');
+
+if ($prenom === '' || $nom === '') {
     json_response(array('ok' => false, 'error' => t('create.error.required')));
 }
-
-$emploi = isset($in['situation_emploi']) ? $in['situation_emploi'] : 'salaire';
-if (!in_array($emploi, array('salaire', 'travailleur_autonome', 'autre'), true)) {
-    $emploi = 'salaire';
+if ($naissance === '') {
+    json_response(array('ok' => false, 'error' => t('create.error.required')));
+}
+// Date de naissance valide (AAAA-MM-JJ) et dans le passé
+$naissance_dt = DateTime::createFromFormat('Y-m-d', $naissance);
+if (!$naissance_dt || $naissance_dt->format('Y-m-d') !== $naissance || $naissance_dt > new DateTime()) {
+    json_response(array('ok' => false, 'error' => t('create.error.naissance')));
+}
+if ($courriel === '' || !filter_var($courriel, FILTER_VALIDATE_EMAIL)) {
+    json_response(array('ok' => false, 'error' => t('create.error.required')));
+}
+if ($telephone === '') {
+    json_response(array('ok' => false, 'error' => t('create.error.required')));
+}
+if ($adresse === '' || $ville === '') {
+    json_response(array('ok' => false, 'error' => t('create.error.required')));
+}
+// Code postal : A1A 1A1 (tolère minuscules/absence d'espace, normalise)
+$code_postal = strtoupper(str_replace(' ', '', $code_postal));
+if ($code_postal === '' || !preg_match('/^[ABCEGHJ-NPRSTVXY]\d[ABCEGHJ-NPRSTVXY]\d[ABCEGHJ-NPRSTVXY]\d$/', $code_postal)) {
+    json_response(array('ok' => false, 'error' => t('create.error.codepostal')));
+}
+$province = strtoupper($province);
+if ($province === '') {
+    $province = 'QC';
 }
 
-$revenu = isset($in['revenu_annuel']) && $in['revenu_annuel'] !== '' ? (float) $in['revenu_annuel'] : null;
-if ($revenu !== null && $revenu < 0) {
-    $revenu = null;
+// --- Champs optionnels ---
+$app = trim(isset($in['app']) ? $in['app'] : '') ?: null;
+$nom_compagnie = trim(isset($in['nom_compagnie']) ? $in['nom_compagnie'] : '') ?: null;
+$neq = trim(isset($in['neq']) ? $in['neq'] : '') ?: null;
+$statut = isset($in['statut']) && $in['statut'] !== '' ? $in['statut'] : null;
+if ($statut !== null && !in_array($statut, array('citoyen', 'residant_permanent'), true)) {
+    $statut = null;
+}
+// NEQ : 9-10 chiffres si présent
+if ($neq !== null && !preg_match('/^\d{9,10}$/', $neq)) {
+    json_response(array('ok' => false, 'error' => t('create.error.neq')));
 }
 
 $st = db()->prepare(
-    'INSERT INTO profils_proprietaire (cree_par, nom_complet, telephone, courriel, situation_emploi, revenu_annuel)
-     VALUES (?, ?, ?, ?, ?, ?)'
+    'INSERT INTO profils_proprietaire
+        (cree_par, prenom, nom, date_naissance, courriel, telephone, app,
+         adresse, ville, code_postal, province, nom_compagnie, neq, statut)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
 );
 $st->execute(array(
     (int) $u['id'],
-    $nom_complet,
-    trim(isset($in['telephone']) ? $in['telephone'] : '') ?: null,
-    trim(isset($in['courriel']) ? $in['courriel'] : '') ?: null,
-    $emploi,
-    $revenu,
+    $prenom,
+    $nom,
+    $naissance,
+    $courriel,
+    $telephone,
+    $app,
+    $adresse,
+    $ville,
+    $code_postal,
+    $province,
+    $nom_compagnie,
+    $neq,
+    $statut,
 ));
 
-json_response(array('ok' => true));
+json_response(array('ok' => true, 'id' => (int) db()->lastInsertId()));

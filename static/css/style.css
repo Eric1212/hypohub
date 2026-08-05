@@ -405,11 +405,54 @@ a:hover { color: #3180BC; }
 }
 .auth-tab.active { background: #0F78A1; border-color: #0F78A1; color: #fff; }
 
+/* Modale de création : boîte plus large + champs en 2 colonnes. */
+#create_modal .auth-modal-box {
+    width: min(32rem, calc(100vw - 2rem));
+}
+.create-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 0.75rem;
+}
+.create-grid-2 label {
+    margin-bottom: 0.75rem;
+}
+.create-details summary {
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #3180BC;
+    margin-bottom: 0.5rem;
+}
+.create-details[open] > label {
+    margin-left: 0;
+}
+
+/* Liste des documents d'un profil (espace membre) */
+.doc-list {
+    margin: 0.35rem 0 0.75rem 1rem;
+    padding: 0;
+    list-style: none;
+    font-size: 0.85rem;
+}
+.doc-list li::before {
+    content: "📄 ";
+}
+.doc-list a {
+    color: #3180BC;
+    text-decoration: none;
+}
+.doc-list a:hover {
+    text-decoration: underline;
+}
+
 .auth-form label { display: block; margin-bottom: 0.75rem; }
 .auth-form label span { display: block; font-size: 0.8rem; font-weight: 500; color: #555758; margin-bottom: 0.25rem; }
 .auth-form input[type=email],
 .auth-form input[type=password],
-.auth-form input[type=text] {
+.auth-form input[type=text],
+.auth-form input[type=tel],
+.auth-form input[type=date] {
     width: 100%;
     padding: 0.5rem 0.6rem;
     border: 1px solid #98bfdd;

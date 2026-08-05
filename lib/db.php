@@ -71,14 +71,24 @@ function db_schema() {
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
     // 2. Profils propriétaire — plusieurs par compte (soi, père, sœur...)
+    //    IDV/INC : prénom+nom = le représentant (INC) ou la personne (IDV) ;
+    //    le classement est dérivé (NEQ / nom_compagnie présents → société).
     $pdo->exec("CREATE TABLE IF NOT EXISTS profils_proprietaire (
         id               INT UNSIGNED NOT NULL AUTO_INCREMENT,
         cree_par         INT UNSIGNED NOT NULL,
-        nom_complet      VARCHAR(150) NOT NULL,
-        telephone        VARCHAR(40)  DEFAULT NULL,
+        prenom           VARCHAR(100) NOT NULL DEFAULT '',
+        nom              VARCHAR(100) NOT NULL DEFAULT '',
+        date_naissance   DATE        DEFAULT NULL,
         courriel         VARCHAR(190) DEFAULT NULL,
-        situation_emploi ENUM('salaire','travailleur_autonome','autre') NOT NULL DEFAULT 'salaire',
-        revenu_annuel    DECIMAL(12,2) DEFAULT NULL,
+        telephone        VARCHAR(40)  DEFAULT NULL,
+        app              VARCHAR(20)  DEFAULT NULL,
+        adresse          VARCHAR(255) NOT NULL DEFAULT '',
+        ville            VARCHAR(100) NOT NULL DEFAULT '',
+        code_postal      VARCHAR(7)   DEFAULT NULL,
+        province         VARCHAR(2)   NOT NULL DEFAULT 'QC',
+        nom_compagnie    VARCHAR(150) DEFAULT NULL,
+        neq              VARCHAR(10)  DEFAULT NULL,
+        statut           ENUM('citoyen','residant_permanent') DEFAULT NULL,
         notes            TEXT,
         date_creation    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (id),
@@ -164,6 +174,54 @@ function db_schema() {
         CONSTRAINT fk_acc_professionnel FOREIGN KEY (professionnel_id) REFERENCES users(id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
+    // 8. Types de documents — dynamiques (backend admin à venir), seed initial
+    $pdo->exec("CREATE TABLE IF NOT EXISTS documents_types (
+        id         INT UNSIGNED NOT NULL AUTO_INCREMENT,
+        nom_fr     VARCHAR(100) NOT NULL,
+        nom_en     VARCHAR(100) NOT NULL,
+        actif      TINYINT(1)   NOT NULL DEFAULT 1,
+        date_creation DATETIME  NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        UNIQUE KEY uq_dt_nom_fr (nom_fr)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    // Seed des types de documents (uniquement si la table vient d'être créée)
+    $has_dt = (int) $pdo->query(
+        "SELECT COUNT(*) FROM information_schema.TABLES
+          WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'documents_types'"
+    )->fetchColumn();
+    if ($has_dt) {
+        $st = $pdo->query('SELECT COUNT(*) FROM documents_types');
+        if ((int) $st->fetchColumn() === 0) {
+            $seed = $pdo->prepare('INSERT INTO documents_types (nom_fr, nom_en) VALUES (?, ?)');
+            foreach (array(
+                array('Permis de conduire', 'Driver\'s licence'),
+                array('Passeport', 'Passport'),
+                array('Avis de cotisation', 'Notice of assessment'),
+                array('Talons de paie', 'Pay stubs'),
+                array('Relevés bancaires', 'Bank statements'),
+                array('États financiers', 'Financial statements'),
+            ) as $t) {
+                $seed->execute($t);
+            }
+        }
+    }
+
+    // 9. Documents — scans/PDF attachés à un profil propriétaire (uploads/)
+    $pdo->exec("CREATE TABLE IF NOT EXISTS documents (
+        id           INT UNSIGNED NOT NULL AUTO_INCREMENT,
+        profil_id    INT UNSIGNED NOT NULL,
+        type_id      INT UNSIGNED NOT NULL,
+        nom_fichier  VARCHAR(255) NOT NULL,
+        fichier_stocke VARCHAR(255) NOT NULL DEFAULT '',
+        taille_octets BIGINT UNSIGNED NOT NULL,
+        date_upload  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id),
+        KEY idx_doc_profil (profil_id),
+        CONSTRAINT fk_doc_profil FOREIGN KEY (profil_id) REFERENCES profils_proprietaire(id),
+        CONSTRAINT fk_doc_type FOREIGN KEY (type_id) REFERENCES documents_types(id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
     // Compteur anti brute-force : 5 échecs → 15 min (par email + IP)
     $pdo->exec("CREATE TABLE IF NOT EXISTS login_tentatives (
         email        VARCHAR(190) NOT NULL,
@@ -193,10 +251,50 @@ function db_schema() {
         $pdo->exec("ALTER TABLE profils_creancier ADD COLUMN nom VARCHAR(150) NOT NULL DEFAULT '' AFTER user_id");
     }
 
+    // Migration profils_proprietaire v6 (2026-08-05) : profil unique IDV/INC.
+    // remplace nom_complet par prenom+nom, ajoute adresse/naissance/INC,
+    // retire situation_emploi et revenu_annuel (l'argent vit au dossier).
+    $col = function ($name) use ($pdo) {
+        return (int) $pdo->query(
+            "SELECT COUNT(*) FROM information_schema.COLUMNS
+              WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'profils_proprietaire' AND COLUMN_NAME = '$name'"
+        )->fetchColumn();
+    };
+
+    // 2a. nom_complet → prenom + nom (split au premier espace)
+    if ($col('nom_complet')) {
+        $pdo->exec("ALTER TABLE profils_proprietaire
+            ADD COLUMN prenom VARCHAR(100) NOT NULL DEFAULT '' AFTER cree_par,
+            ADD COLUMN nom    VARCHAR(100) NOT NULL DEFAULT '' AFTER prenom");
+        $pdo->exec("UPDATE profils_proprietaire SET
+            prenom = SUBSTRING_INDEX(nom_complet, ' ', 1),
+            nom    = SUBSTRING_INDEX(nom_complet, ' ', -1)");
+        $pdo->exec('ALTER TABLE profils_proprietaire DROP COLUMN nom_complet');
+    }
+
+    // 2b. colonnes IDV/INC (si table neuve, déjà présentes dans le CREATE)
+    if (!$col('date_naissance')) {
+        $pdo->exec("ALTER TABLE profils_proprietaire
+            ADD COLUMN date_naissance DATE DEFAULT NULL AFTER nom,
+            ADD COLUMN app VARCHAR(20) DEFAULT NULL AFTER telephone,
+            ADD COLUMN adresse VARCHAR(255) NOT NULL DEFAULT '' AFTER app,
+            ADD COLUMN ville VARCHAR(100) NOT NULL DEFAULT '' AFTER adresse,
+            ADD COLUMN code_postal VARCHAR(7) DEFAULT NULL AFTER ville,
+            ADD COLUMN province VARCHAR(2) NOT NULL DEFAULT 'QC' AFTER code_postal,
+            ADD COLUMN nom_compagnie VARCHAR(150) DEFAULT NULL AFTER province,
+            ADD COLUMN neq VARCHAR(10) DEFAULT NULL AFTER nom_compagnie,
+            ADD COLUMN statut ENUM('citoyen','residant_permanent') DEFAULT NULL AFTER neq");
+    }
+
+    // 2c. suppression des colonnes obsolètes (finance → dossier)
+    if ($col('situation_emploi')) {
+        $pdo->exec('ALTER TABLE profils_proprietaire DROP COLUMN situation_emploi, DROP COLUMN revenu_annuel');
+    }
+
     // Version du schéma (bump à chaque évolution de la structure)
     $st = $pdo->prepare(
-        "INSERT INTO app_meta (meta_key, meta_value) VALUES ('schema_version', '5')
-         ON DUPLICATE KEY UPDATE meta_value = '5'"
+        "INSERT INTO app_meta (meta_key, meta_value) VALUES ('schema_version', '7')
+         ON DUPLICATE KEY UPDATE meta_value = '7'"
     );
     $st->execute();
 }

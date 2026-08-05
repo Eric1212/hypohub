@@ -18,7 +18,7 @@ $creanciers = array();
 $reseau    = array();
 
 if ($__u['acces_proprietaire']) {
-    $st = $pdo->prepare('SELECT id, nom_complet, telephone, courriel, situation_emploi, revenu_annuel FROM profils_proprietaire WHERE cree_par = ? ORDER BY id DESC');
+    $st = $pdo->prepare('SELECT id, prenom, nom, date_naissance, courriel, telephone, app, adresse, ville, code_postal, province, nom_compagnie, neq, statut FROM profils_proprietaire WHERE cree_par = ? ORDER BY id DESC');
     $st->execute(array($__u['id']));
     $profils = $st->fetchAll();
 
@@ -27,7 +27,8 @@ if ($__u['acces_proprietaire']) {
     $proprietes = $st->fetchAll();
 
     $st = $pdo->prepare(
-        'SELECT d.id, d.montant_demande, d.rang, d.type_financement, d.statut, p.nom_complet AS emprunteur
+        'SELECT d.id, d.montant_demande, d.rang, d.type_financement, d.statut,
+                p.prenom, p.nom, p.nom_compagnie, p.neq, p.ville
            FROM dossiers_emprunt d
            JOIN profils_proprietaire p ON p.id = d.profil_proprietaire_id
           WHERE d.cree_par = ?
@@ -45,13 +46,31 @@ if ($__u['acces_creancier']) {
     // Dossiers visibles par le réseau : PAS les profils (masqués tant que pas d'acceptation).
     // Le réseau montre TOUS les dossiers du marché, y compris ceux créés par
     // l'utilisateur connecté (décision Éric, 2026-08-03 : pas d'exclusion).
-    $st = $pdo->query(
+$st = $pdo->query(
         "SELECT id, montant_demande, rang, type_financement, statut
            FROM dossiers_emprunt
           WHERE statut IN ('nouveau', 'accepte')
           ORDER BY id DESC"
     );
     $reseau = $st->fetchAll();
+}
+
+// Documents par profil propriétaire (pour l'affichage dans l'espace)
+$profils_docs = array();
+if ($__u['acces_proprietaire']) {
+    $lang_key = hypohub_current_lang() === 'en' ? 'nom_en' : 'nom_fr';
+    $st = $pdo->prepare(
+        "SELECT d.profil_id AS pid, d.id AS doc_id, d.nom_fichier,
+                t.$lang_key AS doc_type
+           FROM documents d
+        LEFT JOIN documents_types t ON t.id = d.type_id
+          WHERE d.profil_id IN (SELECT p2.id FROM profils_proprietaire p2 WHERE p2.cree_par = ?)
+          ORDER BY d.date_upload DESC"
+    );
+    $st->execute(array((int) $__u['id']));
+    foreach ($st->fetchAll() as $row) {
+        $profils_docs[$row['pid']][] = $row;
+    }
 }
 
 /** Affiche une ligne détail « Libellé : valeur » si la valeur n'est pas vide. */
@@ -87,13 +106,34 @@ function espace_detail($label, $value) {
                                     <ul class="accords">
                                         <?php foreach ($profils as $p): ?>
                                         <li>
-                                            <h4 class="toggle-title"><?php echo htmlspecialchars($p['nom_complet'], ENT_QUOTES, 'UTF-8'); ?></h4>
+                                            <h4 class="toggle-title"><?php
+                                                if ($p['nom_compagnie'] !== null || $p['neq'] !== null) {
+                                                    echo htmlspecialchars(t('space.prop.societe_label', array('nom' => ($p['nom_compagnie'] ?: $p['prenom'] . ' ' . $p['nom']))), ENT_QUOTES, 'UTF-8');
+                                                } else {
+                                                    echo htmlspecialchars($p['prenom'] . ' ' . $p['nom'], ENT_QUOTES, 'UTF-8');
+                                                }
+                                            ?></h4>
                                             <div class="toggle-content" style="display: none;">
                                                 <div class="block">
-                                                    <?php espace_detail(t('field.phone'), $p['telephone']); ?>
+                                                    <?php espace_detail(t('field.naissance'), $p['date_naissance']); ?>
                                                     <?php espace_detail(t('field.email'), $p['courriel']); ?>
-                                                    <?php espace_detail(t('field.emploi'), t('type.emploi.' . $p['situation_emploi'])); ?>
-                                                    <?php espace_detail(t('field.revenu'), ($p['revenu_annuel'] !== null ? number_format((float) $p['revenu_annuel']) . ' $' : null)); ?>
+                                                    <?php espace_detail(t('field.phone'), $p['telephone']); ?>
+                                                    <?php
+                                                        $adresse_complete = trim(($p['app'] !== null ? $p['app'] . ' — ' : '') . $p['adresse'] . ', ' . $p['ville'] . ($p['code_postal'] ? ', ' . $p['code_postal'] : ''));
+                                                        espace_detail(t('field.adresse'), $adresse_complete);
+                                                    ?>
+                                                    <?php espace_detail(t('field.compagnie'), $p['nom_compagnie']); ?>
+                                                    <?php espace_detail(t('field.neq'), $p['neq']); ?>
+                                                    <?php if (isset($profils_docs[$p['id']])): ?>
+                                                    <p><strong><?php echo htmlspecialchars(t('create.profil.documents'), ENT_QUOTES, 'UTF-8'); ?> :</strong></p>
+                                                    <ul class="doc-list">
+                                                        <?php foreach ($profils_docs[$p['id']] as $doc): ?>
+                                                        <li>
+                                                            <a href="api/download_document.php?id=<?php echo (int) $doc['doc_id']; ?>"><?php echo htmlspecialchars($doc['doc_type'] . ' · ' . $doc['nom_fichier'], ENT_QUOTES, 'UTF-8'); ?></a>
+                                                        </li>
+                                                        <?php endforeach; ?>
+                                                    </ul>
+                                                    <?php endif; ?>
                                                 </div>
                                             </div>
                                         </li>
@@ -142,7 +182,12 @@ function espace_detail($label, $value) {
                                     <ul class="accords">
                                         <?php foreach ($dossiers as $d): ?>
                                         <li>
-                                            <h4 class="toggle-title"><?php echo htmlspecialchars($d['emprunteur'] . ' — ' . number_format((float) $d['montant_demande']) . ' $', ENT_QUOTES, 'UTF-8'); ?></h4>
+                                            <h4 class="toggle-title"><?php
+                                                $dossier_nom = ($d['nom_compagnie'] !== null || $d['neq'] !== null)
+                                                    ? ($d['nom_compagnie'] ?: ($d['prenom'] . ' ' . $d['nom']))
+                                                    : ($d['prenom'] . ' ' . $d['nom']);
+                                                echo htmlspecialchars($dossier_nom . ' — ' . number_format((float) $d['montant_demande']) . ' $', ENT_QUOTES, 'UTF-8');
+                                            ?></h4>
                                             <div class="toggle-content" style="display: none;">
                                                 <div class="block">
                                                     <?php espace_detail(t('field.rang'), t('type.rang.' . $d['rang'])); ?>
@@ -230,6 +275,14 @@ function espace_detail($label, $value) {
 </section>
 
 <?php
+// Types de documents (dynamiques — table documents_types)
+$create_doc_types = array();
+try {
+    $create_doc_types = $pdo->query('SELECT id, nom_fr, nom_en FROM documents_types WHERE actif = 1 ORDER BY id')->fetchAll();
+} catch (Exception $e) {
+    // Table pas encore créée par db_schema() — vue install en cours
+}
+
 $create_profils    = isset($profils) ? $profils : array();
 $create_proprietes = isset($proprietes) ? $proprietes : array();
 include __DIR__ . '/partials/create_modal.php';

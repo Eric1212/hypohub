@@ -10,3 +10,7 @@
 
 # Config locale générée par config.php (contient les identifiants MySQL)
 lib/config.local.php
+
+# Documents uploadés (scans/PDF des profils) — jamais dans git
+uploads/*
+!uploads/.gitkeep
