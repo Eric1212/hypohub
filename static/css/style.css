@@ -562,6 +562,19 @@ ul.accords .block p {
     font-size: 0.88rem;
 }
 
+/* Règle no-scroll (Éric, 2026-08-03) : la liste des éléments (H4) sous un H3
+   est bornée en hauteur — scroll interne au-delà. Sans cette borne, un H3
+   avec beaucoup de H4 (ex. 10 dossiers) fait déborder la page (720 p). */
+ul.accords ul.accords {
+    max-height: 9rem;
+    overflow-y: auto;
+}
+/* Le contenu déplié d'un H4 (bloc de détails) est lui aussi borné. */
+ul.accords ul.accords > li > .toggle-content {
+    max-height: 7rem;
+    overflow-y: auto;
+}
+
 /* Sous-titres H4 du contenu (ex. À propos : vision / mission / orientation).
    :not(.toggle-title) — ne jamais surcharger les H4 pliables (espace). */
 ul.accords .block h4:not(.toggle-title) {

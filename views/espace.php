@@ -43,13 +43,14 @@ if ($__u['acces_creancier']) {
     $creanciers = $st->fetchAll();
 
     // Dossiers visibles par le réseau : PAS les profils (masqués tant que pas d'acceptation).
-    $st = $pdo->prepare(
+    // Le réseau montre TOUS les dossiers du marché, y compris ceux créés par
+    // l'utilisateur connecté (décision Éric, 2026-08-03 : pas d'exclusion).
+    $st = $pdo->query(
         "SELECT id, montant_demande, rang, type_financement, statut
            FROM dossiers_emprunt
-          WHERE statut IN ('nouveau', 'accepte') AND cree_par != ?
+          WHERE statut IN ('nouveau', 'accepte')
           ORDER BY id DESC"
     );
-    $st->execute(array($__u['id']));
     $reseau = $st->fetchAll();
 }
 
