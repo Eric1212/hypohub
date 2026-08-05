@@ -322,10 +322,42 @@ function db_schema() {
 
     // Version du schéma (bump à chaque évolution de la structure)
     $st = $pdo->prepare(
-        "INSERT INTO app_meta (meta_key, meta_value) VALUES ('schema_version', '8')
-         ON DUPLICATE KEY UPDATE meta_value = '8'"
+        "INSERT INTO app_meta (meta_key, meta_value) VALUES ('schema_version', '9')
+         ON DUPLICATE KEY UPDATE meta_value = '9'"
     );
     $st->execute();
+
+    // v9 — Zone compte : username, certificat AMF + statut de vérification,
+    // demande d'accès créancier (justification + statut), rôle vérificateur.
+    if (!$col('username')) {
+        $pdo->exec("ALTER TABLE users
+            ADD COLUMN username VARCHAR(80) DEFAULT NULL AFTER nom_complet,
+            ADD UNIQUE KEY uq_users_username (username)");
+    }
+    if (!$col('certificat_amf')) {
+        $pdo->exec("ALTER TABLE users
+            ADD COLUMN certificat_amf VARCHAR(32) DEFAULT NULL AFTER telephone");
+    }
+    if (!$col('certificat_amf_statut')) {
+        $pdo->exec("ALTER TABLE users
+            ADD COLUMN certificat_amf_statut ENUM('vide','en_attente','verifie') NOT NULL DEFAULT 'vide' AFTER certificat_amf");
+    }
+    if (!$col('demande_creancier_justification')) {
+        $pdo->exec("ALTER TABLE users
+            ADD COLUMN demande_creancier_justification TEXT NULL AFTER acces_creancier");
+    }
+    if (!$col('demande_creancier_statut')) {
+        $pdo->exec("ALTER TABLE users
+            ADD COLUMN demande_creancier_statut ENUM('aucune','en_attente','approuve','refuse') NOT NULL DEFAULT 'aucune' AFTER demande_creancier_justification");
+    }
+    if (!$col('demande_creancier_date')) {
+        $pdo->exec('ALTER TABLE users
+            ADD COLUMN demande_creancier_date DATETIME NULL AFTER demande_creancier_statut');
+    }
+    if (!$col('est_admin')) {
+        $pdo->exec('ALTER TABLE users
+            ADD COLUMN est_admin TINYINT(1) NOT NULL DEFAULT 0 AFTER actif');
+    }
 
     // Purge quotidienne des documents en staging (profil_id NULL) — 3h33 locale.
     // Paresseuse (aucun cron sur hébergement partagé) : exécutée au premier

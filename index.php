@@ -44,6 +44,7 @@ $pages = array(
     'a-propos'   => array('view' => 'apropos.php',     'title' => 'nav.about'),
     'contact'    => array('view' => 'contact.php',     'title' => 'nav.contact'),
     'espace'     => array('view' => 'espace.php',      'title' => 'nav.space'),
+    'admin'      => array('view' => 'admin.php',       'title' => 'nav.admin'),
 );
 
 $page = isset($_GET['page']) ? preg_replace('/[^a-z-]/', '', (string) $_GET['page']) : 'accueil';
@@ -56,6 +57,14 @@ if ($page === 'deconnexion') {
 
 if (!isset($pages[$page])) {
     $page = 'accueil';
+}
+
+// Vue admin réservée aux employés vérificateurs (est_admin=1)
+if ($page === 'admin') {
+    $__admin_u = auth_user();
+    if (!$__admin_u || empty($__admin_u['est_admin'])) {
+        redirect('index.php?page=espace');
+    }
 }
 
 $__page = $page;          // slug courant (utilisé par header.php)

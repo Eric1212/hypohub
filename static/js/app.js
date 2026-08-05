@@ -94,6 +94,9 @@ function initPage() {
     // Modales de création (espace membre) : ouverture, fermeture, soumission.
     initCreate();
 
+    // Zone compte : réglages, certificat AMF, demande d'accès créancier.
+    initAccount();
+
     // Modale de visualisation de documents.
     initViewer();
 
@@ -324,6 +327,186 @@ function initCreate() {
             window.location.href = 'index.php?page=espace';
         });
     });
+}
+
+/**
+ * Zone compte (espace membre) : réglages (nom/username/courriel), certificat
+ * AMF (enregistrer / demander vérification) et modale demande accès créancier
+ * (justification, 2000 mots max).
+ */
+function initAccount() {
+    // --- Modale demande d'accès créancier ---
+    var dcModal = document.getElementById('demande_creancier_modal');
+    if (dcModal) {
+        function openDc() {
+            dcModal.classList.add('open');
+            dcModal.setAttribute('aria-hidden', 'false');
+        }
+        function closeDc() {
+            dcModal.classList.remove('open');
+            dcModal.setAttribute('aria-hidden', 'true');
+            var err = dcModal.querySelector('[data-demande-creancier-error]');
+            if (err) err.hidden = true;
+        }
+        document.querySelectorAll('[data-demande-creancier-open]').forEach(function (b) {
+            b.addEventListener('click', openDc);
+        });
+        dcModal.querySelectorAll('[data-demande-creancier-close]').forEach(function (el) {
+            el.addEventListener('click', closeDc);
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') closeDc();
+        });
+
+        // Compteur de mots (limite : 2000).
+        var ta = dcModal.querySelector('textarea[name="justification"]');
+        var compteur = dcModal.querySelector('[data-mots-compteur]');
+        if (ta && compteur) {
+            function majCompteur() {
+                var mots = ta.value.trim() ? ta.value.trim().split(/\s+/).length : 0;
+                compteur.textContent = mots + ' / 2000 ' + accountI18n('mots');
+                if (mots > 2000) {
+                    compteur.classList.add('note-error');
+                } else {
+                    compteur.classList.remove('note-error');
+                }
+            }
+            ta.addEventListener('input', majCompteur);
+            majCompteur();
+        }
+
+        var dcForm = dcModal.querySelector('form');
+        if (dcForm) {
+            dcForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                var errEl = dcModal.querySelector('[data-demande-creancier-error]');
+                errEl.hidden = true;
+                var btn = dcForm.querySelector('button[type="submit"]');
+                var original = btn.textContent;
+                btn.disabled = true;
+                btn.textContent = '…';
+
+                var data = {};
+                new FormData(dcForm).forEach(function (v, k) { data[k] = v; });
+
+                fetch('api/demande_creancier.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                })
+                .then(function (r) { return r.json(); })
+                .then(function (res) {
+                    btn.disabled = false;
+                    btn.textContent = original;
+                    if (res.ok) {
+                        window.location.href = 'index.php?page=espace';
+                    } else {
+                        errEl.textContent = res.error || dcForm.getAttribute('data-err-network');
+                        errEl.hidden = false;
+                    }
+                })
+                .catch(function () {
+                    btn.disabled = false;
+                    btn.textContent = original;
+                    errEl.textContent = dcForm.getAttribute('data-err-network');
+                    errEl.hidden = false;
+                });
+            });
+        }
+    }
+
+    // --- Réglages du compte (nom / username / courriel) ---
+    var compteForm = document.getElementById('compte_form');
+    if (compteForm) {
+        compteForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var errEl = compteForm.querySelector('[data-compte-error]');
+            errEl.hidden = true;
+            var btn = compteForm.querySelector('button[type="submit"]');
+            var original = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = '…';
+
+            var data = {};
+            new FormData(compteForm).forEach(function (v, k) { data[k] = v; });
+
+            fetch('api/update_compte.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+                btn.disabled = false;
+                btn.textContent = original;
+                if (res.ok) {
+                    window.location.href = 'index.php?page=espace';
+                } else {
+                    errEl.textContent = res.error || compteForm.getAttribute('data-err-network');
+                    errEl.hidden = false;
+                }
+            })
+            .catch(function () {
+                btn.disabled = false;
+                btn.textContent = original;
+                errEl.textContent = compteForm.getAttribute('data-err-network');
+                errEl.hidden = false;
+            });
+        });
+    }
+
+    // --- Certificat AMF : enregistrer / demander la vérification ---
+    var amfForm = document.getElementById('certificat_amf_form');
+    if (amfForm) {
+        amfForm.querySelectorAll('button[data-amf-action]').forEach(function (b) {
+            b.addEventListener('click', function (e) {
+                e.preventDefault();
+                var errEl = amfForm.querySelector('[data-amf-error]');
+                errEl.hidden = true;
+                var btn = b;
+                var original = btn.textContent;
+                btn.disabled = true;
+                btn.textContent = '…';
+
+                var data = {};
+                new FormData(amfForm).forEach(function (v, k) { data[k] = v; });
+                data.action = btn.getAttribute('data-amf-action');
+
+                fetch('api/certificat_amf.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                })
+                .then(function (r) { return r.json(); })
+                .then(function (res) {
+                    btn.disabled = false;
+                    btn.textContent = original;
+                    if (res.ok) {
+                        window.location.href = 'index.php?page=espace';
+                    } else {
+                        errEl.textContent = res.error || amfForm.getAttribute('data-err-network');
+                        errEl.hidden = false;
+                    }
+                })
+                .catch(function () {
+                    btn.disabled = false;
+                    btn.textContent = original;
+                    errEl.textContent = amfForm.getAttribute('data-err-network');
+                    errEl.hidden = false;
+                });
+            });
+        });
+    }
+}
+
+/** Libellés i18n locaux de la zone compte (selon <html lang>). */
+function accountI18n(key) {
+    var lang = (document.documentElement.getAttribute('lang') || 'fr').slice(0, 2);
+    var dict = {
+        'mots': { fr: 'mots', en: 'words' },
+    };
+    var map = dict[key];
+    return map ? (map[lang] || map.fr) : key;
 }
 
 /** Soumission du formulaire profil : stage des fichiers, puis POST profil. */

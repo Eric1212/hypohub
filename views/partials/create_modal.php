@@ -217,10 +217,6 @@
                 <input type="number" name="capital_disponible" step="0.01" min="0" placeholder="0,00">
             </label>
             <label>
-                <span><?php echo htmlspecialchars(t('field.permis'), ENT_QUOTES, 'UTF-8'); ?></span>
-                <input type="text" name="permis_opc">
-            </label>
-            <label>
                 <span><?php echo htmlspecialchars(t('field.criteres'), ENT_QUOTES, 'UTF-8'); ?></span>
                 <textarea name="criteres" rows="3"></textarea>
             </label>
@@ -239,5 +235,29 @@
             <button type="button" class="auth-modal-close" data-viewer-close aria-label="<?php echo htmlspecialchars(t('auth.close'), ENT_QUOTES, 'UTF-8'); ?>">&times;</button>
         </div>
         <iframe id="viewer_frame" title="<?php echo htmlspecialchars(t('doc.view'), ENT_QUOTES, 'UTF-8'); ?>" src="about:blank"></iframe>
+    </div>
+</div>
+
+<?php /* Modale — Demander à être créancier */ ?>
+<div class="auth-modal" id="demande_creancier_modal" aria-hidden="true">
+    <div class="auth-modal-overlay" data-demande-creancier-close></div>
+    <div class="auth-modal-box" role="dialog" aria-modal="true">
+        <button type="button" class="auth-modal-close" data-demande-creancier-close aria-label="<?php echo htmlspecialchars(t('auth.close'), ENT_QUOTES, 'UTF-8'); ?>">&times;</button>
+
+        <form id="demande_creancier_form" class="auth-form" data-err-network="<?php echo htmlspecialchars(t('auth.error.network'), ENT_QUOTES, 'UTF-8'); ?>" novalidate>
+            <h2 class="create-title"><?php echo htmlspecialchars(t('account.cle.creancier.title'), ENT_QUOTES, 'UTF-8'); ?></h2>
+            <input type="hidden" name="csrf" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+
+            <p class="note"><?php echo htmlspecialchars(t('account.cle.creancier.intro'), ENT_QUOTES, 'UTF-8'); ?></p>
+
+            <label>
+                <span><?php echo htmlspecialchars(t('account.cle.creancier.justif'), ENT_QUOTES, 'UTF-8'); ?><em> (<?php echo htmlspecialchars(t('account.cle.creancier.limit'), ENT_QUOTES, 'UTF-8'); ?>)</em></span>
+                <textarea name="justification" rows="8" maxlength="16000" data-count-mots></textarea>
+            </label>
+            <p class="note" data-mots-compteur></p>
+
+            <p class="auth-error" data-demande-creancier-error hidden></p>
+            <button type="submit" class="btn btn-primary btn-block"><?php echo htmlspecialchars(t('account.cle.creancier.submit'), ENT_QUOTES, 'UTF-8'); ?></button>
+        </form>
     </div>
 </div>

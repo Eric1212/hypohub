@@ -2,7 +2,7 @@
 /**
  * Hypohub — API : création d'un profil créancier.
  *
- * POST JSON {nom, type, capital_disponible, criteres, permis_opc, csrf}
+ * POST JSON {nom, type, capital_disponible, criteres, csrf}
  * → 200 {ok:true} | {ok:false, error}
  * Session requise (accès créancier).
  */
@@ -48,8 +48,8 @@ if ($capital !== null && $capital < 0) {
 }
 
 $st = db()->prepare(
-    'INSERT INTO profils_creancier (user_id, nom, type, capital_disponible, criteres, permis_opc)
-     VALUES (?, ?, ?, ?, ?, ?)'
+    'INSERT INTO profils_creancier (user_id, nom, type, capital_disponible, criteres)
+     VALUES (?, ?, ?, ?, ?)'
 );
 $st->execute(array(
     (int) $u['id'],
@@ -57,7 +57,6 @@ $st->execute(array(
     $type,
     $capital,
     trim(isset($in['criteres']) ? $in['criteres'] : '') ?: null,
-    trim(isset($in['permis_opc']) ? $in['permis_opc'] : '') ?: null,
 ));
 
 json_response(array('ok' => true));
