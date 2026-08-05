@@ -112,7 +112,21 @@ function espace_detail($label, $value) {
                                                 } else {
                                                     echo htmlspecialchars($p['prenom'] . ' ' . $p['nom'], ENT_QUOTES, 'UTF-8');
                                                 }
-                                            ?></h4>
+                                            ?>
+                                            <button type="button" class="btn-mini" data-edit-profil="<?php echo (int) $p['id']; ?>"
+                                                data-prenom="<?php echo htmlspecialchars($p['prenom'], ENT_QUOTES, 'UTF-8'); ?>"
+                                                data-nom="<?php echo htmlspecialchars($p['nom'], ENT_QUOTES, 'UTF-8'); ?>"
+                                                data-naissance="<?php echo htmlspecialchars($p['date_naissance'], ENT_QUOTES, 'UTF-8'); ?>"
+                                                data-courriel="<?php echo htmlspecialchars($p['courriel'], ENT_QUOTES, 'UTF-8'); ?>"
+                                                data-telephone="<?php echo htmlspecialchars($p['telephone'], ENT_QUOTES, 'UTF-8'); ?>"
+                                                data-app="<?php echo htmlspecialchars($p['app'] ?: '', ENT_QUOTES, 'UTF-8'); ?>"
+                                                data-adresse="<?php echo htmlspecialchars($p['adresse'], ENT_QUOTES, 'UTF-8'); ?>"
+                                                data-ville="<?php echo htmlspecialchars($p['ville'], ENT_QUOTES, 'UTF-8'); ?>"
+                                                data-code="<?php echo htmlspecialchars($p['code_postal'], ENT_QUOTES, 'UTF-8'); ?>"
+                                                data-province="<?php echo htmlspecialchars($p['province'], ENT_QUOTES, 'UTF-8'); ?>"
+                                                data-compagnie="<?php echo htmlspecialchars($p['nom_compagnie'] ?: '', ENT_QUOTES, 'UTF-8'); ?>"
+                                                data-neq="<?php echo htmlspecialchars($p['neq'] ?: '', ENT_QUOTES, 'UTF-8'); ?>"><?php echo htmlspecialchars(t('btn.edit'), ENT_QUOTES, 'UTF-8'); ?></button>
+                                            </h4>
                                             <div class="toggle-content" style="display: none;">
                                                 <div class="block">
                                                     <?php espace_detail(t('field.naissance'), $p['date_naissance']); ?>

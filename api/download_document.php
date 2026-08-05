@@ -19,7 +19,7 @@ if (!$u) {
 
 $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 $st = db()->prepare(
-    'SELECT d.id, d.profil_id, d.nom_fichier, d.fichier_stocke
+    'SELECT d.id, d.profil_id, d.user_id, d.nom_fichier, d.fichier_stocke, d.mime
        FROM documents d
       WHERE d.id = ?'
 );
@@ -31,10 +31,15 @@ if (!$doc) {
     exit;
 }
 
-// Droit d'accès : propriétaire du profil, OU créancier (réseau)
-$own = db()->prepare('SELECT id FROM profils_proprietaire WHERE id = ? AND cree_par = ?');
-$own->execute(array($doc['profil_id'], (int) $u['id']));
-$allowed = (bool) $own->fetchColumn();
+// Droit d'accès :
+//  - document staged (profil_id NULL) : appartient via user_id à l'utilisateur
+//  - document rattaché : le profil appartient (cree_par), sinon créancier (réseau)
+$allowed = (int) $doc['user_id'] === (int) $u['id']; // staged — toujours autorisé
+if (!$allowed && $doc['profil_id'] !== null) {
+    $own = db()->prepare('SELECT id FROM profils_proprietaire WHERE id = ? AND cree_par = ?');
+    $own->execute(array($doc['profil_id'], (int) $u['id']));
+    $allowed = (bool) $own->fetchColumn();
+}
 if (!$allowed && empty($u['acces_creancier'])) {
     http_response_code(403);
     echo 'Forbidden';
@@ -50,9 +55,13 @@ if (!is_file($stored_path)) {
     exit;
 }
 
-header('Content-Description: File Transfer');
-header('Content-Type: application/octet-stream');
-header('Content-Disposition: attachment; filename="' . basename($doc['nom_fichier']) . '"');
+// Mode visualisation (?inline=1) : PDF/images s'affichent dans le navigateur
+$inline = isset($_GET['inline']) && (int) $_GET['inline'] === 1;
+$mime = $doc['mime'] ?: 'application/octet-stream';
+
+header('Content-Description: ' . ($inline ? 'Inline file' : 'File Transfer'));
+header('Content-Type: ' . $mime);
+header('Content-Disposition: ' . ($inline ? 'inline' : 'attachment') . '; filename="' . basename($doc['nom_fichier']) . '"');
 header('Content-Length: ' . filesize($stored_path));
 readfile($stored_path);
 exit;

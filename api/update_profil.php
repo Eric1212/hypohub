@@ -1,11 +1,12 @@
 <?php
 /**
- * Hypohub — API : création d'un profil propriétaire.
+ * Hypohub — API : mise à jour d'un profil propriétaire (même formulaire que la création).
  *
- * POST JSON {prenom, nom, date_naissance, courriel, telephone, app, adresse,
- *            ville, code_postal, province, nom_compagnie, neq, statut, csrf}
- * → 200 {ok:true} | {ok:false, error}
- * Session requise + accès propriétaire.
+ * POST JSON {profil_id, prenom, nom, date_naissance, courriel, telephone, app,
+ *            adresse, ville, code_postal, province, nom_compagnie, neq, statut, csrf}
+ * → 200 {ok:true, id} | {ok:false, error}
+ * Session requise + accès propriétaire ; le profil doit appartenir (cree_par).
+ * Les documents en staging du compte se rattachent au profil comme en création.
  */
 require_once __DIR__ . '/../lib/config.php';
 require_once __DIR__ . '/../lib/helpers.php';
@@ -33,7 +34,15 @@ if (empty($u['acces_proprietaire'])) {
     json_response(array('ok' => false, 'error' => t('create.error.access')), 403);
 }
 
-// --- Champs requis ---
+// --- Profil : existe + appartient à l'utilisateur ---
+$profil_id = isset($in['profil_id']) ? (int) $in['profil_id'] : 0;
+$st = db()->prepare('SELECT id FROM profils_proprietaire WHERE id = ? AND cree_par = ?');
+$st->execute(array($profil_id, (int) $u['id']));
+if (!$st->fetchColumn()) {
+    json_response(array('ok' => false, 'error' => t('create.error.profil')), 404);
+}
+
+// --- Champs requis (mêmes règles que la création) ---
 $prenom = trim(isset($in['prenom']) ? $in['prenom'] : '');
 $nom    = trim(isset($in['nom']) ? $in['nom'] : '');
 $naissance = trim(isset($in['date_naissance']) ? $in['date_naissance'] : '');
@@ -50,9 +59,8 @@ if ($prenom === '' || $nom === '') {
 if ($naissance === '') {
     json_response(array('ok' => false, 'error' => t('create.error.required')));
 }
-// Date de naissance valide (AAAA-MM-JJ) et dans le passé
-$naissance_dt = DateTime::createFromFormat('Y-m-d', $naissance);
-if (!$naissance_dt || $naissance_dt->format('Y-m-d') !== $naissance || $naissance_dt > new DateTime()) {
+$test = DateTime::createFromFormat('Y-m-d', $naissance);
+if (!$test || $test->format('Y-m-d') !== $naissance || $test > new DateTime()) {
     json_response(array('ok' => false, 'error' => t('create.error.naissance')));
 }
 if ($courriel === '' || !filter_var($courriel, FILTER_VALIDATE_EMAIL)) {
@@ -64,7 +72,6 @@ if ($telephone === '') {
 if ($adresse === '' || $ville === '') {
     json_response(array('ok' => false, 'error' => t('create.error.required')));
 }
-// Code postal : A1A 1A1 (tolère minuscules/absence d'espace, normalise)
 $code_postal = strtoupper(str_replace(' ', '', $code_postal));
 if ($code_postal === '' || !preg_match('/^[ABCEGHJ-NPRSTVXY]\d[ABCEGHJ-NPRSTVXY]\d[ABCEGHJ-NPRSTVXY]\d$/', $code_postal)) {
     json_response(array('ok' => false, 'error' => t('create.error.codepostal')));
@@ -74,7 +81,6 @@ if ($province === '') {
     $province = 'QC';
 }
 
-// --- Champs optionnels ---
 $app = trim(isset($in['app']) ? $in['app'] : '') ?: null;
 $nom_compagnie = trim(isset($in['nom_compagnie']) ? $in['nom_compagnie'] : '') ?: null;
 $neq = trim(isset($in['neq']) ? $in['neq'] : '') ?: null;
@@ -82,19 +88,17 @@ $statut = isset($in['statut']) && $in['statut'] !== '' ? $in['statut'] : null;
 if ($statut !== null && !in_array($statut, array('citoyen', 'residant_permanent'), true)) {
     $statut = null;
 }
-// NEQ : 9-10 chiffres si présent
 if ($neq !== null && !preg_match('/^\d{9,10}$/', $neq)) {
     json_response(array('ok' => false, 'error' => t('create.error.neq')));
 }
 
 $st = db()->prepare(
-    'INSERT INTO profils_proprietaire
-        (cree_par, prenom, nom, date_naissance, courriel, telephone, app,
-         adresse, ville, code_postal, province, nom_compagnie, neq, statut)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    'UPDATE profils_proprietaire SET
+        prenom = ?, nom = ?, date_naissance = ?, courriel = ?, telephone = ?, app = ?,
+        adresse = ?, ville = ?, code_postal = ?, province = ?, nom_compagnie = ?, neq = ?, statut = ?
+     WHERE id = ?'
 );
 $st->execute(array(
-    (int) $u['id'],
     $prenom,
     $nom,
     $naissance,
@@ -108,15 +112,13 @@ $st->execute(array(
     $nom_compagnie,
     $neq,
     $statut,
+    $profil_id,
 ));
-$profil_id = (int) db()->lastInsertId();
 
-// Rattachement automatique : tous les documents en staging du compte (profil_id NULL)
-// se rattachent au profil fraîchement créé — l'utilisateur les a uploadés pendant
-// la tentative ; le F5 ne les perd pas, ils réapparaissent au prochain essai.
+// Rattachement automatique des documents en staging (même logique création)
 $st = db()->prepare(
     'UPDATE documents SET profil_id = ?
-      WHERE user_id = ? AND profil_id IS NULL'
+     WHERE user_id = ? AND profil_id IS NULL'
 );
 $st->execute(array($profil_id, (int) $u['id']));
 

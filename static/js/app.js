@@ -94,6 +94,9 @@ function initPage() {
     // Modales de création (espace membre) : ouverture, fermeture, soumission.
     initCreate();
 
+    // Modale de visualisation de documents.
+    initViewer();
+
     // Défilement fluide vers les ancres internes.
     document.querySelectorAll('a[href^="#"]').forEach(function (a) {
         a.addEventListener('click', function (e) {
@@ -232,7 +235,9 @@ function attachJsonForm(form, url, onSuccess) {
         btn.disabled = true;
         btn.textContent = '…';
 
-        fetch(url, {
+        var target = (typeof url === 'function') ? url() : url;
+
+        fetch(target, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
@@ -277,6 +282,28 @@ function initCreate() {
         });
     });
 
+    // Passage en mode édition d'un profil : pré-remplit la modale + charge les docs
+    document.querySelectorAll('[data-edit-profil]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var data = {
+                profil_id: btn.getAttribute('data-edit-profil'),
+                prenom: btn.getAttribute('data-prenom') || '',
+                nom: btn.getAttribute('data-nom') || '',
+                date_naissance: btn.getAttribute('data-naissance') || '',
+                courriel: btn.getAttribute('data-courriel') || '',
+                telephone: btn.getAttribute('data-telephone') || '',
+                app: btn.getAttribute('data-app') || '',
+                adresse: btn.getAttribute('data-adresse') || '',
+                ville: btn.getAttribute('data-ville') || '',
+                code_postal: btn.getAttribute('data-code') || '',
+                province: btn.getAttribute('data-province') || '',
+                nom_compagnie: btn.getAttribute('data-compagnie') || '',
+                neq: btn.getAttribute('data-neq') || '',
+            };
+            openCreateModal('profil', data);
+        });
+    });
+
     modal.querySelectorAll('[data-create-close]').forEach(function (el) {
         el.addEventListener('click', closeCreateModal);
     });
@@ -287,33 +314,291 @@ function initCreate() {
 
     modal.querySelectorAll('form[data-create-type]').forEach(function (form) {
         var type = form.getAttribute('data-create-type');
-        attachJsonForm(form, 'api/create_' + type + '.php', function (res) {
-            // Profil : après la création, uploader les documents sélectionnés
-            // (multipart) puis recharger — la modale profil seule a des fichiers.
-            var filesInput = form.querySelector('input[type=file][name="doc_fichiers[]"]');
-            if (type === 'profil' && filesInput && filesInput.files.length > 0 && res && res.id) {
-                var typeId = form.querySelector('select[name="doc_type_id"]').value;
-                var csrf = form.querySelector('input[name="csrf"]').value;
-                uploadDocuments(res.id, typeId, csrf, filesInput.files, function () {
-                    window.location.href = 'index.php?page=espace';
-                });
-            } else {
-                window.location.href = 'index.php?page=espace';
-            }
+        if (type === 'profil') {
+            // Flux profil séquencé : uploads en staging PUIS création — le
+            // serveur rattache les staged au profil créé (contrat validé Éric).
+            bindProfilSubmit(form);
+            return;
+        }
+        attachJsonForm(form, 'api/create_' + type + '.php', function () {
+            window.location.href = 'index.php?page=espace';
         });
     });
 }
 
-function openCreateModal(type) {
+/** Soumission du formulaire profil : stage des fichiers, puis POST profil. */
+function bindProfilSubmit(form) {
+    // Staging immédiat dès la sélection des fichiers : ils apparaissent dans la
+    // liste de la modale (actions disponibles), et survivent au F5.
+    var filesInput = form.querySelector('input[type=file][name="doc_fichiers[]"]');
+    if (filesInput) {
+        filesInput.addEventListener('change', function () {
+            var files = filesInput.files ? Array.prototype.slice.call(filesInput.files) : [];
+            if (files.length === 0) return;
+            var typeId = form.querySelector('[name="doc_type_id"]').value;
+            var csrf = form.querySelector('[name="csrf"]').value;
+            var i = 0;
+            function next() {
+                if (i >= files.length) {
+                    var pidEl = form.querySelector('[name="profil_id"]');
+                    if (pidEl && pidEl.value) { loadDocuments(pidEl.value, form); }
+                    else { loadStaged(form); }
+                    filesInput.value = ''; // permet de re-sélectionner le même fichier
+                    return;
+                }
+                var fd = new FormData();
+                fd.append('csrf', csrf);
+                fd.append('type_id', typeId);
+                fd.append('fichier', files[i]);
+                i++;
+                fetch('api/stage_document.php', { method: 'POST', body: fd })
+                    .then(function (r) { return r.json(); })
+                    .then(function () { next(); })
+                    .catch(function () { next(); });
+            }
+            next();
+        });
+    }
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var errEl = form.querySelector('[data-create-error]');
+        if (errEl) errEl.hidden = true;
+
+        var filesInput = form.querySelector('input[type=file][name="doc_fichiers[]"]');
+        var filesInput = form.querySelector('input[type=file][name="doc_fichiers[]"]');
+        var files = filesInput && filesInput.files ? Array.prototype.slice.call(filesInput.files) : [];
+
+        var btn = form.querySelector('button[type=submit]');
+        if (btn) { btn.disabled = true; btn.textContent = '…'; }
+
+        // Les fichiers choisis sont déjà staged à la sélection (listener change).
+        // Si des fichiers restent non diffusés (ex. re-chargement rapide), stage
+        // au dernier moment avant l'envoi — mais si aucun staged récent, direct.
+        var typeId = form.querySelector('[name="doc_type_id"]').value;
+        var csrf = form.querySelector('[name="csrf"]').value;
+
+        // Création/édition du profil — le serveur rattache les staged du compte
+        function postProfil() {
+            var data = {};
+            new FormData(form).forEach(function (v, k) {
+                // exclure les champs fichiers (déjà staged) et le csrf déjà envoyé
+                if (k === 'doc_fichiers[]' || k === 'doc_type_id') return;
+                data[k] = v;
+            });
+            var endpoint = data.profil_id ? 'api/update_profil.php' : 'api/create_profil.php';
+            fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+                if (res.ok) {
+                    window.location.href = 'index.php?page=espace';
+                } else {
+                    if (btn) { btn.disabled = false; btn.textContent = (btn.dataset.label || 'Créer le profil'); }
+                    if (errEl) {
+                        errEl.textContent = res.error || 'Erreur inconnue';
+                        errEl.hidden = false;
+                    }
+                }
+            })
+            .catch(function () {
+                if (btn) { btn.disabled = false; btn.textContent = (btn.dataset.label || 'Créer le profil'); }
+                if (errEl) {
+                    errEl.textContent = form.getAttribute('data-err-network') || 'Erreur réseau';
+                    errEl.hidden = false;
+                }
+            });
+        }
+
+        postProfil();
+    });
+}
+
+function openCreateModal(type, data) {
     var modal = document.getElementById('create_modal');
     if (!modal) return;
     modal.querySelectorAll('form[data-create-type]').forEach(function (f) {
         f.hidden = f.getAttribute('data-create-type') !== type;
     });
+    var form = modal.querySelector('form[data-create-type="' + type + '"]');
+    // Pré-remplissage (mode édition profil) : remplir chaque champ d'après data
+    if (form) {
+        var isEdit = !!(data && data.profil_id);
+        // Titre et libellé du bouton (profil uniquement — les autres types
+        // gardent leur titre i18n rendu côté serveur)
+        if (type === 'profil') {
+            var titleEl = form.querySelector('.create-title');
+            var submitBtn = form.querySelector('button[type=submit]');
+            if (titleEl) titleEl.textContent = isEdit ? docI18n('create.edit.title') : docI18n('create.new.title');
+            if (submitBtn) {
+                submitBtn.textContent = isEdit ? docI18n('create.edit.btn') : docI18n('create.new.btn');
+                submitBtn.dataset.label = submitBtn.textContent;
+            }
+        }
+        Object.keys(data || {}).forEach(function (k) {
+            var el = form.querySelector('[name="' + k + '"]');
+            if (el && el.type !== 'file') el.value = data[k];
+        });
+        // Champ caché profil_id : signaler update to l'API
+        var pid = form.querySelector('[name="profil_id"]');
+        if (pid) {
+            pid.value = (data && data.profil_id) || '';
+            pid.dataset.mode = pid.value ? 'update' : 'create';
+        }
+        // Charger la liste des docs existants ou des staged du compte
+        var docList = form.querySelector('[data-doc-list]');
+        if (docList) {
+            if (pid && pid.value) {
+                loadDocuments(pid.value, form);
+            } else {
+                loadStaged(form);
+            }
+        }
+    }
     modal.classList.add('open');
     modal.setAttribute('aria-hidden', 'false');
     var first = modal.querySelector('form[data-create-type="' + type + '"] input, form[data-create-type="' + type + '"] select');
     if (first) first.focus();
+}
+
+/** Charge la liste des documents du profil (mode édition) et la rend dans la modale. */
+function loadDocuments(profilId, form) {
+    fetch('api/list_documents.php?profil_id=' + encodeURIComponent(profilId))
+        .then(function (r) { return r.json(); })
+        .then(function (res) {
+            if (!res.ok) return;
+            renderDocs(res.documents || [], form);
+        })
+        .catch(function () { /* silence — liste est bonus */ });
+}
+
+/** Charge les documents en staging du compte (mode création) et les rend dans la modale. */
+function loadStaged(form) {
+    fetch('api/list_staged.php')
+        .then(function (r) { return r.json(); })
+        .then(function (res) {
+            if (!res.ok) return;
+            renderDocs(res.documents || [], form);
+        })
+        .catch(function () { });
+}
+
+/** Rend la liste des documents (staged ou rattachés) dans la modale. */
+function renderDocs(documents, form) {
+    var listEl = form.querySelector('[data-doc-list]');
+    var items = form.querySelector('[data-doc-items]');
+    if (!listEl || !items) return;
+    items.innerHTML = '';
+    (documents || []).forEach(function (d) {
+        items.appendChild(renderDocItem(d, form));
+    });
+    listEl.hidden = (documents || []).length === 0;
+}
+
+/** Construit la ligne d'un document avec ses actions (view/download/rename/type/remove). */
+function renderDocItem(d, form) {
+    var li = document.createElement('li');
+    var fmt;
+    try {
+        fmt = d.taille_octets >= 1048576 ? (d.taille_octets / 1048576).toFixed(1) + ' Mo'
+            : d.taille_octets >= 1024 ? Math.round(d.taille_octets / 1024) + ' Ko'
+            : d.taille_octets + ' o';
+    } catch (e) { fmt = ''; }
+
+    var name = document.createElement('span');
+    name.textContent = d.nom_fichier;
+    var meta = document.createElement('span');
+    meta.className = 'note';
+    meta.textContent = ' (' + fmt + ' · ' + (d.type_nom || '') + ')';
+
+    var actions = document.createElement('div');
+    actions.className = 'doc-actions';
+
+    var view = document.createElement('button');
+    view.type = 'button';
+    view.textContent = docI18n('doc.view');
+    view.addEventListener('click', function () {
+        openDocViewer(d.id);
+    });
+
+    var dl = document.createElement('a');
+    dl.href = 'api/download_document.php?id=' + d.id;
+    dl.textContent = docI18n('doc.download');
+
+    var rename = document.createElement('button');
+    rename.type = 'button';
+    rename.className = 'doc-rename';
+    rename.textContent = docI18n('doc.rename');
+    rename.addEventListener('click', function () {
+        var newName = window.prompt(docI18n('doc.rename') + ' :', d.nom_fichier);
+        if (newName === null) return;
+        newName = newName.trim();
+        if (!newName) return;
+        updateDocument(d.id, { nom_fichier: newName }, form, d, li);
+    });
+
+    var typeSel = document.createElement('select');
+    typeSel.className = 'doc-type';
+    typeOptions().forEach(function (o) {
+        var opt = document.createElement('option');
+        opt.value = o.id;
+        opt.textContent = o.label;
+        opt.selected = String(o.id) === String(d.type_id);
+        typeSel.appendChild(opt);
+    });
+    typeSel.addEventListener('change', function () {
+        updateDocument(d.id, { type_id: typeSel.value }, form, d, li);
+    });
+
+    var remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'doc-remove';
+    remove.textContent = docI18n('doc.remove');
+    remove.addEventListener('click', function () {
+        if (!confirm(docI18n('doc.confirm') + ' : ' + d.nom_fichier)) return;
+        updateDocument(d.id, { _delete: true }, form, d, li);
+    });
+
+    actions.appendChild(view);
+    actions.appendChild(dl);
+    actions.appendChild(rename);
+    actions.appendChild(typeSel);
+    actions.appendChild(remove);
+
+    li.appendChild(name);
+    li.appendChild(meta);
+    li.appendChild(actions);
+    return li;
+}
+
+/** Envoie une mise à jour de document (renommage/type/suppression) et rafraîchit. */
+function updateDocument(docId, payload, form) {
+    var pidEl = form.querySelector('[name="profil_id"]');
+    var pid = pidEl ? pidEl.value : '';
+    var csrf = form.querySelector('[name="csrf"]').value;
+    var body = { id: docId, csrf: csrf };
+    var deleteIt = !!payload._delete;
+    for (var k in payload) {
+        if (k !== '_delete') body[k] = payload[k];
+    }
+    fetch(deleteIt ? 'api/delete_document.php' : 'api/update_document.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (res) {
+        if (!res.ok) return;
+        if (pid) {
+            loadDocuments(pid, form); // rafraîchir la liste après chaque mutation
+        } else {
+            loadStaged(form);
+        }
+    })
+    .catch(function () {});
 }
 
 function closeCreateModal() {
@@ -321,6 +606,36 @@ function closeCreateModal() {
     if (!modal) return;
     modal.classList.remove('open');
     modal.setAttribute('aria-hidden', 'true');
+}
+
+/** Ouvre la modale de visualisation d'un document (inline, session requise). */
+function openDocViewer(docId) {
+    var viewer = document.getElementById('viewer_modal');
+    if (!viewer) return;
+    var frame = document.getElementById('viewer_frame');
+    if (frame) frame.src = 'api/download_document.php?id=' + docId + '&inline=1';
+    viewer.classList.add('open');
+    viewer.setAttribute('aria-hidden', 'false');
+}
+
+/** Ferme la modale de visualisation (et vide le frame). */
+function closeDocViewer() {
+    var viewer = document.getElementById('viewer_modal');
+    if (!viewer) return;
+    var frame = document.getElementById('viewer_frame');
+    if (frame) frame.src = 'about:blank';
+    viewer.classList.remove('open');
+    viewer.setAttribute('aria-hidden', 'true');
+}
+
+/** Écran viewer : fermeture par overlay, bouton et Échap. */
+function initViewer() {
+    document.querySelectorAll('[data-viewer-close]').forEach(function (el) {
+        el.addEventListener('click', closeDocViewer);
+    });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeDocViewer();
+    });
 }
 
 /** Intercepte les clics sur les liens internes pour naviguer en AJAX. */
@@ -381,26 +696,39 @@ function updateActiveNav(url) {
         a.classList.toggle('active', linkTarget === url);
     });
 }
-
 /**
- * Upload séquentiel des documents d'un profil (multipart vers upload_document.php).
- * En cas d'échec d'un fichier, on continue quand même (documents indépendants).
+ * Options <select> des types de documents, depuis le select de la modale.
  */
-function uploadDocuments(profilId, typeId, csrf, files, done) {
-    var queue = Array.prototype.slice.call(files);
-    var i = 0;
-    function next() {
-        if (i >= queue.length) { done(); return; }
-        var fd = new FormData();
-        fd.append('csrf', csrf);
-        fd.append('profil_id', profilId);
-        fd.append('type_id', typeId);
-        fd.append('fichier', queue[i]);
-        i++;
-        fetch('api/upload_document.php', { method: 'POST', body: fd })
-            .then(function (r) { return r.json(); })
-            .then(function () { next(); })
-            .catch(function () { next(); });
-    }
-    next();
+function typeOptions() {
+    var sel = document.querySelector('#create_form_profil select[name="doc_type_id"]');
+    if (!sel) return [];
+    return Array.prototype.slice.call(sel.options).map(function (o) {
+        return { id: o.value, label: o.textContent };
+    });
+}
+
+/** Libellé i18n des actions documents (selon <html lang>). */
+function docI18n(key) {
+    var lang = (document.documentElement.getAttribute('lang') || 'fr').slice(0, 2);
+    var dict = {
+        'doc.view': { fr: 'Visualiser', en: 'View' },
+        'doc.download': { fr: 'Télécharger', en: 'Download' },
+        'doc.rename': { fr: 'Renommer', en: 'Rename' },
+        'doc.remove': { fr: 'Retirer', en: 'Remove' },
+        'doc.confirm': { fr: 'Retirer définitivement ce document ?', en: 'Permanently remove this document?' },
+        'doc.existing': { fr: 'Documents déjà joints :', en: 'Attached documents:' },
+        'create.new.title': { fr: 'Nouveau profil', en: 'New profile' },
+        'create.new.btn': { fr: 'Créer le profil', en: 'Create profile' },
+        'create.edit.title': { fr: 'Modifier le profil', en: 'Edit profile' },
+        'create.edit.btn': { fr: 'Enregistrer', en: 'Save' },
+    };
+    var map = dict[key];
+    return map ? (map[lang] || map.fr) : key;
+}
+
+/** Échappe un texte pour insertion HTML (XSS). */
+function esc(s) {
+    var div = document.createElement('div');
+    div.textContent = s;
+    return div.innerHTML;
 }

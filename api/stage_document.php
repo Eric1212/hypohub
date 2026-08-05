@@ -1,13 +1,15 @@
 <?php
 /**
- * Hypohub — API : upload d'un document (scan/PDF) sur un profil propriétaire.
+ * Hypohub — API : stage d'un document (scan/PDF) sur le compte utilisateur.
  *
- * POST multipart : {csrf, profil_id, type_id, fichier: <file>}
+ * POST multipart : {csrf, type_id, fichier: <file>}
  * → 200 {ok:true, id} | {ok:false, error}
- * Session requise + accès propriétaire ; le profil doit appartenir à l'utilisateur.
+ * Session requise. Le document est stocké en staging (profil_id = NULL),
+ * rattaché au profil lors de la création/modification de profil.
+ * Purge quotidienne des staged (3h33).
  *
  * Limites : 100 Mo max, extensions .pdf/.jpg/.jpeg/.png (magic bytes vérifiés),
- * stockage sur disque dans uploads/ (nom = id du fichier, pas le nom original).
+ * stockage sur disque dans uploads/ (nom = hash, jamais le nom original).
  */
 require_once __DIR__ . '/../lib/config.php';
 require_once __DIR__ . '/../lib/helpers.php';
@@ -31,14 +33,6 @@ if (empty($u['acces_proprietaire'])) {
     json_response(array('ok' => false, 'error' => t('create.error.access')), 403);
 }
 
-// --- Profil : existe + appartient à l'utilisateur ---
-$profil_id = isset($in['profil_id']) ? (int) $in['profil_id'] : 0;
-$st = db()->prepare('SELECT id FROM profils_proprietaire WHERE id = ? AND cree_par = ?');
-$st->execute(array($profil_id, (int) $u['id']));
-if (!$st->fetchColumn()) {
-    json_response(array('ok' => false, 'error' => t('create.error.profil')), 404);
-}
-
 // --- Type de document existant ---
 $type_id = isset($in['type_id']) ? (int) $in['type_id'] : 0;
 $st = db()->prepare('SELECT id FROM documents_types WHERE id = ? AND actif = 1');
@@ -58,8 +52,8 @@ if ($f['error'] !== UPLOAD_ERR_OK) {
     json_response(array('ok' => false, 'error' => $msg));
 }
 
-const MAX_UPLOAD_BYTES = 100 * 1024 * 1024; // 100 Mo
-if ($f['size'] <= 0 || $f['size'] > MAX_UPLOAD_BYTES) {
+const MAX_STAGE_BYTES = 100 * 1024 * 1024; // 100 Mo
+if ($f['size'] <= 0 || $f['size'] > MAX_STAGE_BYTES) {
     json_response(array('ok' => false, 'error' => t('doc.error.size')));
 }
 
@@ -73,19 +67,15 @@ $finfo = new finfo(FILEINFO_MIME_TYPE);
 $mime = $finfo->file($tmp_path);
 $allowed = array(
     'application/pdf'   => 'pdf',
-    'image/jpeg'         => 'jpg',
-    'image/png'          => 'png',
+    'image/jpeg'        => 'jpg',
+    'image/png'         => 'png',
+    'image/webp'        => 'webp',
 );
 if (!isset($allowed[$mime])) {
     json_response(array('ok' => false, 'error' => t('doc.error.mime')));
 }
 $ext = $allowed[$mime];
 
-// Nom de stockage : horodatage + hash — jamais le nom d'origine (sécurité)
-$dir = __DIR__ . '/../uploads/';
-if (!is_dir($dir)) {
-    mkdir($dir, 0755, true);
-}
 // Nom de stockage : horodatage + hash — jamais le nom d'origine (sécurité)
 $dir = __DIR__ . '/../uploads/';
 if (!is_dir($dir)) {
@@ -101,9 +91,9 @@ if (!move_uploaded_file($tmp_path, $stored)) {
 $nom_original = isset($f['name']) ? basename($f['name']) : '';
 
 $st = db()->prepare(
-    'INSERT INTO documents (profil_id, type_id, nom_fichier, fichier_stocke, taille_octets)
-     VALUES (?, ?, ?, ?, ?)'
+    'INSERT INTO documents (user_id, type_id, nom_fichier, fichier_stocke, taille_octets, mime)
+     VALUES (?, ?, ?, ?, ?, ?)'
 );
-$st->execute(array($profil_id, $type_id, $nom_original, $stored_name, $f['size']));
+$st->execute(array((int) $u['id'], $type_id, $nom_original, $stored_name, $f['size'], $mime));
 
 json_response(array('ok' => true, 'id' => (int) db()->lastInsertId()));

@@ -446,6 +446,82 @@ a:hover { color: #3180BC; }
     text-decoration: underline;
 }
 
+/* Bouton compact (ex. Modifier un profil) */
+.btn-mini {
+    font-size: 0.7rem;
+    padding: 0.1rem 0.5rem;
+    margin-left: 0.5rem;
+    vertical-align: middle;
+    border: 1px solid #3180BC;
+    border-radius: 0.25rem;
+    background: #fff;
+    color: #3180BC;
+    cursor: pointer;
+}
+.btn-mini:hover {
+    background: #3180BC;
+    color: #fff;
+}
+
+/* Actions de gestion des documents dans l'éditeur */
+.doc-actions {
+    font-size: 0.75rem;
+}
+.doc-actions a,
+.doc-actions button {
+    margin-right: 0.5rem;
+    padding: 0;
+    background: none;
+    border: none;
+    color: #3180BC;
+    cursor: pointer;
+    font-size: 0.75rem;
+    text-decoration: underline;
+}
+.doc-actions .doc-remove {
+    color: #c0392b;
+}
+.doc-actions select,
+.doc-actions input[type=text] {
+    font-size: 0.75rem;
+    padding: 0.15rem 0.3rem;
+    margin: 0 0.25rem;
+}
+
+/* Modale de visualisation de documents */
+.viewer-box {
+    width: min(880px, 92vw);
+    height: min(86vh, 80rem);
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+.viewer-head {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid #d7e2ea;
+    background: #f7fafc;
+    font-weight: 600;
+}
+.viewer-head .auth-modal-close {
+    position: static;
+    top: auto;
+    right: auto;
+    margin: 0;
+    font-size: 1.25rem;
+    line-height: 1;
+}
+#viewer_frame {
+    flex: 1;
+    border: 0;
+    border-top: 1px solid #98bfdd;
+    background: #f4f6f8;
+    min-height: 0;
+}
+
 .auth-form label { display: block; margin-bottom: 0.75rem; }
 .auth-form label span { display: block; font-size: 0.8rem; font-weight: 500; color: #555758; margin-bottom: 0.25rem; }
 .auth-form input[type=email],

@@ -207,20 +207,49 @@ function db_schema() {
         }
     }
 
-    // 9. Documents — scans/PDF attachés à un profil propriétaire (uploads/)
+    // 9. Documents — scans/PDF attachés à un profil propriétaire (uploads/).
+    //    Staging : profil_id NULL = en attente sur le compte (rattaché à la
+    //    création du profil) ; purgés chaque jour à 3h33 (voir purge ci-bas).
     $pdo->exec("CREATE TABLE IF NOT EXISTS documents (
         id           INT UNSIGNED NOT NULL AUTO_INCREMENT,
-        profil_id    INT UNSIGNED NOT NULL,
+        user_id      INT UNSIGNED NOT NULL,
+        profil_id    INT UNSIGNED DEFAULT NULL,
         type_id      INT UNSIGNED NOT NULL,
         nom_fichier  VARCHAR(255) NOT NULL,
         fichier_stocke VARCHAR(255) NOT NULL DEFAULT '',
         taille_octets BIGINT UNSIGNED NOT NULL,
+        mime         VARCHAR(50)  NOT NULL DEFAULT 'application/octet-stream',
         date_upload  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (id),
+        KEY idx_doc_user (user_id),
         KEY idx_doc_profil (profil_id),
+        CONSTRAINT fk_doc_user FOREIGN KEY (user_id) REFERENCES users(id),
         CONSTRAINT fk_doc_profil FOREIGN KEY (profil_id) REFERENCES profils_proprietaire(id),
         CONSTRAINT fk_doc_type FOREIGN KEY (type_id) REFERENCES documents_types(id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    // Migration v8 : documents passe du profil-déterminé au staging compte
+    $h_user = (int) $pdo->query(
+        "SELECT COUNT(*) FROM information_schema.COLUMNS
+          WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'documents' AND COLUMN_NAME = 'user_id'"
+    )->fetchColumn();
+    if (!$h_user) {
+        $pdo->exec('ALTER TABLE documents
+            ADD COLUMN user_id INT UNSIGNED NOT NULL DEFAULT 0 AFTER id,
+            ADD INDEX idx_documents_user (user_id)');
+        // injecter le créateur du profil dans user_id (v7 : tout doc avait un profil)
+        $pdo->exec('UPDATE documents d JOIN profils_proprietaire p ON p.id = d.profil_id
+            SET d.user_id = p.cree_par');
+    }
+    $h_mime = (int) $pdo->query(
+        "SELECT COUNT(*) FROM information_schema.COLUMNS
+          WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'documents' AND COLUMN_NAME = 'mime'"
+    )->fetchColumn();
+    if (!$h_mime) {
+        $pdo->exec('ALTER TABLE documents ADD COLUMN mime VARCHAR(50) NOT NULL DEFAULT "application/octet-stream" AFTER taille_octets');
+    }
+    // profil_id nullable = staging (document uploadé, pas encore rattaché)
+    $pdo->exec('ALTER TABLE documents MODIFY profil_id INT UNSIGNED DEFAULT NULL');
 
     // Compteur anti brute-force : 5 échecs → 15 min (par email + IP)
     $pdo->exec("CREATE TABLE IF NOT EXISTS login_tentatives (
@@ -293,8 +322,32 @@ function db_schema() {
 
     // Version du schéma (bump à chaque évolution de la structure)
     $st = $pdo->prepare(
-        "INSERT INTO app_meta (meta_key, meta_value) VALUES ('schema_version', '7')
-         ON DUPLICATE KEY UPDATE meta_value = '7'"
+        "INSERT INTO app_meta (meta_key, meta_value) VALUES ('schema_version', '8')
+         ON DUPLICATE KEY UPDATE meta_value = '8'"
     );
     $st->execute();
+
+    // Purge quotidienne des documents en staging (profil_id NULL) — 3h33 locale.
+    // Paresseuse (aucun cron sur hébergement partagé) : exécutée au premier
+    // accès après 03:33 du jour, une seule fois par jour.
+    $purge_key = 'derniere_purge_stage';
+    $st = $pdo->query("SELECT meta_value FROM app_meta WHERE meta_key = '$purge_key'");
+    $last_purge = $st->fetchColumn();
+    $today = date('Y-m-d');
+    if ($last_purge !== $today && date('Hi') >= '0333') {
+        // fichiers disque des staged expirés
+        $st = $pdo->query('SELECT fichier_stocke FROM documents WHERE profil_id IS NULL');
+        foreach ($st->fetchAll() as $r) {
+            $f = __DIR__ . '/../uploads/' . basename($r['fichier_stocke']);
+            if (is_file($f)) {
+                @unlink($f);
+            }
+        }
+        $pdo->exec('DELETE FROM documents WHERE profil_id IS NULL');
+        $st = $pdo->prepare(
+            "INSERT INTO app_meta (meta_key, meta_value) VALUES ('$purge_key', ?)
+             ON DUPLICATE KEY UPDATE meta_value = VALUES(meta_value)"
+        );
+        $st->execute(array($today));
+    }
 }

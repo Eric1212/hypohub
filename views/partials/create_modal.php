@@ -20,6 +20,7 @@
         <form id="create_form_profil" class="auth-form" data-create-type="profil" data-err-network="<?php echo htmlspecialchars(t('auth.error.network'), ENT_QUOTES, 'UTF-8'); ?>" hidden novalidate>
             <h2 class="create-title"><?php echo htmlspecialchars(t('create.profil.title'), ENT_QUOTES, 'UTF-8'); ?></h2>
             <input type="hidden" name="csrf" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+            <input type="hidden" name="profil_id" value="">
 
             <details class="create-details">
                 <summary><?php echo htmlspecialchars(t('create.profil.identification'), ENT_QUOTES, 'UTF-8'); ?></summary>
@@ -102,10 +103,14 @@
                     </label>
                     <label>
                         <span><?php echo htmlspecialchars(t('doc.select'), ENT_QUOTES, 'UTF-8'); ?></span>
-                        <input type="file" name="doc_fichiers[]" accept=".pdf,.jpg,.jpeg,.png" multiple>
+                        <input type="file" name="doc_fichiers[]" accept=".pdf,.jpg,.jpeg,.png,.webp" multiple>
                     </label>
                 </div>
                 <p class="note"><?php echo htmlspecialchars(t('doc.max'), ENT_QUOTES, 'UTF-8'); ?></p>
+                <div class="doc-edit-list" data-doc-list hidden>
+                    <p class="note"><strong><?php echo htmlspecialchars(t('doc.existing'), ENT_QUOTES, 'UTF-8'); ?></strong></p>
+                    <ul class="doc-list" data-doc-items></ul>
+                </div>
             </details>
 
             <p class="auth-error" data-create-error hidden></p>
@@ -222,5 +227,17 @@
             <p class="auth-error" data-create-error hidden></p>
             <button type="submit" class="btn btn-primary btn-block"><?php echo htmlspecialchars(t('create.submit'), ENT_QUOTES, 'UTF-8'); ?></button>
         </form>
+    </div>
+</div>
+
+<?php /* Modale de visualisation de documents (au-dessus de la modale de création) */ ?>
+<div class="auth-modal" id="viewer_modal" aria-hidden="true">
+    <div class="auth-modal-overlay" data-viewer-close></div>
+    <div class="auth-modal-box viewer-box" role="dialog" aria-modal="true" aria-labelledby="viewer_title">
+        <div class="viewer-head">
+            <span id="viewer_title"><?php echo htmlspecialchars(t('doc.view'), ENT_QUOTES, 'UTF-8'); ?></span>
+            <button type="button" class="auth-modal-close" data-viewer-close aria-label="<?php echo htmlspecialchars(t('auth.close'), ENT_QUOTES, 'UTF-8'); ?>">&times;</button>
+        </div>
+        <iframe id="viewer_frame" title="<?php echo htmlspecialchars(t('doc.view'), ENT_QUOTES, 'UTF-8'); ?>" src="about:blank"></iframe>
     </div>
 </div>
