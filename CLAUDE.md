@@ -1,6 +1,9 @@
 # CLAUDE.md — Hypohub
 
-Règles de travail applicables à ce dépôt. Elles prévalent sur toute autre considération.
+Règles de travail applicables à ce dépôt. Elles prévalent sur toute autre
+considération. Ce fichier décrit **le projet et ses décisions** ; la mémoire
+(`~/.claude/projects/-home-eric-dev-hypohub/memory/MEMORY.md`) décrit
+l'outillage et les standards de travail.
 
 ## Projet
 
@@ -13,24 +16,45 @@ Hypohub — guichet unique de référencement de financements hypothécaires pri
   moment de l'enregistrement au Registre foncier.
 - **Véhicule** : Financière B&A Inc. (dormante, NEQ 1177249589) — domaine corporate
   `bafinanciere.ca`. Domaine de la plateforme : `hypohub.ca` (à réserver).
-- **Benchmark** : PADS Financial (fr.padsfinancial.com) — fintech montréalaise de
-  prêts hypothécaires privés, analysée en profondeur.
 - **Marché** : Québec. Prêteurs hypothécaires privés (alternatifs) et courtiers.
+
+## Décisions produit (2026-08-02 et après)
+
+- **Terminologie** : on parle de **propriétaire** (emprunteur), **courtier**,
+  **créancier** (prêteur). Pas de « plateforme » : on martèle **« guichet
+  unique »** partout. Libellés persona : « Je suis propriétaire / courtier /
+  créancier ». Slugs internes : `proprietaire`, `courtier`, `creancier`.
+- **Commission** : la facturation 25 pdb est gérée **hors guichet** (outil
+  interne séparé) — pas de tables `commissions`/`financements` dans le guichet.
+- **Périmètre** : le guichet s'arrête au référencement ; pas d'estimation de
+  commission dans le guichet, pas de numéro d'enregistrement au Registre.
 
 ## Stack
 
-À définir — pas de GitHub Pages.
+- **Hébergement** : partagé 1-2 $/mois (PHP + MySQL) — un adolescent doit pouvoir l'installer.
+- **Langage** : PHP 8, sans framework (vanilla), zéro dépendance.
+- **Base de données** : MySQL (cPanel/hPanel + phpMyAdmin).
+- **Pattern** : AJAX type regioncities — `index.php` front controller,
+  `api/<action>.php` (JSON), `lib/` partagé, `views/` + `partials/`, `static/`
+  CSS/JS, `lang/` i18n **fr et en dès le départ**.
+- **Config** : `lib/config.local.php` (installeur, gitignoré) + `config.example.php`.
+- **Installeur** : `config.php` test MySQL → écrit config.local → crée les tables.
+- **Schéma** : 7 tables métier (`users` + 2 accès booléens, `profils_proprietaire`,
+  `profils_propriete`, `dossiers_emprunt`, `profils_creancier`,
+  `offres_financement`, `acceptations`) + `app_meta` pour `schema_version`.
+- **Police** : Inter (OFL, self-hostée), mapping de graisses validé en 2026-08-02.
+- **Pas de GitHub Pages.**
 
 ## Conventions
 
 - Référentiel du modèle d'affaires : courriel Éric (SADC Shawinigan, commission 25 pdb).
+- Tout état/décision du projet se retrouve dans ce fichier ; jamais dans la mémoire externe.
 
 ## Memory & Personal Context
 
-- Consigner l'état et les décisions du projet dans la mémoire externe, jamais dans le repo.
 - La mémoire persistante vit hors du repo, dans
   `~/.claude/projects/-home-eric-dev-hypohub/memory/` (index `MEMORY.md`).
-- Lire ce fichier avant d'assumer une convention ou une préférence d'Éric.
+- Lire ce fichier avant d'assumer une convention ou préférence d'Éric.
 
 You MUST LOAD `~/.claude/projects/-home-eric-dev-hypohub/memory/MEMORY.md`
 PERMANENTLY.
