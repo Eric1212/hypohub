@@ -29,6 +29,19 @@ Hypohub — guichet unique de référencement de financements hypothécaires pri
 - **Périmètre** : le guichet s'arrête au référencement ; pas d'estimation de
   commission dans le guichet, pas de numéro d'enregistrement au Registre.
 
+## Profil propriétaire (2026-08-05)
+
+- **Un seul profil, table unique, pas de champ `type`.** Le classement IDV/INC
+  est dérivé : NEQ présent → société (INC) ; nom compagnie seul → société ;
+  sinon → individu (IDV). Pas de personne de liaison : prénom/nom = le
+  représentant si INC, la personne si IDV.
+- **Obligatoires** : prénom, nom, date de naissance (toujours, même INC —
+  le représentant est une personne physique), courriel, téléphone, adresse
+  (porte : numéro + rue), ville, code postal (A1A 1A1), province (QC par défaut).
+- **Optionnels** : app (logement), nom compagnie, NEQ, statut
+  (citoyen / résident permanent).
+- **Exclus** : province d'incorporation (retirée), NAS (inutile).
+
 ## Stack
 
 - **Hébergement** : partagé 1-2 $/mois (PHP + MySQL) — un adolescent doit pouvoir l'installer.
