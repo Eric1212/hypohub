@@ -9,6 +9,59 @@
  * 3. Formulaire de contact (envoi via mailto, sans backend au MVP).
  */
 
+/**
+ * Autosave générique (2026-08-06) — une seule mécanique pour tout le site.
+ *
+ * Chaque champ à enregistrement porte une pastille (.save-dot data-save-surface)
+ * dans son .field-wrap. À la frappe : pastille « idle » (gris) → 3 secondes de
+ * pause → le « saver » s'exécute → pastille « saved » (vert/✓) ou « error »
+ * (rouge/✕). Le saver est fourni par l'appelant (fetch serveur, ou brouillon
+ * localStorage pour les champs hors compte).
+ *
+ * Retourne la fonction à brancher sur l'événement "input".
+ */
+function buildAutosave(dot, saveFn) {
+    var timer = null;
+    return function () {
+        if (!dot) { return; }
+        dot.setAttribute('data-save-state', 'idle');
+        if (timer) { clearTimeout(timer); }
+        timer = setTimeout(function () {
+            timer = null;
+            saveFn().then(function () {
+                dot.setAttribute('data-save-state', 'saved');
+            }, function () {
+                dot.setAttribute('data-save-state', 'error');
+            });
+        }, 3000);
+    };
+}
+
+/**
+ * Autosave-brouillon (localStorage) : utilisé sur les formulaires sans
+ * compte/sans fiche existante (modales de création, contact). Le serveur ne
+ * reçoit rien — la valeur reste dans le navigateur et est restaurée à
+ * l'ouverture (réflexe sauvé, cohérence avec la Zone compte).
+ */
+function saveDraftLocal(form, input) {
+    var key = 'hypohub:draft:' + form.id + ':' + input.name;
+    return function () {
+        try {
+            localStorage.setItem(key, input.value);
+            return Promise.resolve(true);
+        } catch (e) {
+            return Promise.reject(e);
+        }
+    };
+}
+
+function restoreDraftLocal(form, input) {
+    try {
+        var v = localStorage.getItem('hypohub:draft:' + form.id + ':' + input.name);
+        if (v !== null && input.value === '') { input.value = v; }
+    } catch (e) { /* silencieux — pas de brouillon */ }
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     applyZoom();
     initPage();
@@ -93,6 +146,18 @@ function initPage() {
 
     // Modales de création (espace membre) : ouverture, fermeture, soumission.
     initCreate();
+
+    // Autosave-brouillon (localStorage) : tout champ .field-wrap[data-autosave]
+    // — modales de création, contact — reçoit la même pastille que la Zone
+    // compte, mais la sauvegarde reste locale au navigateur.
+    document.querySelectorAll('.field-wrap[data-autosave]').forEach(function (wrap) {
+        var input = wrap.querySelector('input, textarea');
+        if (!input) { return; }
+        var dot = wrap.querySelector('[data-save-surface]');
+        var form = wrap.closest('form');
+        if (!form || !dot) { return; }
+        input.addEventListener('input', buildAutosave(dot, saveDraftLocal(form, input)));
+    });
 
     // Zone compte : réglages, certificat AMF, demande d'accès créancier.
     initAccount();
@@ -508,8 +573,6 @@ function initAccount() {
             var dot = wrap.querySelector('[data-save-surface]');
             if (!input || !dot) { return; }
 
-            var timer = null;
-
             var doSave = function () {
                 var payload = {};
                 payload[input.name] = input.value;
@@ -517,37 +580,22 @@ function initAccount() {
 
                 errEl.hidden = true;
 
-                fetch('api/update_compte.php', {
+                return fetch('api/update_compte.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 })
                 .then(function (r) { return r.json(); })
                 .then(function (res) {
-                    if (res.ok) {
-                        dot.setAttribute('data-save-state', 'saved');
-                    } else {
+                    if (!res.ok) {
                         errEl.textContent = res.error || compteForm.getAttribute('data-err-network');
                         errEl.hidden = false;
-                        dot.setAttribute('data-save-state', 'error');
+                        throw new Error(res.error);
                     }
-                })
-                .catch(function () {
-                    errEl.textContent = compteForm.getAttribute('data-err-network');
-                    errEl.hidden = false;
-                    dot.setAttribute('data-save-state', 'error');
                 });
             };
 
-            // Debounce propre à ce champ : 3 s de pause au clavier (event "input"),
-            // aucune dépendance au focus/blur.
-            var surSaisie = function () {
-                dot.setAttribute('data-save-state', 'idle');
-                if (timer) { clearTimeout(timer); }
-                timer = setTimeout(function () { timer = null; doSave(); }, 3000);
-            };
-
-            input.addEventListener('input', surSaisie);
+            input.addEventListener('input', buildAutosave(dot, doSave));
         });
     }
 
@@ -568,30 +616,22 @@ function initAccount() {
         var csrfAmf = amfForm.querySelector('input[name="csrf"]');
 
         // --- Autosave du n° (comme les 3 champs réglages) ---
-        var amfTimer = null;
         var amfSave = function () {
-            if (!csrfAmf) { return; }
+            if (!csrfAmf) { return Promise.reject(new Error('csrf')); }
             var payload = { certificat_amf: amfInput.value, csrf: csrfAmf.value };
             amfErr.hidden = true;
-            fetch('api/update_compte.php', {
+            return fetch('api/update_compte.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             })
             .then(function (r) { return r.json(); })
             .then(function (res) {
-                if (res.ok) {
-                    amfDot.setAttribute('data-save-state', 'saved');
-                } else {
+                if (!res.ok) {
                     amfErr.textContent = res.error || amfForm.getAttribute('data-err-network');
                     amfErr.hidden = false;
-                    amfDot.setAttribute('data-save-state', 'error');
+                    throw new Error(res.error);
                 }
-            })
-            .catch(function () {
-                amfErr.textContent = amfForm.getAttribute('data-err-network');
-                amfErr.hidden = false;
-                amfDot.setAttribute('data-save-state', 'error');
             });
         };
 
@@ -601,8 +641,7 @@ function initAccount() {
                 amfBtn.disabled = (amfInput.value.trim() === '');
             }
             if (amfDot) { amfDot.setAttribute('data-save-state', 'idle'); }
-            if (amfTimer) { clearTimeout(amfTimer); }
-            amfTimer = setTimeout(function () { amfTimer = null; amfSave(); }, 3000);
+            buildAutosave(amfDot, amfSave)();
         };
         amfInput.addEventListener('input', majAmf);
 
@@ -819,6 +858,14 @@ function openCreateModal(type, data) {
         if (pid) {
             pid.value = (data && data.profil_id) || '';
             pid.dataset.mode = pid.value ? 'update' : 'create';
+        }
+        // Restaure le brouillon local (mode création uniquement — lors d'une
+        // édition, les valeurs serveur ont déjà été appliquées ci-dessus).
+        if (form.querySelector('.field-wrap[data-autosave]') && !(data && data.profil_id)) {
+            form.querySelectorAll('.field-wrap[data-autosave]').forEach(function (wrap) {
+                var input = wrap.querySelector('input, textarea');
+                if (input) { restoreDraftLocal(form, input); }
+            });
         }
         // Charger la liste des docs existants ou des staged du compte
         var docList = form.querySelector('[data-doc-list]');

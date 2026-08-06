@@ -16,11 +16,17 @@
                 <form id="contact_form" class="contact-form" action="#" method="get">
                     <label>
                         <span><?php echo htmlspecialchars(t('ct.form.name'), ENT_QUOTES, 'UTF-8'); ?></span>
-                        <input type="text" id="ct_name" name="name" required>
+                        <span class="field-wrap" data-autosave>
+                            <input type="text" id="ct_name" name="name" required>
+                            <span class="save-dot" data-save-surface data-save-state="saved"></span>
+                        </span>
                     </label>
                     <label>
                         <span><?php echo htmlspecialchars(t('ct.form.email'), ENT_QUOTES, 'UTF-8'); ?></span>
-                        <input type="email" id="ct_email" name="from" required>
+                        <span class="field-wrap" data-autosave>
+                            <input type="email" id="ct_email" name="from" required>
+                            <span class="save-dot" data-save-surface data-save-state="saved"></span>
+                        </span>
                     </label>
                     <label>
                         <span><?php echo htmlspecialchars(t('ct.form.subject'), ENT_QUOTES, 'UTF-8'); ?></span>
@@ -33,7 +39,10 @@
                     </label>
                     <label>
                         <span><?php echo htmlspecialchars(t('ct.form.message'), ENT_QUOTES, 'UTF-8'); ?></span>
-                        <textarea id="ct_message" name="message" rows="3" required></textarea>
+                        <span class="field-wrap" data-autosave>
+                            <textarea id="ct_message" name="message" rows="3" required></textarea>
+                            <span class="save-dot" data-save-surface data-save-state="saved"></span>
+                        </span>
                     </label>
                     <button type="submit" class="btn btn-primary"><?php echo htmlspecialchars(t('ct.form.send'), ENT_QUOTES, 'UTF-8'); ?></button>
                 </form>

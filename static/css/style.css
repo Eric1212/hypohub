@@ -914,7 +914,17 @@ ul.accords .block h4:not(.toggle-title) {
     position: relative;
     display: block;
 }
-.field-wrap input {
+/* Neutraliser les styles de span génériques (label span, contact span) qui
+   s'appliqueraient au conteneur field-wrap dans les modales et le contact. */
+.auth-form label .field-wrap,
+.contact-form .field-wrap {
+    margin: 0;
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
+}
+.field-wrap input,
+.field-wrap textarea {
     padding-right: 2rem;
 }
 .account-grid .field-wrap { flex: 1 1 auto; min-width: 0; }

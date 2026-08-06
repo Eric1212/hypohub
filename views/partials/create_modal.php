@@ -27,16 +27,25 @@
                 <div class="create-grid-2">
                     <label>
                         <span><?php echo htmlspecialchars(t('field.prenom'), ENT_QUOTES, 'UTF-8'); ?></span>
-                        <input type="text" name="prenom" required>
+                        <span class="field-wrap" data-autosave>
+                            <input type="text" name="prenom" required>
+                            <span class="save-dot" data-save-surface data-save-state="saved"></span>
+                        </span>
                     </label>
                     <label>
                         <span><?php echo htmlspecialchars(t('field.nom'), ENT_QUOTES, 'UTF-8'); ?></span>
-                        <input type="text" name="nom" required>
+                        <span class="field-wrap" data-autosave>
+                            <input type="text" name="nom" required>
+                            <span class="save-dot" data-save-surface data-save-state="saved"></span>
+                        </span>
                     </label>
                 </div>
                 <label>
                     <span><?php echo htmlspecialchars(t('field.naissance'), ENT_QUOTES, 'UTF-8'); ?></span>
-                    <input type="date" name="date_naissance" required>
+                    <span class="field-wrap" data-autosave>
+                        <input type="date" name="date_naissance" required>
+                        <span class="save-dot" data-save-surface data-save-state="saved"></span>
+                    </span>
                 </label>
             </details>
 
@@ -45,35 +54,56 @@
                 <div class="create-grid-2">
                     <label>
                         <span><?php echo htmlspecialchars(t('field.email'), ENT_QUOTES, 'UTF-8'); ?></span>
-                        <input type="email" name="courriel" required>
+                        <span class="field-wrap" data-autosave>
+                            <input type="email" name="courriel" required>
+                            <span class="save-dot" data-save-surface data-save-state="saved"></span>
+                        </span>
                     </label>
                     <label>
                         <span><?php echo htmlspecialchars(t('field.phone'), ENT_QUOTES, 'UTF-8'); ?></span>
-                        <input type="tel" name="telephone" required>
+                        <span class="field-wrap" data-autosave>
+                            <input type="tel" name="telephone" required>
+                            <span class="save-dot" data-save-surface data-save-state="saved"></span>
+                        </span>
                     </label>
                 </div>
                 <div class="create-grid-2">
                     <label>
                         <span><?php echo htmlspecialchars(t('field.app'), ENT_QUOTES, 'UTF-8'); ?></span>
-                        <input type="text" name="app">
+                        <span class="field-wrap" data-autosave>
+                            <input type="text" name="app">
+                            <span class="save-dot" data-save-surface data-save-state="saved"></span>
+                        </span>
                     </label>
                     <label>
                         <span><?php echo htmlspecialchars(t('field.province'), ENT_QUOTES, 'UTF-8'); ?></span>
-                        <input type="text" name="province" value="QC" maxlength="2" required>
+                        <span class="field-wrap" data-autosave>
+                            <input type="text" name="province" value="QC" maxlength="2" required>
+                            <span class="save-dot" data-save-surface data-save-state="saved"></span>
+                        </span>
                     </label>
                 </div>
                 <label>
                     <span><?php echo htmlspecialchars(t('field.adresse'), ENT_QUOTES, 'UTF-8'); ?></span>
-                    <input type="text" name="adresse" placeholder="<?php echo htmlspecialchars(t('field.adresse.placeholder'), ENT_QUOTES, 'UTF-8'); ?>" required>
+                    <span class="field-wrap" data-autosave>
+                        <input type="text" name="adresse" placeholder="<?php echo htmlspecialchars(t('field.adresse.placeholder'), ENT_QUOTES, 'UTF-8'); ?>" required>
+                        <span class="save-dot" data-save-surface data-save-state="saved"></span>
+                    </span>
                 </label>
                 <div class="create-grid-2">
                     <label>
                         <span><?php echo htmlspecialchars(t('field.ville'), ENT_QUOTES, 'UTF-8'); ?></span>
-                        <input type="text" name="ville" required>
+                        <span class="field-wrap" data-autosave>
+                            <input type="text" name="ville" required>
+                            <span class="save-dot" data-save-surface data-save-state="saved"></span>
+                        </span>
                     </label>
                     <label>
                         <span><?php echo htmlspecialchars(t('field.code'), ENT_QUOTES, 'UTF-8'); ?></span>
-                        <input type="text" name="code_postal" placeholder="A1A 1A1" required>
+                        <span class="field-wrap" data-autosave>
+                            <input type="text" name="code_postal" placeholder="A1A 1A1" required>
+                            <span class="save-dot" data-save-surface data-save-state="saved"></span>
+                        </span>
                     </label>
                 </div>
             </details>
@@ -82,11 +112,17 @@
                 <summary><?php echo htmlspecialchars(t('create.profil.societe'), ENT_QUOTES, 'UTF-8'); ?></summary>
                 <label>
                     <span><?php echo htmlspecialchars(t('field.compagnie'), ENT_QUOTES, 'UTF-8'); ?></span>
-                    <input type="text" name="nom_compagnie">
+                    <span class="field-wrap" data-autosave>
+                        <input type="text" name="nom_compagnie">
+                        <span class="save-dot" data-save-surface data-save-state="saved"></span>
+                    </span>
                 </label>
                 <label>
                     <span><?php echo htmlspecialchars(t('field.neq'), ENT_QUOTES, 'UTF-8'); ?></span>
-                    <input type="text" name="neq" placeholder="XXXXXXXXXX">
+                    <span class="field-wrap" data-autosave>
+                        <input type="text" name="neq" placeholder="XXXXXXXXXX">
+                        <span class="save-dot" data-save-surface data-save-state="saved"></span>
+                    </span>
                 </label>
             </details>
 
@@ -123,23 +159,38 @@
             <input type="hidden" name="csrf" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
             <label>
                 <span><?php echo htmlspecialchars(t('field.adresse'), ENT_QUOTES, 'UTF-8'); ?></span>
-                <input type="text" name="adresse" required>
+                <span class="field-wrap" data-autosave>
+                    <input type="text" name="adresse" required>
+                    <span class="save-dot" data-save-surface data-save-state="saved"></span>
+                </span>
             </label>
             <label>
                 <span><?php echo htmlspecialchars(t('field.ville'), ENT_QUOTES, 'UTF-8'); ?></span>
-                <input type="text" name="ville" required>
+                <span class="field-wrap" data-autosave>
+                    <input type="text" name="ville" required>
+                    <span class="save-dot" data-save-surface data-save-state="saved"></span>
+                </span>
             </label>
             <label>
                 <span><?php echo htmlspecialchars(t('field.code'), ENT_QUOTES, 'UTF-8'); ?></span>
-                <input type="text" name="code_postal" placeholder="G0X 2P0">
+                <span class="field-wrap" data-autosave>
+                    <input type="text" name="code_postal" placeholder="G0X 2P0">
+                    <span class="save-dot" data-save-surface data-save-state="saved"></span>
+                </span>
             </label>
             <label>
                 <span><?php echo htmlspecialchars(t('field.valeur'), ENT_QUOTES, 'UTF-8'); ?></span>
-                <input type="number" name="valeur_estimee" step="0.01" min="0" placeholder="0,00">
+                <span class="field-wrap" data-autosave>
+                    <input type="number" name="valeur_estimee" step="0.01" min="0" placeholder="0,00">
+                    <span class="save-dot" data-save-surface data-save-state="saved"></span>
+                </span>
             </label>
             <label>
                 <span><?php echo htmlspecialchars(t('field.nette'), ENT_QUOTES, 'UTF-8'); ?></span>
-                <input type="number" name="valeur_nette" step="0.01" min="0" placeholder="0,00">
+                <span class="field-wrap" data-autosave>
+                    <input type="number" name="valeur_nette" step="0.01" min="0" placeholder="0,00">
+                    <span class="save-dot" data-save-surface data-save-state="saved"></span>
+                </span>
             </label>
             <p class="auth-error" data-create-error hidden></p>
             <button type="submit" class="btn btn-primary btn-block"><?php echo htmlspecialchars(t('create.submit'), ENT_QUOTES, 'UTF-8'); ?></button>
@@ -175,7 +226,10 @@
             <?php endif; ?>
             <label>
                 <span><?php echo htmlspecialchars(t('field.montant'), ENT_QUOTES, 'UTF-8'); ?></span>
-                <input type="number" name="montant_demande" step="0.01" min="1" required placeholder="0,00">
+                <span class="field-wrap" data-autosave>
+                    <input type="number" name="montant_demande" step="0.01" min="1" required placeholder="0,00">
+                    <span class="save-dot" data-save-surface data-save-state="saved"></span>
+                </span>
             </label>
             <label>
                 <span><?php echo htmlspecialchars(t('field.rang'), ENT_QUOTES, 'UTF-8'); ?></span>
@@ -203,7 +257,10 @@
             <input type="hidden" name="csrf" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
             <label>
                 <span><?php echo htmlspecialchars(t('create.creancier.nom'), ENT_QUOTES, 'UTF-8'); ?></span>
-                <input type="text" name="nom" required>
+                <span class="field-wrap" data-autosave>
+                    <input type="text" name="nom" required>
+                    <span class="save-dot" data-save-surface data-save-state="saved"></span>
+                </span>
             </label>
             <label>
                 <span><?php echo htmlspecialchars(t('field.type'), ENT_QUOTES, 'UTF-8'); ?></span>
@@ -214,11 +271,17 @@
             </label>
             <label>
                 <span><?php echo htmlspecialchars(t('space.cre.capital'), ENT_QUOTES, 'UTF-8'); ?></span>
-                <input type="number" name="capital_disponible" step="0.01" min="0" placeholder="0,00">
+                <span class="field-wrap" data-autosave>
+                    <input type="number" name="capital_disponible" step="0.01" min="0" placeholder="0,00">
+                    <span class="save-dot" data-save-surface data-save-state="saved"></span>
+                </span>
             </label>
             <label>
                 <span><?php echo htmlspecialchars(t('field.criteres'), ENT_QUOTES, 'UTF-8'); ?></span>
-                <textarea name="criteres" rows="3"></textarea>
+                <span class="field-wrap" data-autosave>
+                    <textarea name="criteres" rows="3"></textarea>
+                    <span class="save-dot" data-save-surface data-save-state="saved"></span>
+                </span>
             </label>
             <p class="auth-error" data-create-error hidden></p>
             <button type="submit" class="btn btn-primary btn-block"><?php echo htmlspecialchars(t('create.submit'), ENT_QUOTES, 'UTF-8'); ?></button>
@@ -252,7 +315,10 @@
 
             <label>
                 <span><?php echo htmlspecialchars(t('account.cle.creancier.justif'), ENT_QUOTES, 'UTF-8'); ?><em> (<?php echo htmlspecialchars(t('account.cle.creancier.limit'), ENT_QUOTES, 'UTF-8'); ?>)</em></span>
-                <textarea name="justification" rows="8" maxlength="16000" data-count-mots></textarea>
+                <span class="field-wrap" data-autosave>
+                    <textarea name="justification" rows="8" maxlength="16000" data-count-mots></textarea>
+                    <span class="save-dot" data-save-surface data-save-state="saved"></span>
+                </span>
             </label>
             <p class="note" data-mots-compteur></p>
 
