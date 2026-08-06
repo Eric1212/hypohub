@@ -925,11 +925,19 @@ ul.accords .block h4:not(.toggle-title) {
     overflow: visible;
     text-overflow: ellipsis;
 }
-/* Le petit compteur est incrusté sur la première lettre du libellé. */
-.admin-sec-badge {
+/* Ancrage : point de largeur nulle posé sur la première lettre. Le badge,
+   aligné sur son BORD DROIT à cet ancrage, s'étend vers la gauche quand le
+   compteur grossit (5 → 105) — jamais plus à droite que le chiffre seul. */
+.admin-badge-anchor {
     position: absolute;
     top: -0.35rem;
     left: -0.55rem;
+    width: 0;
+    overflow: visible;
+}
+.admin-sec-badge {
+    position: absolute;
+    right: 0;
     min-width: 0.85rem;
     padding: 0 0.15rem;
     border-radius: 0.5rem;
@@ -940,6 +948,7 @@ ul.accords .block h4:not(.toggle-title) {
     line-height: 0.85rem;
     text-align: center;
     box-shadow: 0 0 0 1px #fff;
+    white-space: nowrap;
 }
 
 /* Colonne 2 — liste des entités */

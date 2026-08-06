@@ -23,19 +23,13 @@ if (empty($__admin_u) || empty($__admin_u['est_admin'])) {
                 <!-- Colonne 1 — sections (badge incrusté sur la 1re lettre) -->
                 <nav class="admin-sections" aria-label="Sections admin">
                     <button type="button" class="admin-sec" data-admin-sec="amf">
-                        <span class="admin-sec-label"><?php echo htmlspecialchars(t('admin.amf.title'), ENT_QUOTES, 'UTF-8'); ?>
-                            <span class="admin-sec-badge" data-badge="amf" hidden></span>
-                        </span>
+                        <span class="admin-sec-label"><span class="admin-badge-anchor"><span class="admin-sec-badge" data-badge="amf" hidden></span></span><?php echo htmlspecialchars(t('admin.amf.title'), ENT_QUOTES, 'UTF-8'); ?></span>
                     </button>
                     <button type="button" class="admin-sec" data-admin-sec="creancier">
-                        <span class="admin-sec-label"><?php echo htmlspecialchars(t('admin.creancier.title'), ENT_QUOTES, 'UTF-8'); ?>
-                            <span class="admin-sec-badge" data-badge="creancier" hidden></span>
-                        </span>
+                        <span class="admin-sec-label"><span class="admin-badge-anchor"><span class="admin-sec-badge" data-badge="creancier" hidden></span></span><?php echo htmlspecialchars(t('admin.creancier.title'), ENT_QUOTES, 'UTF-8'); ?></span>
                     </button>
                     <button type="button" class="admin-sec" data-admin-sec="utilisateurs">
-                        <span class="admin-sec-label"><?php echo htmlspecialchars(t('admin.users.title'), ENT_QUOTES, 'UTF-8'); ?>
-                            <span class="admin-sec-badge" data-badge="utilisateurs" hidden></span>
-                        </span>
+                        <span class="admin-sec-label"><span class="admin-badge-anchor"><span class="admin-sec-badge" data-badge="utilisateurs" hidden></span></span><?php echo htmlspecialchars(t('admin.users.title'), ENT_QUOTES, 'UTF-8'); ?></span>
                     </button>
                 </nav>
 
