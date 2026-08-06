@@ -919,26 +919,17 @@ ul.accords .block h4:not(.toggle-title) {
 .admin-sec:hover { background: #eef4f8; }
 .admin-sec.active { background: #e7f2f8; color: #0073AE; font-weight: 600; }
 
-/* Pastille lettre (A / C / U) : le compteur est incrusté dans le coin de la
-   lettre, sans déborder de la pastille. */
-.admin-sec-ic {
+.admin-sec-label {
     position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.65rem;
-    height: 1.65rem;
-    border-radius: 0.45rem;
-    background: #dce9f3;
-    color: #0F78A1;
-    font-size: 0.82rem;
-    font-weight: 700;
-    flex: 0 0 auto;
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: ellipsis;
 }
+/* Le petit compteur est incrusté sur la première lettre du libellé. */
 .admin-sec-badge {
     position: absolute;
-    top: 0.02rem;
-    right: 0.02rem;
+    top: -0.35rem;
+    left: -0.1rem;
     min-width: 0.85rem;
     padding: 0 0.15rem;
     border-radius: 0.5rem;
@@ -948,8 +939,8 @@ ul.accords .block h4:not(.toggle-title) {
     font-weight: 700;
     line-height: 0.85rem;
     text-align: center;
+    box-shadow: 0 0 0 1px #fff;
 }
-.admin-sec-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* Colonne 2 — liste des entités */
 .admin-list {
