@@ -694,9 +694,79 @@ ul.accords .block p {
    est bornée en hauteur — scroll interne au-delà. Sans cette borne, un H3
    avec beaucoup de H4 (ex. 10 dossiers) fait déborder la page (720 p). */
 ul.accords ul.accords {
-    max-height: 9rem;
+    max-height: 11rem;
     overflow-y: auto;
 }
+
+/* Page espace : le main est borné à la fenêtre (pas min-height), sinon le
+   contenu pousse la page et la liste déborde au lieu de scroller. */
+body.page-espace { height: 100vh; }
+body.page-espace .site-main--page {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: hidden;
+}
+/* Le conteneur des cartes (page-content) s'étire et reste borné : sans ça, le
+   centrage vertical de la page fait « couper » le haut quand ça déborde. */
+.page-content.space-layout {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: hidden;
+}
+.space-layout > .section-inner {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+}
+.space-layout .two-col {
+    flex: 1 1 auto;
+    min-height: 0;
+    grid-template-rows: 1fr;
+}
+.space-layout .two-col > .card {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+.space-layout .two-col > .card > .accords {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+}
+/* Les li repliés gardent leur hauteur naturelle — seul l'accordéon OUVERT
+   (li.active, marqué par le JS) s'étire pour combler l'espace. */
+.space-layout .accords > li {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+.space-layout .accords > li.active {
+    flex: 1 1 auto;
+}
+.space-layout .accords > li.active > .toggle-content {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+.space-layout .accords > li.active .block {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+/* La liste H4 (le <ul> du block) : toute la hauteur restante + scroll. */
+.space-layout .accords > li.active .block > ul.accords {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none; /* l'espace utilise toute la hauteur dispo, pas 11rem */
+    overflow-y: auto;
+}
+
 /* Le contenu déplié d'un H4 (bloc de détails) est lui aussi borné. */
 ul.accords ul.accords > li > .toggle-content {
     max-height: 7rem;

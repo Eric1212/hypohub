@@ -89,7 +89,7 @@ function espace_detail($label, $value) {
     </div>
 </section>
 
-<section class="section page-content">
+<section class="section page-content space-layout">
     <div class="section-inner wide">
 
         <?php /* ---------- Zone compte (réglages + demandes) ---------- */ ?>

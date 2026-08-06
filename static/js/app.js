@@ -79,7 +79,7 @@ function initPage() {
                 });
             }
 
-            content.style.display = wasClosed ? 'block' : 'none';
+            content.style.display = wasClosed ? '' : 'none';
             h.classList.toggle('active', wasClosed);
             if (h.tagName === 'H3') {
                 // La barre du H3 est masquée seulement s'il contient des H4
