@@ -918,7 +918,7 @@ body.page-admin .site-main--page .page-content {
     flex: 1 1 auto;
     min-height: 0;
     display: grid;
-    grid-template-columns: 165px 220px 1fr;
+    grid-template-columns: max-content 220px 1fr;
 }
 
 /* Colonne 1 — sections */
