@@ -919,34 +919,34 @@ ul.accords .block h4:not(.toggle-title) {
 .admin-sec:hover { background: #eef4f8; }
 .admin-sec.active { background: #e7f2f8; color: #0073AE; font-weight: 600; }
 
-/* Pastille lettre (A / C / U) avec badge de comptage plaqué dans le coin. */
+/* Pastille lettre (A / C / U) : le compteur est incrusté dans le coin de la
+   lettre, sans déborder de la pastille. */
 .admin-sec-ic {
     position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1.8rem;
-    height: 1.8rem;
-    border-radius: 50%;
+    width: 1.65rem;
+    height: 1.65rem;
+    border-radius: 0.45rem;
     background: #dce9f3;
     color: #0F78A1;
-    font-size: 0.9rem;
+    font-size: 0.82rem;
     font-weight: 700;
     flex: 0 0 auto;
 }
 .admin-sec-badge {
     position: absolute;
-    top: -0.35rem;
-    right: -0.35rem;
-    min-width: 1.15rem;
-    padding: 0 0.25rem;
-    border-radius: 0.75rem;
+    top: 0.02rem;
+    right: 0.02rem;
+    min-width: 0.85rem;
+    padding: 0 0.15rem;
+    border-radius: 0.5rem;
     background: #C62828;
-    border: 2px solid #fff;
     color: #fff;
-    font-size: 0.68rem;
+    font-size: 0.6rem;
     font-weight: 700;
-    line-height: 1.1rem;
+    line-height: 0.85rem;
     text-align: center;
 }
 .admin-sec-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
