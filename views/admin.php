@@ -11,7 +11,7 @@ if (empty($__admin_u) || empty($__admin_u['est_admin'])) {
     redirect('index.php?page=espace');
 }
 ?>
-<section class="section page-content">
+<section class="section page-content admin-page">
     <div class="section-inner wide">
         <div class="card admin-shell">
             <div class="admin-shell-head">

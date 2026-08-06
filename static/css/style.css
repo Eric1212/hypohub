@@ -877,19 +877,46 @@ ul.accords .block h4:not(.toggle-title) {
 }
 
 /* ---------- Panneau admin — Zone Admin (espace connecté, 3 colonnes) ---------- */
-.admin-shell { padding: 0; }
+/* La carte occupe TOUT l'espace vertical disponible (sans scroll de page) :
+   la section s'étire (stretch), le section-inner et la carte suivent, et le
+   scroll se fait dans les colonnes (overflow-y auto). */
+.admin-page {
+    /* Le contenu ne doit jamais agrandir la page : hauteur bornée = viewport
+       moins en-tête (53px) et pied de page (70px + marge 8px). Le scroll se
+       fait dans les colonnes de la carte, jamais sur la page. */
+    height: calc(100vh - 53px - 78px);
+    min-height: 0;
+    overflow: hidden;
+    justify-content: stretch !important;
+}
+.admin-page > .section-inner {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+}
+.admin-shell {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+}
 .admin-shell-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 1rem 1.25rem;
     border-bottom: 1px solid #e4e9f0;
+    flex: 0 0 auto;
 }
 .admin-shell-head h1 { margin: 0; font-size: 1.15rem; color: #303030; }
 .admin-shell-body {
+    flex: 1 1 auto;
+    min-height: 0;
     display: grid;
     grid-template-columns: 165px 220px 1fr;
-    min-height: 420px;
 }
 
 /* Colonne 1 — sections */
