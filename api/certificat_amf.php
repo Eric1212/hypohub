@@ -2,9 +2,15 @@
 /**
  * Hypohub — API : certificat AMF (Zone compte).
  *
- * Actions (champ `action`) :
- *   - 'enregistrer' : met à jour certificat_amf (aucune demande de vérif)
- *   - 'demander'    : met à jour certificat_amf ET passe le statut en_attente
+ * Cousin de demande_creancier.php : une « demande d'activation » soumise à un
+ * humain. Actions (champ `action`) :
+ *   - 'demander' : met à jour certificat_amf ET passe le statut en_attente
+ *                 (demande de vérification par un employé)
+ *   - 'retirer'  : révocation immédiate d'un certificat validé (le nouveau n°
+ *                 repasse à vide, l'accès courtier/créancier tombe, la demande
+ *                 doit être refaite à zéro)
+ *
+ * NB : la simple sauvegarde du n° (autosave) passe par api/update_compte.php.
  * Session requise. Accessible depuis Zone Propriétaire ET Zone Créancier.
  */
 require_once __DIR__ . '/../lib/config.php';
@@ -29,21 +35,34 @@ if (!$u) {
     json_response(array('ok' => false, 'error' => t('auth.error.invalid')), 401);
 }
 
-$action = isset($in['action']) ? $in['action'] : 'enregistrer';
-if (!in_array($action, array('enregistrer', 'demander'), true)) {
-    json_response(array('ok' => false, 'error' => t('account.error.vide')));
-}
+$action = isset($in['action']) ? $in['action'] : '';
 
-$num = trim(isset($in['certificat_amf']) ? $in['certificat_amf'] : '');
-// Format flexible : chiffres, lettres (A-F), tirets — 4 à 32 caractères
-if ($num === '' || !preg_match('/^[A-Za-z0-9-]{4,32}$/', $num)) {
-    json_response(array('ok' => false, 'error' => t('account.error.amf')));
-}
+switch ($action) {
+    case 'demander':
+        $num = trim(isset($in['certificat_amf']) ? $in['certificat_amf'] : '');
+        if ($num === '') {
+            json_response(array('ok' => false, 'error' => t('account.error.amf_vide')));
+        }
+        $st = db()->prepare(
+            "UPDATE users SET certificat_amf = ?, certificat_amf_statut = 'en_attente' WHERE id = ?"
+        );
+        $st->execute(array($num, (int) $u['id']));
+        break;
 
-$statut = ($action === 'demander') ? 'en_attente' : 'vide';
-$st = db()->prepare(
-    "UPDATE users SET certificat_amf = ?, certificat_amf_statut = ? WHERE id = ?"
-);
-$st->execute(array($num, $statut, (int) $u['id']));
+    case 'retirer':
+        // Révocation d'un certificat validé : l'accès tombe, demande à refaire.
+        $st = db()->prepare(
+            "UPDATE users
+                SET certificat_amf_statut = 'vide',
+                    acces_creancier = 0,
+                    demande_creancier_statut = 'aucune'
+              WHERE id = ?"
+        );
+        $st->execute(array((int) $u['id']));
+        break;
+
+    default:
+        json_response(array('ok' => false, 'error' => t('account.error.vide')));
+}
 
 json_response(array('ok' => true));

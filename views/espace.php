@@ -96,72 +96,70 @@ function espace_detail($label, $value) {
         <div class="card account-card">
             <h2><?php echo htmlspecialchars(t('space.account.title'), ENT_QUOTES, 'UTF-8'); ?></h2>
 
-            <!-- Réglages : nom, utilisateur, courriel, certificat AMF -->
-            <form id="compte_form" class="auth-form account-grid" data-err-network="<?php echo htmlspecialchars(t('auth.error.network'), ENT_QUOTES, 'UTF-8'); ?>" novalidate>
+            <!-- Réglages : nom, utilisateur, courriel, certificat AMF (autosave : pastille dans chaque champ) -->
+            <form id="compte_form" class="auth-form" data-err-network="<?php echo htmlspecialchars(t('auth.error.network'), ENT_QUOTES, 'UTF-8'); ?>" novalidate>
                 <input type="hidden" name="csrf" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
 
+                <div class="account-grid">
                 <label>
                     <span><?php echo htmlspecialchars(t('account.nom_complet'), ENT_QUOTES, 'UTF-8'); ?></span>
-                    <input type="text" name="nom_complet" value="<?php echo htmlspecialchars($__u['nom_complet'], ENT_QUOTES, 'UTF-8'); ?>">
+                    <span class="field-wrap">
+                        <input type="text" name="nom_complet" value="<?php echo htmlspecialchars($__u['nom_complet'], ENT_QUOTES, 'UTF-8'); ?>">
+                        <span class="save-dot" data-save-surface data-save-state="saved"></span>
+                    </span>
                 </label>
                 <label>
                     <span><?php echo htmlspecialchars(t('account.username'), ENT_QUOTES, 'UTF-8'); ?></span>
-                    <input type="text" name="username" value="<?php echo htmlspecialchars($__u['username'] ?: '', ENT_QUOTES, 'UTF-8'); ?>" placeholder="3-80 caractères, accueil a-z0-9_.-">
+                    <span class="field-wrap">
+                        <input type="text" name="username" value="<?php echo htmlspecialchars($__u['username'] ?: '', ENT_QUOTES, 'UTF-8'); ?>" placeholder="3-80 caractères, accueil a-z0-9_.-">
+                        <span class="save-dot" data-save-surface data-save-state="saved"></span>
+                    </span>
                 </label>
                 <label>
                     <span><?php echo htmlspecialchars(t('account.courriel'), ENT_QUOTES, 'UTF-8'); ?></span>
-                    <input type="email" name="courriel" value="<?php echo htmlspecialchars($__u['email'], ENT_QUOTES, 'UTF-8'); ?>">
-                </label>
-                <div class="account-actions">
-                    <p class="auth-error" data-compte-error hidden></p>
-                    <button type="submit" class="btn btn-primary"><?php echo htmlspecialchars(t('account.save'), ENT_QUOTES, 'UTF-8'); ?></button>
-                </div>
-            </form>
-
-            <hr class="account-sep">
-
-            <!-- Certificat AMF (accessible Zones Propriétaire ET Créancier) -->
-            <form id="certificat_amf_form" class="auth-form account-inline" data-err-network="<?php echo htmlspecialchars(t('auth.error.network'), ENT_QUOTES, 'UTF-8'); ?>" novalidate>
-                <input type="hidden" name="csrf" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
-                <label>
-                    <span><?php echo htmlspecialchars(t('account.amf'), ENT_QUOTES, 'UTF-8'); ?>
-                        <?php
-                        $amf_statut = $__u['certificat_amf_statut'];
-                        $amf_result = $__u['certificat_amf'];
-                        if ($amf_statut === 'verifie'):
-                            ?>
-                        <strong class="badge badge-ok"><?php echo htmlspecialchars(t('account.amf.verifie'), ENT_QUOTES, 'UTF-8'); ?></strong>
-                        <?php elseif ($amf_statut === 'en_attente'): ?>
-                        <strong class="badge badge-wait"><?php echo htmlspecialchars(t('account.amf.attente'), ENT_QUOTES, 'UTF-8'); ?></strong>
-                        <?php else: ?>
-                        <strong class="badge"><?php echo htmlspecialchars(t('account.amf.non'), ENT_QUOTES, 'UTF-8'); ?></strong>
-                        <?php endif; ?>
+                    <span class="field-wrap">
+                        <input type="email" name="courriel" value="<?php echo htmlspecialchars($__u['email'], ENT_QUOTES, 'UTF-8'); ?>">
+                        <span class="save-dot" data-save-surface data-save-state="saved"></span>
                     </span>
-                    <input type="text" name="certificat_amf" value="<?php echo htmlspecialchars($amf_result ?: '', ENT_QUOTES, 'UTF-8'); ?>" placeholder="ex. ABC-1234">
                 </label>
-                <p class="account-error" data-amf-error hidden></p>
-                <div class="btn-row">
-                    <button type="submit" data-amf-action="enregistrer" class="btn btn-primary"><?php echo htmlspecialchars(t('account.amf.enregistrer'), ENT_QUOTES, 'UTF-8'); ?></button>
-                    <?php if ($amf_statut !== 'verifie'): ?>
-                    <button type="submit" data-amf-action="demander" class="btn btn-outline"><?php echo htmlspecialchars(t('account.amf.demander'), ENT_QUOTES, 'UTF-8'); ?></button>
-                    <?php endif; ?>
                 </div>
+                <p class="auth-error" data-compte-error hidden></p>
             </form>
 
-            <hr class="account-sep">
-
-            <!-- Demande accès créancier (un bouton selon l'état) -->
-            <div class="account-inline account-block">
-                <?php if (empty($__u['acces_creancier'])): ?>
-                    <?php if ($__u['demande_creancier_statut'] === 'en_attente'): ?>
-                        <button type="button" class="btn btn-outline" disabled><?php echo htmlspecialchars(t('account.cre.demander'), ENT_QUOTES, 'UTF-8'); ?></button>
+            <!-- Certificat AMF (une rangée : champ + bouton) -->
+            <form id="certificat_amf_form" class="auth-form account-inline" data-err-network="<?php echo htmlspecialchars(t('auth.error.network'), ENT_QUOTES, 'UTF-8'); ?>" data-lock-warn="<?php echo htmlspecialchars(t('account.amf.lock_warn'), ENT_QUOTES, 'UTF-8'); ?>" data-lock-ok="<?php echo htmlspecialchars(t('account.amf.lock_ok'), ENT_QUOTES, 'UTF-8'); ?>" novalidate>
+                <input type="hidden" name="csrf" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+                <div class="amf-row">
+                    <label class="amf-label">
+                        <span class="amf-label-text"><?php echo htmlspecialchars(t('account.amf'), ENT_QUOTES, 'UTF-8'); ?>
+                            <?php
+                            $amf_statut = $__u['certificat_amf_statut'];
+                            $amf_result = $__u['certificat_amf'];
+                            if ($amf_statut === 'verifie'):
+                                ?>
+                            <strong class="badge badge-ok"><?php echo htmlspecialchars(t('account.amf.verifie'), ENT_QUOTES, 'UTF-8'); ?></strong>
+                            <?php elseif ($amf_statut === 'en_attente'): ?>
+                            <strong class="badge badge-wait"><?php echo htmlspecialchars(t('account.amf.attente'), ENT_QUOTES, 'UTF-8'); ?></strong>
+                            <?php endif; ?>
+                        </span>
+                        <span class="field-wrap">
+                            <input type="text" name="certificat_amf" value="<?php echo htmlspecialchars($amf_result ?: '', ENT_QUOTES, 'UTF-8'); ?>" placeholder="ex. 123456" <?php echo $amf_statut === 'verifie' ? 'readonly' : ''; ?>>
+                            <span class="save-dot" data-save-surface data-save-state="saved"></span>
+                        </span>
+                    </label>
+                    <button type="submit" data-amf-action="demander" class="btn btn-outline" <?php echo $amf_statut === 'verifie' ? 'hidden' : ''; ?> <?php echo ($amf_result === null || $amf_result === '') ? 'disabled' : ''; ?>><?php echo htmlspecialchars(t('account.amf.demander'), ENT_QUOTES, 'UTF-8'); ?></button>
+                    <?php if (empty($__u['acces_creancier'])): ?>
+                        <?php if ($__u['demande_creancier_statut'] === 'en_attente'): ?>
+                            <button type="button" class="btn btn-outline" data-amp-spacer data-cre-attente disabled><?php echo htmlspecialchars(t('account.cre.demander'), ENT_QUOTES, 'UTF-8'); ?></button>
+                        <?php else: ?>
+                            <button type="button" class="btn btn-primary" data-amp-spacer data-demande-creancier-open><?php echo htmlspecialchars(t('account.cre.demander'), ENT_QUOTES, 'UTF-8'); ?></button>
+                        <?php endif; ?>
                     <?php else: ?>
-                        <button type="button" class="btn btn-primary" data-demande-creancier-open><?php echo htmlspecialchars(t('account.cre.demander'), ENT_QUOTES, 'UTF-8'); ?></button>
+                        <button type="button" class="btn btn-outline" data-amp-spacer disabled><?php echo htmlspecialchars(t('account.cre.deja'), ENT_QUOTES, 'UTF-8'); ?></button>
                     <?php endif; ?>
-                <?php else: ?>
-                    <button type="button" class="btn btn-outline" disabled><?php echo htmlspecialchars(t('account.cre.deja'), ENT_QUOTES, 'UTF-8'); ?></button>
-                <?php endif; ?>
-            </div>
+                </div>
+                <p class="account-error" data-amf-error hidden></p>
+            </form>
         </div>
 
         <div class="two-col">

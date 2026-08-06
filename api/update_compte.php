@@ -77,6 +77,35 @@ if (array_key_exists('courriel', $in)) {
     $params[] = $courriel;
 }
 
+// Certificat AMF — autosave (le champ d'un certificat vérifié est verrouillé côté
+// UI : l'alerte de révocation passe par api/certificat_amf.php action=retirer).
+// Garde-fou serveur : si une mise à jour arrive directement et que la valeur
+// change alors que l'ancien certificat était 'verifie', on révoque l'accès
+// courtier/créancier (le nouveau numéro n'a pas été validé par un humain).
+if (array_key_exists('certificat_amf', $in)) {
+    // Champ AMF : vider est un état valide (on efface le n° et, s'il était
+    // vérifié, on révoque l'accès — la révocation passe par certificat_amf.php
+    // côté UI ; ce garde-fou protège les requêtes directes).
+    $amf = trim((string) $in['certificat_amf']);
+    $old = db()->prepare('SELECT certificat_amf, certificat_amf_statut FROM users WHERE id = ?');
+    $old->execute(array((int) $u['id']));
+    $ancient = $old->fetch();
+
+    if (($ancient['certificat_amf'] ?? null) !== ($amf !== '' ? $amf : null)) {
+        $set[] = 'certificat_amf = ?';
+        $params[] = $amf !== '' ? $amf : null;
+        if (($ancient['certificat_amf_statut'] ?? '') === 'verifie') {
+            // Récocation : certif non validé, droit à revendiquer à nouveau.
+            $set[] = 'certificat_amf_statut = ?';
+            $params[] = 'vide';
+            $set[] = 'acces_creancier = ?';
+            $params[] = 0;
+            $set[] = 'demande_creancier_statut = ?';
+            $params[] = 'aucune';
+        }
+    }
+}
+
 if (!$set) {
     json_response(array('ok' => false, 'error' => t('account.error.vide')));
 }

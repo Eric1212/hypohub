@@ -415,49 +415,156 @@ function initAccount() {
         }
     }
 
-    // --- Réglages du compte (nom / username / courriel) ---
+    // --- Réglages du compte : autosave par champ (3 s de pause au clavier) ---
     var compteForm = document.getElementById('compte_form');
     if (compteForm) {
-        compteForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-            var errEl = compteForm.querySelector('[data-compte-error]');
-            errEl.hidden = true;
-            var btn = compteForm.querySelector('button[type="submit"]');
-            var original = btn.textContent;
-            btn.disabled = true;
-            btn.textContent = '…';
+        var errEl = compteForm.querySelector('[data-compte-error]');
+        var csrfInput = compteForm.querySelector('input[name="csrf"]');
 
-            var data = {};
-            new FormData(compteForm).forEach(function (v, k) { data[k] = v; });
+        compteForm.querySelectorAll('.field-wrap').forEach(function (wrap) {
+            var input = wrap.querySelector('input');
+            var dot = wrap.querySelector('[data-save-surface]');
+            if (!input || !dot) { return; }
 
-            fetch('api/update_compte.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            })
-            .then(function (r) { return r.json(); })
-            .then(function (res) {
-                btn.disabled = false;
-                btn.textContent = original;
-                if (res.ok) {
-                    window.location.href = 'index.php?page=espace';
-                } else {
-                    errEl.textContent = res.error || compteForm.getAttribute('data-err-network');
+            var timer = null;
+
+            var doSave = function () {
+                var payload = {};
+                payload[input.name] = input.value;
+                payload.csrf = csrfInput.value;
+
+                errEl.hidden = true;
+
+                fetch('api/update_compte.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                })
+                .then(function (r) { return r.json(); })
+                .then(function (res) {
+                    if (res.ok) {
+                        dot.setAttribute('data-save-state', 'saved');
+                    } else {
+                        errEl.textContent = res.error || compteForm.getAttribute('data-err-network');
+                        errEl.hidden = false;
+                        dot.setAttribute('data-save-state', 'error');
+                    }
+                })
+                .catch(function () {
+                    errEl.textContent = compteForm.getAttribute('data-err-network');
                     errEl.hidden = false;
-                }
-            })
-            .catch(function () {
-                btn.disabled = false;
-                btn.textContent = original;
-                errEl.textContent = compteForm.getAttribute('data-err-network');
-                errEl.hidden = false;
-            });
+                    dot.setAttribute('data-save-state', 'error');
+                });
+            };
+
+            // Debounce propre à ce champ : 3 s de pause au clavier (event "input"),
+            // aucune dépendance au focus/blur.
+            var surSaisie = function () {
+                dot.setAttribute('data-save-state', 'idle');
+                if (timer) { clearTimeout(timer); }
+                timer = setTimeout(function () { timer = null; doSave(); }, 3000);
+            };
+
+            input.addEventListener('input', surSaisie);
         });
     }
 
-    // --- Certificat AMF : enregistrer / demander la vérification ---
+    // --- Certificat AMF ---
+    // Autosave du n° via update_compte.php (même pattern que les champs de la
+    // carte réglages : pastille idle → 3 s → sauvegarde → vert/rouge).
+    // Bouton « Demander à être courtier » : soumet la demande de vérification
+    // (certificat_amf.php action=demander, cousin de demande_creancier.php).
+    // Champ verrouillé si certificat vérifié : alerte avant toute édition, et
+    // révocation immédiate côté serveur (action=retirer) si l'utilisateur
+    // confirme — l'accès courtier/créancier tombe, la demande repart à zéro.
     var amfForm = document.getElementById('certificat_amf_form');
     if (amfForm) {
+        var amfInput = amfForm.querySelector('input[name="certificat_amf"]');
+        var amfBtn = amfForm.querySelector('button[data-amf-action="demander"]');
+        var amfDot = amfForm.querySelector('[data-save-surface]');
+        var amfErr = amfForm.querySelector('[data-amf-error]');
+        var csrfAmf = amfForm.querySelector('input[name="csrf"]');
+
+        // --- Autosave du n° (comme les 3 champs réglages) ---
+        var amfTimer = null;
+        var amfSave = function () {
+            if (!csrfAmf) { return; }
+            var payload = { certificat_amf: amfInput.value, csrf: csrfAmf.value };
+            amfErr.hidden = true;
+            fetch('api/update_compte.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+                if (res.ok) {
+                    amfDot.setAttribute('data-save-state', 'saved');
+                } else {
+                    amfErr.textContent = res.error || amfForm.getAttribute('data-err-network');
+                    amfErr.hidden = false;
+                    amfDot.setAttribute('data-save-state', 'error');
+                }
+            })
+            .catch(function () {
+                amfErr.textContent = amfForm.getAttribute('data-err-network');
+                amfErr.hidden = false;
+                amfDot.setAttribute('data-save-state', 'error');
+            });
+        };
+
+        // --- Dégrisement du bouton + état de la pastille à la frappe ---
+        var majAmf = function () {
+            if (amfBtn && !amfBtn.hidden) {
+                amfBtn.disabled = (amfInput.value.trim() === '');
+            }
+            if (amfDot) { amfDot.setAttribute('data-save-state', 'idle'); }
+            if (amfTimer) { clearTimeout(amfTimer); }
+            amfTimer = setTimeout(function () { amfTimer = null; amfSave(); }, 3000);
+        };
+        amfInput.addEventListener('input', majAmf);
+
+        // --- Champ verrouillé : alerte avant édition, révocation immédiate ---
+        if (amfInput.hasAttribute('readonly')) {
+            var demanderDeverrouillage = function (e) {
+                if (!amfInput.hasAttribute('readonly')) { return; }
+                e.preventDefault();
+                var message = amfForm.getAttribute('data-lock-warn') || '…';
+                if (!window.confirm(message)) { return; }
+
+                // Révocation immédiate (Option A) : l'accès tombe maintenant.
+                var data = { action: 'retirer', csrf: csrfAmf.value };
+                fetch('api/certificat_amf.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                })
+                .then(function (r) { return r.json(); })
+                .then(function (res) {
+                    if (res.ok) {
+                        amfInput.removeAttribute('readonly');
+                        amfDot.setAttribute('data-save-state', 'idle');
+                        var ok = amfForm.getAttribute('data-lock-ok') || '';
+                        if (ok) {
+                            amfErr.textContent = ok;
+                            amfErr.hidden = false;
+                        }
+                        amfInput.focus();
+                    } else {
+                        amfErr.textContent = res.error || amfForm.getAttribute('data-err-network');
+                        amfErr.hidden = false;
+                    }
+                })
+                .catch(function () {
+                    amfErr.textContent = amfForm.getAttribute('data-err-network');
+                    amfErr.hidden = false;
+                });
+            };
+            amfInput.addEventListener('mousedown', demanderDeverrouillage);
+            amfInput.addEventListener('focus', demanderDeverrouillage);
+        }
+
+        // --- Bouton « Demander à être courtier » : vérification par un humain ---
         amfForm.querySelectorAll('button[data-amf-action]').forEach(function (b) {
             b.addEventListener('click', function (e) {
                 e.preventDefault();

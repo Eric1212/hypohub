@@ -749,11 +749,29 @@ ul.accords .block h4:not(.toggle-title) {
 
 .account-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
     gap: 0.85rem;
-    align-items: end;
 }
-.account-grid .account-actions { align-self: end; }
+.account-grid label {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0;
+    min-width: 0;
+}
+.account-grid label > span:first-child {
+    display: inline;
+    flex: 0 0 auto;
+    margin-bottom: 0;
+    min-width: 0;
+    white-space: nowrap;
+}
+.account-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 0.75rem;
+}
 
 .account-sep {
     border: 0;
@@ -796,3 +814,80 @@ ul.accords .block h4:not(.toggle-title) {
 }
 .admin-item p { margin: 0.25rem 0; }
 .admin-item .btn { margin-right: 0.5rem; }
+
+/* Rangée certificat AMF (Mon compte) : label + champ souple + bouton. */
+.amf-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+}
+.amf-row .amf-label {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0;
+}
+.amf-label .amf-label-text { font-size: 0.8rem; font-weight: 500; color: #555758; white-space: nowrap; }
+.amf-row input[type=text] {
+    flex: 0 1 auto;
+    width: 8rem;
+    min-width: 7rem;
+}
+.amf-row .btn { flex: 0 0 auto; margin-top: 0; }
+.amf-row [data-amp-spacer] { margin-left: auto; }
+
+
+/* Indicateur autosave dans chaque champ (Mon compte) : rond gris / crochet vert / x rouge. */
+.field-wrap {
+    position: relative;
+    display: block;
+}
+.field-wrap input {
+    padding-right: 2rem;
+}
+.account-grid .field-wrap { flex: 1 1 auto; min-width: 0; }
+.account-grid .field-wrap input { width: 100%; }
+.save-dot {
+    position: absolute;
+    right: 0.55rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0.85rem;
+    height: 0.85rem;
+    border-radius: 50%;
+    border: 2px solid #c3cdda;
+    background: transparent;
+    transition: border-color 0.15s, background 0.15s;
+}
+.save-dot[data-save-state="saved"] {
+    border-color: #2e9e5b;
+    background: #2e9e5b;
+    box-shadow: inset 0 0 0 2px #fff, 0 0 0 1px #2e9e5b;
+}
+.save-dot[data-save-state="saved"]::after {
+    content: "\2713";
+    position: relative;
+    display: block;
+    text-align: center;
+    font-size: 0.7rem;
+    line-height: 0.8rem;
+    color: #fff;
+    font-weight: 700;
+}
+.save-dot[data-save-state="error"] {
+    border-color: #c0392b;
+    background: #c0392b;
+    box-shadow: inset 0 0 0 1px #fff;
+}
+.save-dot[data-save-state="error"]::after {
+    content: "\2715";
+    position: relative;
+    display: block;
+    text-align: center;
+    font-size: 0.6rem;
+    line-height: 0.8rem;
+    color: #fff;
+    font-weight: 700;
+}
