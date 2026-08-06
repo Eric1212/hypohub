@@ -65,6 +65,11 @@ if ($page === 'admin') {
     if (!$__admin_u || empty($__admin_u['est_admin'])) {
         redirect('index.php?page=espace');
     }
+    // Espace & panneau : jamais en cache — les données changent à chaque
+    // action et dépendent de la session (sinon le navigateur ressort des
+    // copies périmées et il faut F5 pour voir l'état réel).
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
 }
 
 $__page = $page;          // slug courant (utilisé par header.php)

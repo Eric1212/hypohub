@@ -1095,6 +1095,19 @@ function navigate(url) {
             oldMain.outerHTML = newMain.outerHTML;
             if (title) document.title = title.textContent;
 
+            // Les scripts inline du nouveau <main> ne sont JAMAIS exécutés par
+            // outerHTML (règle de sécurité du navigateur) : on les recrée pour
+            // forcer leur exécution (ex. panneau admin, badges, listes AJAX).
+            document.querySelectorAll('.site-main script').forEach(function (s) {
+                var ns = document.createElement('script');
+                if (s.src) {
+                    ns.src = s.src;
+                } else {
+                    ns.textContent = s.textContent;
+                }
+                s.parentNode.replaceChild(ns, s);
+            });
+
             history.pushState({}, '', url);
             window.scrollTo(0, 0);
             updateActiveNav(url);

@@ -26,6 +26,10 @@ function config_ok() {
  */
 function json_response($data, $code = 200) {
     http_response_code($code);
+    // Jamais de cache : les données dépendent de la session et changent
+    // après chaque action — le navigateur ne doit pas resservir de copie.
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
     header('Content-Type: application/json; charset=UTF-8');
     echo json_encode($data);
     exit;

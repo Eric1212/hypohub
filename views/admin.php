@@ -93,7 +93,8 @@ if (empty($__admin_u) || empty($__admin_u['est_admin'])) {
         return fetch('api/demandes_admin.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
+            body: JSON.stringify(body),
+            cache: 'no-store'
         })
         .then(function (r) { return r.json(); })
         .then(function (res) {
@@ -103,7 +104,7 @@ if (empty($__admin_u) || empty($__admin_u['est_admin'])) {
     }
 
     function reload() {
-        fetch('api/demandes_admin.php')
+        fetch('api/demandes_admin.php', { cache: 'no-store' })
             .then(function (r) { return r.json(); })
             .then(function (res) {
                 if (!res.ok) return;
@@ -236,15 +237,25 @@ if (empty($__admin_u) || empty($__admin_u['est_admin'])) {
         });
     });
 
-    /* --- Démarrage : chargement des données + rafraîchissement des badges --- */
-    fetch('api/demandes_admin.php')
-        .then(function (r) { return r.json(); })
-        .then(function (res) {
-            if (!res.ok) return;
-            data = res;
-            updateBadges();
-            if (current) renderList(current);
-        })
-        .catch(function () {});
+    /* --- Chargement des données + rafraîchissement des badges --- */
+    function load() {
+        fetch('api/demandes_admin.php', { cache: 'no-store' })
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+                if (!res.ok) return;
+                data = res;
+                updateBadges();
+                if (current) renderList(current);
+            })
+            .catch(function () {});
+    }
+
+    /* --- Démarrage + retour du cache de navigation (bfcache/back) ---
+       Sans cette écoute, revenir de l'espace restaure l'ancien HTML sans
+       jamais relancer le chargement : la page semble vide à l'arrivée. */
+    load();
+    window.addEventListener('pageshow', function (e) {
+        if (e.persisted) { data = null; load(); }
+    });
 })();
 </script>
