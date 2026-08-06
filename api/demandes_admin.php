@@ -44,7 +44,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
           ORDER BY u.demande_creancier_date"
     )->fetchAll();
 
-    json_response(array('ok' => true, 'amf' => $amf, 'creancier' => $creancier));
+    $utilisateurs = $pdo->query(
+        "SELECT id, nom_complet, username, email, est_admin, mdp_temporaire,
+                certificat_amf_statut, acces_creancier, acces_proprietaire
+           FROM users
+          ORDER BY id"
+    )->fetchAll();
+
+    json_response(array('ok' => true, 'amf' => $amf, 'creancier' => $creancier, 'utilisateurs' => $utilisateurs));
 }
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -69,6 +76,26 @@ switch ($action) {
         if ($target <= 0 || !in_array($decision, array('verifie', 'refuse'), true)) {
             json_response(array('ok' => false, 'error' => t('admin.error.invalide')));
         }
+        if ($decision === 'verifie') {
+            // Un n° déjà vérifié par un autre compte ne peut pas être réclamé :
+            // réserve le certificat AMF au premier vérifié. (Les n° non vérifiés
+            // restent libres : NULL n'est pas soumis à l'unicité MySQL.)
+            $cible = $pdo->prepare('SELECT certificat_amf FROM users WHERE id = ?');
+            $cible->execute(array($target));
+            $num = $cible->fetchColumn();
+            if ($num !== false && $num !== null && $num !== '') {
+                $dupl = $pdo->prepare(
+                    'SELECT id FROM users
+                      WHERE certificat_amf = ? AND certificat_amf_statut = \'verifie\'
+                        AND id != ?
+                      LIMIT 1'
+                );
+                $dupl->execute(array($num, $target));
+                if ($dupl->fetchColumn()) {
+                    json_response(array('ok' => false, 'error' => t('admin.error.amf_prise')));
+                }
+            }
+        }
         $st = $pdo->prepare("UPDATE users SET certificat_amf_statut = ? WHERE id = ?");
         $st->execute(array($decision, $target));
         break;
@@ -90,6 +117,31 @@ switch ($action) {
         }
         $st = $pdo->prepare('UPDATE users SET est_admin = ? WHERE id = ?');
         $st->execute(array($action === 'promote' ? 1 : 0, $target));
+        break;
+
+    case 'reset_mdp':
+        // Génère un mot de passe temporaire : le compte DOIT définir son vrai
+        // mot de passe au premier login (modale dédiée, auth_changer_mdp).
+        if ($target <= 0) {
+            json_response(array('ok' => false, 'error' => t('admin.error.invalide')));
+        }
+        $chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+        $temp  = '';
+        for ($i = 0; $i < 10; $i++) {
+            $temp .= $chars[random_int(0, strlen($chars) - 1)];
+        }
+        $hash = password_hash($temp, PASSWORD_DEFAULT);
+        $st = $pdo->prepare(
+            'UPDATE users SET mot_de_passe = ?, mdp_temporaire = 1 WHERE id = ?'
+        );
+        $st->execute(array($hash, $target));
+        $nom = $pdo->prepare("SELECT nom_complet FROM users WHERE id = ?");
+        $nom->execute(array($target));
+        json_response(array(
+            'ok'   => true,
+            'temp' => $temp,
+            'nom'  => $nom->fetchColumn(),
+        ));
         break;
 
     default:

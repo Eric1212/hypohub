@@ -103,7 +103,11 @@ function initPage() {
     // Défilement fluide vers les ancres internes.
     document.querySelectorAll('a[href^="#"]').forEach(function (a) {
         a.addEventListener('click', function (e) {
-            var target = document.querySelector(a.getAttribute('href'));
+            var href = a.getAttribute('href');
+            if (!href || href === '#') {
+                return; // ancre vide : ne pas lancer querySelector('#')
+            }
+            var target = document.querySelector(href);
             if (target) {
                 e.preventDefault();
                 target.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -212,8 +216,86 @@ function initAuth() {
         });
     });
 
-    attachAuthForm(loginForm, 'api/auth_login.php');
     attachAuthForm(registerForm, 'api/auth_register.php');
+
+    // Connexion : si le serveur répond {changer_mdp:true} (mot de passe
+    // temporaire), on bascule sur le formulaire de vrai mot de passe au lieu de
+    // recharger. Les identifiants (email + temporaire) restent en mémoire.
+    var changerMdpForm = document.getElementById('auth_changer_mdp_form');
+    var loginForm2 = document.getElementById('auth_login_form');
+    attachJsonForm(loginForm2, 'api/auth_login.php', function (res) {
+        if (res && res.changer_mdp && changerMdpForm) {
+            changerMdpForm.hidden = false;
+            loginForm2.hidden = true;
+            modal.querySelectorAll('.auth-tab').forEach(function (o) {
+                o.classList.toggle('active', o.getAttribute('data-auth-tab') === 'login');
+            });
+            var mailIn = changerMdpForm.querySelector('input[name="email"]');
+            var pwdIn = changerMdpForm.querySelector('input[name="password"]');
+            var tmpMail = loginForm2.querySelector('input[name="email"]');
+            var tmpPwd = loginForm2.querySelector('input[name="password"]');
+            if (mailIn) mailIn.value = tmpMail ? tmpMail.value : '';
+            if (pwdIn) pwdIn.value = tmpPwd ? tmpPwd.value : '';
+            var focus = changerMdpForm.querySelector('input[name="nouveau"]');
+            if (focus) focus.focus();
+            return;
+        }
+        window.location.href = 'index.php?page=espace';
+    });
+
+    // Soumission : valide la confirmation, puis définit le vrai mot de passe.
+    if (changerMdpForm) {
+        changerMdpForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var errEl = changerMdpForm.querySelector('[data-chgmdp-error]');
+            if (errEl) errEl.hidden = true;
+
+            var nouveau = changerMdpForm.querySelector('input[name="nouveau"]').value;
+            var confirm = changerMdpForm.querySelector('input[name="confirmation"]').value;
+            if (nouveau !== confirm) {
+                if (errEl) {
+                    errEl.textContent = changerMdpForm.getAttribute('data-err-confirm') || '…';
+                    errEl.hidden = false;
+                }
+                return;
+            }
+
+            var data = {};
+            new FormData(changerMdpForm).forEach(function (v, k) { data[k] = v; });
+
+            var btn = changerMdpForm.querySelector('button[type=submit]');
+            var original = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = '…';
+
+            fetch('api/changer_mdp.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+                btn.disabled = false;
+                btn.textContent = original;
+                if (res.ok) {
+                    window.location.href = 'index.php?page=espace';
+                } else {
+                    if (errEl) {
+                        errEl.textContent = res.error || changerMdpForm.getAttribute('data-err-network');
+                        errEl.hidden = false;
+                    }
+                }
+            })
+            .catch(function () {
+                btn.disabled = false;
+                btn.textContent = original;
+                if (errEl) {
+                    errEl.textContent = changerMdpForm.getAttribute('data-err-network');
+                    errEl.hidden = false;
+                }
+            });
+        });
+    }
 }
 
 /** Soumet un formulaire de la modale en JSON ; recharge la page en cas de succès. */
@@ -250,7 +332,7 @@ function attachJsonForm(form, url, onSuccess) {
             btn.disabled = false;
             btn.textContent = original;
             if (res.ok) {
-                onSuccess();
+                onSuccess(res);
             } else {
                 if (errEl) {
                     errEl.textContent = res.error || form.getAttribute('data-err-network');

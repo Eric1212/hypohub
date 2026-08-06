@@ -241,6 +241,16 @@ return array(
     'admin.refuser'       => 'Decline',
     'admin.error.denied'  => 'Staff only.',
     'admin.error.invalide'=> 'Invalid request.',
+    'admin.error.amf_prise' => 'This certificate number is already verified by another account.',
+    'admin.users.title'   => 'Users',
+    'admin.users.list'    => 'All accounts',
+    'admin.users.amf'     => 'AMF:',
+    'admin.users.admin'   => 'admin',
+    'admin.users.creancier' => 'lender',
+    'admin.users.proprietaire' => 'owner',
+    'admin.users.temp_flag' => 'temp password',
+    'admin.users.temp'    => 'Temporary password',
+    'admin.users.temp_done' => 'Temporary password generated for {nom} (valid for a single login):',
 
     // Creating items (space modals)
     'create.profil.title'    => 'New profile',
@@ -353,5 +363,13 @@ return array(
     'auth.error.csrf'       => 'Session expired. Reload the page.',
     'auth.error.blocked'    => 'Too many attempts. Try again in {minutes} min.',
     'auth.error.inactive'   => 'Account disabled.',
+    'auth.error.changer_mdp_deja' => 'This account has already set its password.',
+
+    // Setting the real password (after a temporary password)
+    'auth.chgmdp.hint'      => 'A staff member set a temporary password for your account. Choose your real password (min. 8 characters) to continue.',
+    'auth.chgmdp.nouveau'   => 'New password (min. 8 characters)',
+    'auth.chgmdp.confirm'   => 'Confirm the new password',
+    'auth.chgmdp.submit'    => 'Set my password',
+    'auth.chgmdp.err_confirm' => 'The two passwords do not match.',
     'auth.error.network'    => 'Network error. Please try again.',
 );

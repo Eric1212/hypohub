@@ -240,6 +240,16 @@ return array(
     'admin.refuser'       => 'Refuser',
     'admin.error.denied'  => 'Accès réservé au personnel.',
     'admin.error.invalide'=> 'Demande invalide.',
+    'admin.error.amf_prise' => 'Ce numéro de certificat est déjà vérifié par un autre compte.',
+    'admin.users.title'   => 'Utilisateurs',
+    'admin.users.list'    => 'Tous les comptes',
+    'admin.users.amf'     => 'AMF :',
+    'admin.users.admin'   => 'admin',
+    'admin.users.creancier' => 'créancier',
+    'admin.users.proprietaire' => 'propriétaire',
+    'admin.users.temp_flag' => 'mdp temporaire',
+    'admin.users.temp'    => 'Mot de passe temporaire',
+    'admin.users.temp_done' => 'Mot de passe temporaire généré pour {nom} (valable une seule connexion) :',
 
     // Création d'items (modales de l'espace membre)
     'create.profil.title'    => 'Nouveau profil',
@@ -352,5 +362,13 @@ return array(
     'auth.error.csrf'       => 'Session expirée. Rechargez la page.',
     'auth.error.blocked'    => 'Trop de tentatives. Réessayez dans {minutes} min.',
     'auth.error.inactive'   => 'Compte désactivé.',
+    'auth.error.changer_mdp_deja' => 'Ce compte a déjà défini son mot de passe.',
+
+    // Définition du vrai mot de passe (après un mot de passe temporaire)
+    'auth.chgmdp.hint'      => 'Un employé a défini un mot de passe temporaire pour votre compte. Choisissez votre vrai mot de passe (min. 8 caractères) pour continuer.',
+    'auth.chgmdp.nouveau'   => 'Nouveau mot de passe (min. 8 caractères)',
+    'auth.chgmdp.confirm'   => 'Confirmez le nouveau mot de passe',
+    'auth.chgmdp.submit'    => 'Définir mon mot de passe',
+    'auth.chgmdp.err_confirm' => 'Les deux mots de passe ne correspondent pas.',
     'auth.error.network'    => 'Erreur réseau. Réessayez.',
 );

@@ -117,7 +117,7 @@ a:hover { color: #3180BC; }
 .site-main--page .page-content { flex: 1 0 auto; display: flex; flex-direction: column; justify-content: center; }
 .site-main--page .page-content > .section-inner { width: 100%; }
 
-.section { padding: 1.25rem 0; }
+.section { padding: 0.5rem 0; }
 .section-inner { max-width: 53.75rem; margin: 0 auto; }
 .section-inner.wide { max-width: 62.25rem; }
 
@@ -133,7 +133,7 @@ a:hover { color: #3180BC; }
 .two-col {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1.25rem;
+    gap: 0.625rem;
     align-items: stretch;
 }
 
@@ -153,7 +153,7 @@ a:hover { color: #3180BC; }
     text-align: center;
     border: 1px solid #7CAED4;
     border-radius: 0.5rem;
-    margin-top: 1.25rem;
+    margin-top: 0.5rem;
 }
 
 .page-banner h1 { color: #d8ff00; font-size: 1.5rem; margin-bottom: 0.3rem; }
@@ -336,8 +336,8 @@ a:hover { color: #3180BC; }
 .site-footer {
     background: transparent;
     color: #555758;
-    margin-top: 1rem;
-    padding: 1.5rem 1rem;
+    margin-top: 0.5rem;
+    padding: 0.75rem 1rem;
     border-top: 1px solid #98bfdd;
 }
 
@@ -601,27 +601,27 @@ a:hover { color: #3180BC; }
 
 /* Accordéons imbriqués (règle d'Éric : H3 ET H4 pliables).
    Barres sans fond : texte #303030 → #3180BC au survol/actif. */
-ul.accords { list-style: none; margin: 0.6rem 0 0; padding: 0; }
+ul.accords { list-style: none; margin: 0.3rem 0 0; padding: 0; }
 
 /* Barre de fin de zone de texte, DANS LE FLUX (jamais masquée) :
    une sous chaque panneau H4, et sous chaque H3 UNIQUEMENT quand il est
    replié (quand il est déplié, ce sont les H4 qui délimitent). */
-ul.accords > li { padding-bottom: 0.3rem; }
+ul.accords > li { padding-bottom: 0.15rem; }
 ul.accords > li::after {
     content: '';
     display: block;
     height: 1px;
-    margin: 0.3rem 1.5rem 0; /* alignée avec le texte H3 (après le « + ») */
+    margin: 0.15rem 1.5rem 0; /* alignée avec le texte H3 (après le « + ») */
     background: rgba(125, 162, 41, 0.45); /* vert olive non fluo #7da229 (financiereba) */
 }
 ul.accords > li.active::after { display: none; } /* H3 déplié : pas de barre */
 
-ul.accords ul.accords > li { padding-bottom: 0.3rem; }
+ul.accords ul.accords > li { padding-bottom: 0.15rem; }
 ul.accords ul.accords > li::after {
     content: '';
     display: block;
     height: 1px;
-    margin: 0.3rem 2.2rem 0; /* alignée avec le texte H4 (après le « + ») */
+    margin: 0.15rem 2.2rem 0; /* alignée avec le texte H4 (après le « + ») */
     background: rgba(125, 162, 41, 0.45); /* vert olive non fluo #7da229 (financiereba) */
 }
 
@@ -631,7 +631,7 @@ ul.accords h3.toggle-title {
     font-family: inherit;
     font-weight: 400;
     font-size: 1.125rem; /* 18 px (source) */
-    line-height: 2em;
+    line-height: 1.5em;
     margin: 0;
     position: relative;
     padding: 0.15rem 0 0.05rem 1.5rem; /* 1.5rem = 0.7rem + place pour le « + » */
@@ -658,7 +658,7 @@ ul.accords h4.toggle-title {
     font-family: inherit;
     font-weight: 600;
     font-size: 0.9rem;
-    line-height: 1.8em;
+    line-height: 1.4em;
     margin: 0;
     position: relative;
     padding: 0.1rem 0 0 2.2rem; /* 2.2rem = 1.4rem + place pour le « + » */
@@ -680,10 +680,10 @@ ul.accords h4.toggle-title.active {
 }
 
 ul.accords .block {
-    padding: 1.25rem 1.9rem 1.25rem 1.1rem; /* 20 px 30 px 20 px (source) */
+    padding: 0.625rem 1.9rem 0.625rem 1.1rem; /* moitié du padding vertical (déployé) */
 }
 ul.accords ul.accords .block {
-    padding: 1.25rem 1.9rem 1.25rem 2.6rem;
+    padding: 0.625rem 1.9rem 0.625rem 2.6rem;
 }
 ul.accords .block p {
     margin: 0.2rem 0;
@@ -744,7 +744,7 @@ ul.accords .block h4:not(.toggle-title) {
 }
 
 /* ---------- Zone compte (espace membre) ---------- */
-.account-card { margin-bottom: 1.25rem; }
+.account-card { margin-bottom: 0.625rem; }
 .account-card h2 { margin-top: 0; }
 
 .account-grid {

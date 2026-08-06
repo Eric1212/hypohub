@@ -283,10 +283,15 @@ function db_schema() {
     // Migration profils_proprietaire v6 (2026-08-05) : profil unique IDV/INC.
     // remplace nom_complet par prenom+nom, ajoute adresse/naissance/INC,
     // retire situation_emploi et revenu_annuel (l'argent vit au dossier).
-    $col = function ($name) use ($pdo) {
+    // Vérifie si une colonne existe dans la table indiquée (par défaut
+    // profils_proprietaire, pour la migration v6). Les migrations v9/v10
+    // (users) passent la table en 2e argument — sans quoi le garde-fou
+    // interrogerait toujours la mauvaise table et relancerait les ALTER.
+    $col = function ($name, $table = 'profils_proprietaire') use ($pdo) {
+        $table = preg_replace('/[^a-z_]/i', '', $table);
         return (int) $pdo->query(
             "SELECT COUNT(*) FROM information_schema.COLUMNS
-              WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'profils_proprietaire' AND COLUMN_NAME = '$name'"
+              WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '$table' AND COLUMN_NAME = '$name'"
         )->fetchColumn();
     };
 
@@ -320,44 +325,52 @@ function db_schema() {
         $pdo->exec('ALTER TABLE profils_proprietaire DROP COLUMN situation_emploi, DROP COLUMN revenu_annuel');
     }
 
-    // Version du schéma (bump à chaque évolution de la structure)
-    $st = $pdo->prepare(
-        "INSERT INTO app_meta (meta_key, meta_value) VALUES ('schema_version', '9')
-         ON DUPLICATE KEY UPDATE meta_value = '9'"
-    );
-    $st->execute();
-
     // v9 — Zone compte : username, certificat AMF + statut de vérification,
     // demande d'accès créancier (justification + statut), rôle vérificateur.
-    if (!$col('username')) {
+    if (!$col('username', 'users')) {
         $pdo->exec("ALTER TABLE users
             ADD COLUMN username VARCHAR(80) DEFAULT NULL AFTER nom_complet,
             ADD UNIQUE KEY uq_users_username (username)");
     }
-    if (!$col('certificat_amf')) {
+    if (!$col('certificat_amf', 'users')) {
         $pdo->exec("ALTER TABLE users
             ADD COLUMN certificat_amf VARCHAR(32) DEFAULT NULL AFTER telephone");
     }
-    if (!$col('certificat_amf_statut')) {
+    if (!$col('certificat_amf_statut', 'users')) {
         $pdo->exec("ALTER TABLE users
             ADD COLUMN certificat_amf_statut ENUM('vide','en_attente','verifie') NOT NULL DEFAULT 'vide' AFTER certificat_amf");
     }
-    if (!$col('demande_creancier_justification')) {
+    if (!$col('demande_creancier_justification', 'users')) {
         $pdo->exec("ALTER TABLE users
             ADD COLUMN demande_creancier_justification TEXT NULL AFTER acces_creancier");
     }
-    if (!$col('demande_creancier_statut')) {
+    if (!$col('demande_creancier_statut', 'users')) {
         $pdo->exec("ALTER TABLE users
             ADD COLUMN demande_creancier_statut ENUM('aucune','en_attente','approuve','refuse') NOT NULL DEFAULT 'aucune' AFTER demande_creancier_justification");
     }
-    if (!$col('demande_creancier_date')) {
+    if (!$col('demande_creancier_date', 'users')) {
         $pdo->exec('ALTER TABLE users
             ADD COLUMN demande_creancier_date DATETIME NULL AFTER demande_creancier_statut');
     }
-    if (!$col('est_admin')) {
+    if (!$col('est_admin', 'users')) {
         $pdo->exec('ALTER TABLE users
             ADD COLUMN est_admin TINYINT(1) NOT NULL DEFAULT 0 AFTER actif');
     }
+
+    // v10 — Mot de passe temporaire : quand un employé en génère un
+    // (admin « reset_mdp »), le compte est marqué et DOIT changer son mot de
+    // passe au premier login (modale dédiée avant toute session).
+    if (!$col('mdp_temporaire', 'users')) {
+        $pdo->exec('ALTER TABLE users
+            ADD COLUMN mdp_temporaire TINYINT(1) NOT NULL DEFAULT 0 AFTER mot_de_passe');
+    }
+
+    // Version du schéma (bump à chaque évolution de la structure)
+    $st = $pdo->prepare(
+        "INSERT INTO app_meta (meta_key, meta_value) VALUES ('schema_version', '10')
+         ON DUPLICATE KEY UPDATE meta_value = '10'"
+    );
+    $st->execute();
 
     // Purge quotidienne des documents en staging (profil_id NULL) — 3h33 locale.
     // Paresseuse (aucun cron sur hébergement partagé) : exécutée au premier

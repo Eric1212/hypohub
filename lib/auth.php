@@ -106,7 +106,58 @@ function auth_login($email, $password) {
         return array('ok' => false, 'error' => t('auth.error.inactive'));
     }
 
+    // Mot de passe temporaire (généré par un employé) : aucune session n'est
+    // ouverte — le compte doit d'abord définir son vrai mot de passe (modale
+    // dédiée → api/changer_mdp.php).
+    if (!empty($user['mdp_temporaire'])) {
+        auth_reset_failures($email, $ip);
+        return array('ok' => true, 'changer_mdp' => true);
+    }
+
     auth_reset_failures($email, $ip);
+    session_regenerate_id(true);
+    $_SESSION['user_id'] = (int) $user['id'];
+
+    return array('ok' => true);
+}
+
+/**
+ * Définit un vrai mot de passe après une connexion avec mot de passe
+ * temporaire. Vérifie l'ancien, exige 8 caractères, lève le flag, ouvre la
+ * session proprement.
+ * @return array ['ok' => true] ou ['ok' => false, 'error' => message]
+ */
+function auth_changer_mdp($email, $ancien, $nouveau) {
+    $email  = strtolower(trim((string) $email));
+    $ancien = (string) $ancien;
+    $nouveau = (string) $nouveau;
+
+    if ($email === '' || $ancien === '' || $nouveau === '') {
+        return array('ok' => false, 'error' => t('auth.error.required'));
+    }
+    if (strlen($nouveau) < 8) {
+        return array('ok' => false, 'error' => t('auth.error.password'));
+    }
+
+    $st = db()->prepare('SELECT * FROM users WHERE email = ?');
+    $st->execute(array($email));
+    $user = $st->fetch();
+
+    if (!$user || !password_verify($ancien, $user['mot_de_passe'])) {
+        return array('ok' => false, 'error' => t('auth.error.invalid'));
+    }
+    if (!$user['actif']) {
+        return array('ok' => false, 'error' => t('auth.error.inactive'));
+    }
+    if (empty($user['mdp_temporaire'])) {
+        return array('ok' => false, 'error' => t('auth.error.changer_mdp_deja'));
+    }
+
+    $st = db()->prepare(
+        'UPDATE users SET mot_de_passe = ?, mdp_temporaire = 0 WHERE id = ?'
+    );
+    $st->execute(array(password_hash($nouveau, PASSWORD_DEFAULT), (int) $user['id']));
+
     session_regenerate_id(true);
     $_SESSION['user_id'] = (int) $user['id'];
 

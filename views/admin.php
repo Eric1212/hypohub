@@ -43,6 +43,18 @@ if (empty($__admin_u) || empty($__admin_u['est_admin'])) {
                 </li>
             </ul>
         </div>
+
+        <div class="card">
+            <h2><?php echo htmlspecialchars(t('admin.users.title'), ENT_QUOTES, 'UTF-8'); ?></h2>
+            <ul class="accords">
+                <li data-admin-panel="utilisateurs">
+                    <h3 class="toggle-title"><?php echo htmlspecialchars(t('admin.users.list'), ENT_QUOTES, 'UTF-8'); ?></h3>
+                    <div class="toggle-content" style="display:none;"><div class="block">
+                        <p class="note"><?php echo htmlspecialchars(t('admin.loading'), ENT_QUOTES, 'UTF-8'); ?></p>
+                    </div></div>
+                </li>
+            </ul>
+        </div>
     </div>
 </section>
 
@@ -53,6 +65,8 @@ if (empty($__admin_u) || empty($__admin_u['est_admin'])) {
     var LABEL_OK = <?php echo json_encode(t('admin.ok_label')); ?>;
     var LABEL_NO = <?php echo json_encode(t('admin.refuser')); ?>;
     var LABEL_EMPTY = <?php echo json_encode(t('admin.empty')); ?>;
+    var LABEL_TEMP = <?php echo json_encode(t('admin.users.temp')); ?>;
+    var LABEL_TEMP_DONE = <?php echo json_encode(t('admin.users.temp_done')); ?>;
 
     function esc(s) {
         var d = document.createElement('div');
@@ -70,6 +84,7 @@ if (empty($__admin_u) || empty($__admin_u['est_admin'])) {
         .then(function (r) { return r.json(); })
         .then(function (res) {
             if (res.ok) window.location.reload();
+            else if (res.error && res.error !== '') alert(res.error);
         });
     }
 
@@ -91,6 +106,57 @@ if (empty($__admin_u) || empty($__admin_u['est_admin'])) {
                     }
                     var container = block;
                     container.innerHTML = '';
+
+                    // Panneau « utilisateurs » : liste complète + mot de passe temporaire.
+                    if (type === 'utilisateurs') {
+                        rows.forEach(function (row) {
+                            var card = document.createElement('div');
+                            card.className = 'admin-item';
+
+                            var head = document.createElement('p');
+                            head.innerHTML = '<strong>' + esc(row.nom_complet || row.username || row.email) + '</strong> '
+                                + '<em>' + esc(row.email || '') + '</em>';
+
+                            var info = document.createElement('p');
+                            var badges = [];
+                            if (row.est_admin) badges.push('<?php echo htmlspecialchars(t('admin.users.admin'), ENT_QUOTES, 'UTF-8'); ?>');
+                            if (row.acces_creancier) badges.push('<?php echo htmlspecialchars(t('admin.users.creancier'), ENT_QUOTES, 'UTF-8'); ?>');
+                            if (row.acces_proprietaire) badges.push('<?php echo htmlspecialchars(t('admin.users.proprietaire'), ENT_QUOTES, 'UTF-8'); ?>');
+                            if (row.mdp_temporaire) badges.push('<?php echo htmlspecialchars(t('admin.users.temp_flag'), ENT_QUOTES, 'UTF-8'); ?>');
+                            info.innerHTML = '<?php echo htmlspecialchars(t('admin.users.amf'), ENT_QUOTES, 'UTF-8'); ?> '
+                                + esc(row.certificat_amf_statut || '') + (badges.length ? ' · ' + badges.join(' · ') : '');
+
+                            var btnTemp = document.createElement('button');
+                            btnTemp.type = 'button';
+                            btnTemp.className = 'btn btn-outline';
+                            btnTemp.textContent = LABEL_TEMP;
+                            btnTemp.onclick = function () {
+                                var b = btnTemp;
+                                b.disabled = true;
+                                fetch('api/demandes_admin.php', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ action: 'reset_mdp', user_id: row.id, csrf: CSRF })
+                                })
+                                .then(function (r) { return r.json(); })
+                                .then(function (res) {
+                                    b.disabled = false;
+                                    if (res.ok && res.temp) {
+                                        alert(LABEL_TEMP_DONE.replace('{nom}', res.nom || '') + '\n\n' + res.temp);
+                                    } else if (res.error) {
+                                        alert(res.error);
+                                    }
+                                });
+                            };
+
+                            card.appendChild(head);
+                            card.appendChild(info);
+                            card.appendChild(btnTemp);
+                            container.appendChild(card);
+                        });
+                        return;
+                    }
+
                     rows.forEach(function (row) {
                         var card = document.createElement('div');
                         card.className = 'admin-item';

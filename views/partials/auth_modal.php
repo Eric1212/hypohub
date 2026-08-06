@@ -24,6 +24,24 @@
             <button type="submit" class="btn btn-primary btn-block"><?php echo htmlspecialchars(t('auth.login.submit'), ENT_QUOTES, 'UTF-8'); ?></button>
         </form>
 
+        <!-- Vrai mot de passe après un mot de passe temporaire (premier login) -->
+        <form id="auth_changer_mdp_form" class="auth-form" data-err-network="<?php echo htmlspecialchars(t('auth.error.network'), ENT_QUOTES, 'UTF-8'); ?>" data-err-confirm="<?php echo htmlspecialchars(t('auth.chgmdp.err_confirm'), ENT_QUOTES, 'UTF-8'); ?>" hidden novalidate>
+            <input type="hidden" name="csrf" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
+            <input type="hidden" name="email" value="">
+            <input type="hidden" name="password" value="">
+            <p class="auth-hint" data-chgmdp-hint><?php echo htmlspecialchars(t('auth.chgmdp.hint'), ENT_QUOTES, 'UTF-8'); ?></p>
+            <label>
+                <span><?php echo htmlspecialchars(t('auth.chgmdp.nouveau'), ENT_QUOTES, 'UTF-8'); ?></span>
+                <input type="password" name="nouveau" autocomplete="new-password" minlength="8" required>
+            </label>
+            <label>
+                <span><?php echo htmlspecialchars(t('auth.chgmdp.confirm'), ENT_QUOTES, 'UTF-8'); ?></span>
+                <input type="password" name="confirmation" autocomplete="new-password" minlength="8" required>
+            </label>
+            <p class="auth-error" data-chgmdp-error hidden></p>
+            <button type="submit" class="btn btn-primary btn-block"><?php echo htmlspecialchars(t('auth.chgmdp.submit'), ENT_QUOTES, 'UTF-8'); ?></button>
+        </form>
+
         <!-- Onglet création de compte -->
         <form id="auth_register_form" class="auth-form" data-err-network="<?php echo htmlspecialchars(t('auth.error.network'), ENT_QUOTES, 'UTF-8'); ?>" hidden novalidate>
             <input type="hidden" name="csrf" value="<?php echo htmlspecialchars(csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
