@@ -151,6 +151,9 @@ function espace_detail($label, $value) {
                         </span>
                     </label>
                     <button type="submit" data-amf-action="demander" class="btn btn-outline" <?php echo $amf_statut === 'verifie' ? 'hidden' : ''; ?> <?php echo ($amf_result === null || $amf_result === '') ? 'disabled' : ''; ?>><?php echo htmlspecialchars(t('account.amf.demander'), ENT_QUOTES, 'UTF-8'); ?></button>
+                    <?php if (!empty($__u['est_admin'])): ?>
+                        <a class="btn btn-outline" href="index.php?page=admin"><?php echo htmlspecialchars(t('account.admin.btn'), ENT_QUOTES, 'UTF-8'); ?></a>
+                    <?php endif; ?>
                     <?php if (empty($__u['acces_creancier'])): ?>
                         <?php if ($__u['demande_creancier_statut'] === 'en_attente'): ?>
                             <button type="button" class="btn btn-outline" data-amp-spacer data-cre-attente disabled><?php echo htmlspecialchars(t('account.cre.demander'), ENT_QUOTES, 'UTF-8'); ?></button>

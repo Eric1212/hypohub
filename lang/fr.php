@@ -207,6 +207,7 @@ return array(
     'account.amf.attente'     => 'Vérification en attente',
     'account.amf.verifie'     => 'Vérifié',
     'account.amf.demander'    => 'Demander à être courtier',
+    'account.admin.btn'       => 'Panneau admin',
     'account.amf.lock_warn'   => 'Votre certificat AMF est vérifié. Le modifier retire immédiatement votre accès courtier/créancier, et votre demande sera à refaire à zéro. Continuer ?',
     'account.amf.lock_ok'     => 'Certificat révoqué — le champ est déverrouillé.',
 

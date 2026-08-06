@@ -208,6 +208,7 @@ return array(
     'account.amf.attente'     => 'Verification pending',
     'account.amf.verifie'     => 'Verified',
     'account.amf.demander'    => 'Ask to become a broker',
+    'account.admin.btn'       => 'Admin panel',
     'account.amf.lock_warn'   => 'Your AMF certificate is verified. Editing it immediately revokes your broker/lender access, and your request will have to be redone from scratch. Continue?',
     'account.amf.lock_ok'     => 'Certificate revoked — the field is unlocked.',
 
