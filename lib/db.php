@@ -368,7 +368,7 @@ function db_schema() {
 
     // v11 — Cycle de vie du dossier d'emprunt (décision Éric, 2026-08-06) :
     //   nouveau = créé, aucun professionnel ne l'a encore ouvert ;
-    //   act     = au moins un courtier/créancier travaille dessus (ex-accepte) ;
+    //   actif   = au moins un courtier/créancier travaille dessus (ex-accepte) ;
     //   finance = résultat post-acceptation d'une offre (date_financement) ;
     //   expire  = fermé par le système après 90 jours sans activité ;
     //   retire  = retiré volontairement par l'utilisateur.
@@ -378,16 +378,16 @@ function db_schema() {
         "SELECT COLUMN_TYPE FROM information_schema.COLUMNS
           WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'dossiers_emprunt' AND COLUMN_NAME = 'statut'"
     )->fetchColumn();
-if (strpos($statut_type, "'accepte'") !== false) {
-        // Élargir d'abord (ajouter les nouvelles valeurs), convertir, resserrer.
+    if (strpos($statut_type, "'actif'") === false) {
+        // Élargir d'abord (ajouter les valeurs), convertir, resserrer.
         // MySQL ne permet pas d'affecter une valeur qui n'est pas (encore)
-        // dans l'ENUM — il faut d'abord que 'act' et 'expire' existent.
+        // dans l'ENUM — il faut d'abord que 'actif' et 'expire' existent.
         $pdo->exec("ALTER TABLE dossiers_emprunt
-            MODIFY statut ENUM('nouveau','act','finance','expire','retire','accepte','refuse') NOT NULL DEFAULT 'nouveau'");
-        $pdo->exec("UPDATE dossiers_emprunt SET statut = 'act' WHERE statut = 'accepte'");
+            MODIFY statut ENUM('nouveau','actif','finance','expire','retire','act','accepte','refuse') NOT NULL DEFAULT 'nouveau'");
+        $pdo->exec("UPDATE dossiers_emprunt SET statut = 'actif' WHERE statut IN ('accepte', 'act')");
         $pdo->exec("UPDATE dossiers_emprunt SET statut = 'expire' WHERE statut = 'refuse'");
         $pdo->exec("ALTER TABLE dossiers_emprunt
-            MODIFY statut ENUM('nouveau','act','finance','expire','retire') NOT NULL DEFAULT 'nouveau'");
+            MODIFY statut ENUM('nouveau','actif','finance','expire','retire') NOT NULL DEFAULT 'nouveau'");
     }
     if (!$col('derniere_activite', 'dossiers_emprunt')) {
         $pdo->exec('ALTER TABLE dossiers_emprunt

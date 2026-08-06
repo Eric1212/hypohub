@@ -331,7 +331,7 @@ return array(
     'type.fin.deuxieme_rang'         => 'Second rank',
     'type.fin.delai_serre'           => 'Tight deadline',
     'type.statut.nouveau'            => 'New',
-    'type.statut.act'                => 'Active',
+    'type.statut.actif'              => 'Active',
     'type.statut.finance'            => 'Financed',
     'type.statut.expire'             => 'Expired',
     'type.statut.retire'             => 'Withdrawn',

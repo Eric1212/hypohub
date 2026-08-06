@@ -330,7 +330,7 @@ return array(
     'type.fin.deuxieme_rang'         => '2e rang',
     'type.fin.delai_serre'           => 'Délai serré',
     'type.statut.nouveau'            => 'Nouveau',
-    'type.statut.act'                => 'Actif',
+    'type.statut.actif'              => 'Actif',
     'type.statut.finance'            => 'Financé',
     'type.statut.expire'             => 'Expiré',
     'type.statut.retire'             => 'Retiré',

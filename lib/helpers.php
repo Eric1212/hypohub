@@ -41,7 +41,7 @@ function redirect($url) {
 
 /**
  * Expiration automatique des dossiers (décision Éric, 2026-08-06) : tout
- * dossier resté 'nouveau' ou 'act' pendant 90 jours sans activité passe au
+ * dossier resté 'nouveau' ou 'actif' pendant 90 jours sans activité passe au
  * statut 'expire' (fermé par le système). Appelée à chaque chargement de
  * l'espace membre — pas besoin de cron sur l'hébergement partagé.
  */
@@ -62,7 +62,7 @@ function expire_dossiers_inactifs() {
  * Statistiques du bandeau de preuve de l'accueil, calculées depuis la base.
  *
  * - demandes     : nombre de dossiers d'emprunt ACTIFS — statut 'nouveau' ou
- *                  'act' (un dossier 'finance' est un résultat finalisé, plus
+ *                  'actif' (un dossier 'finance' est un résultat finalisé, plus
  *                  un dossier actif ; décision Éric 2026-08-06) — affiché par
  *                  la logique de palier d'Éric :
  *                    1. base = fenêtre au ratio/j le plus élevé ;
