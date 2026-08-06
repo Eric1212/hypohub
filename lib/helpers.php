@@ -40,11 +40,31 @@ function redirect($url) {
 }
 
 /**
+ * Expiration automatique des dossiers (décision Éric, 2026-08-06) : tout
+ * dossier resté 'nouveau' ou 'act' pendant 90 jours sans activité passe au
+ * statut 'expire' (fermé par le système). Appelée à chaque chargement de
+ * l'espace membre — pas besoin de cron sur l'hébergement partagé.
+ */
+function expire_dossiers_inactifs() {
+    try {
+        db()->exec(
+            "UPDATE dossiers_emprunt
+                SET statut = 'expire'
+              WHERE statut IN ('nouveau', 'actif')
+                AND derniere_activite < (NOW() - INTERVAL 90 DAY)"
+        );
+    } catch (Exception $e) {
+        // Silencieux : l'espace fonctionne même si le balayage échoue.
+    }
+}
+
+/**
  * Statistiques du bandeau de preuve de l'accueil, calculées depuis la base.
  *
- * - demandes     : nombre de dossiers d'emprunt ACTIFS — statut 'nouveau',
- *                  'accepte' ou 'finance' (les dossiers finalisés comptent
- *                  aussi) — affiché par la logique de palier d'Éric :
+ * - demandes     : nombre de dossiers d'emprunt ACTIFS — statut 'nouveau' ou
+ *                  'act' (un dossier 'finance' est un résultat finalisé, plus
+ *                  un dossier actif ; décision Éric 2026-08-06) — affiché par
+ *                  la logique de palier d'Éric :
  *                    1. base = fenêtre au ratio/j le plus élevé ;
  *                    2. ratio < 1 partout → repli « 1 aujourd'hui » ;
  *                    3. cascade : chaque fenêtre à droite de la base a un
@@ -91,7 +111,7 @@ function home_stats() {
         $counts = array();
         $ratios = array();
         foreach ($periods as $p => $info) {
-            $counts[$p] = (int) $pdo->query("SELECT COUNT(*) FROM dossiers_emprunt WHERE statut IN ('nouveau', 'accepte', 'finance') AND " . $info[1])->fetchColumn();
+            $counts[$p] = (int) $pdo->query("SELECT COUNT(*) FROM dossiers_emprunt WHERE statut IN ('nouveau', 'actif') AND " . $info[1])->fetchColumn();
             $ratios[$p] = $counts[$p] / $info[0];
         }
 
@@ -145,11 +165,11 @@ function home_stats() {
         //   - total_global : somme cumulée toutes dates.
         // Affichage « X K$ / Y K$ » (option d'Éric). Au repli de la stat 1,
         // la fenêtre jour est vide → on montre le cumul des deux côtés.
-        $stats['total_global'] = (float) $pdo->query("SELECT COALESCE(SUM(montant_demande), 0) FROM dossiers_emprunt WHERE statut IN ('nouveau', 'accepte', 'finance')")->fetchColumn();
+        $stats['total_global'] = (float) $pdo->query("SELECT COALESCE(SUM(montant_demande), 0) FROM dossiers_emprunt WHERE statut IN ('nouveau', 'actif')")->fetchColumn();
         if ($repli) {
             $stats['total'] = $stats['total_global'];
         } else {
-            $stats['total'] = (float) $pdo->query("SELECT COALESCE(SUM(montant_demande), 0) FROM dossiers_emprunt WHERE statut IN ('nouveau', 'accepte', 'finance') AND " . $periods[$base][1])->fetchColumn();
+            $stats['total'] = (float) $pdo->query("SELECT COALESCE(SUM(montant_demande), 0) FROM dossiers_emprunt WHERE statut IN ('nouveau', 'actif') AND " . $periods[$base][1])->fetchColumn();
         }
 
         // Plancher « jamais 0 » sur les compteurs (base vide ou toute neuve).

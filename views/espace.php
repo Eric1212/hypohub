@@ -10,6 +10,9 @@ if (!$__u) {
     redirect('index.php');
 }
 
+// Balayage d'expiration : les dossiers inactifs 90 jours passent à 'expire'.
+expire_dossiers_inactifs();
+
 $pdo       = db();
 $profils   = array();
 $proprietes = array();
@@ -49,7 +52,7 @@ if ($__u['acces_creancier']) {
 $st = $pdo->query(
         "SELECT id, montant_demande, rang, type_financement, statut
            FROM dossiers_emprunt
-          WHERE statut IN ('nouveau', 'accepte')
+          WHERE statut IN ('nouveau', 'act')
           ORDER BY id DESC"
     );
     $reseau = $st->fetchAll();

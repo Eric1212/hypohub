@@ -120,8 +120,9 @@ function db_schema() {
         montant_demande         DECIMAL(12,2) NOT NULL,
         rang                    ENUM('premier','deuxieme') NOT NULL DEFAULT 'premier',
         type_financement        ENUM('travailleur_autonome','consolidation','deuxieme_rang','delai_serre') NOT NULL DEFAULT 'travailleur_autonome',
-        statut                  ENUM('nouveau','accepte','finance','refuse','retire') NOT NULL DEFAULT 'nouveau',
+        statut                  ENUM('nouveau','actif','finance','expire','retire') NOT NULL DEFAULT 'nouveau',
         date_financement        DATETIME DEFAULT NULL,
+        derniere_activite       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
         date_creation           DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (id),
         KEY idx_de_cree_par (cree_par),
@@ -365,10 +366,38 @@ function db_schema() {
             ADD COLUMN mdp_temporaire TINYINT(1) NOT NULL DEFAULT 0 AFTER mot_de_passe');
     }
 
+    // v11 — Cycle de vie du dossier d'emprunt (décision Éric, 2026-08-06) :
+    //   nouveau = créé, aucun professionnel ne l'a encore ouvert ;
+    //   act     = au moins un courtier/créancier travaille dessus (ex-accepte) ;
+    //   finance = résultat post-acceptation d'une offre (date_financement) ;
+    //   expire  = fermé par le système après 90 jours sans activité ;
+    //   retire  = retiré volontairement par l'utilisateur.
+    // 'refuse' n'existe plus (un dossier n'est pas « refusé », c'est une offre
+    // qui l'est). Colonne derniere_activite : pilote l'expiration automatique.
+    $statut_type = (string) $pdo->query(
+        "SELECT COLUMN_TYPE FROM information_schema.COLUMNS
+          WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'dossiers_emprunt' AND COLUMN_NAME = 'statut'"
+    )->fetchColumn();
+if (strpos($statut_type, "'accepte'") !== false) {
+        // Élargir d'abord (ajouter les nouvelles valeurs), convertir, resserrer.
+        // MySQL ne permet pas d'affecter une valeur qui n'est pas (encore)
+        // dans l'ENUM — il faut d'abord que 'act' et 'expire' existent.
+        $pdo->exec("ALTER TABLE dossiers_emprunt
+            MODIFY statut ENUM('nouveau','act','finance','expire','retire','accepte','refuse') NOT NULL DEFAULT 'nouveau'");
+        $pdo->exec("UPDATE dossiers_emprunt SET statut = 'act' WHERE statut = 'accepte'");
+        $pdo->exec("UPDATE dossiers_emprunt SET statut = 'expire' WHERE statut = 'refuse'");
+        $pdo->exec("ALTER TABLE dossiers_emprunt
+            MODIFY statut ENUM('nouveau','act','finance','expire','retire') NOT NULL DEFAULT 'nouveau'");
+    }
+    if (!$col('derniere_activite', 'dossiers_emprunt')) {
+        $pdo->exec('ALTER TABLE dossiers_emprunt
+            ADD COLUMN derniere_activite DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP AFTER date_financement');
+    }
+
     // Version du schéma (bump à chaque évolution de la structure)
     $st = $pdo->prepare(
-        "INSERT INTO app_meta (meta_key, meta_value) VALUES ('schema_version', '10')
-         ON DUPLICATE KEY UPDATE meta_value = '10'"
+        "INSERT INTO app_meta (meta_key, meta_value) VALUES ('schema_version', '11')
+         ON DUPLICATE KEY UPDATE meta_value = '11'"
     );
     $st->execute();
 
