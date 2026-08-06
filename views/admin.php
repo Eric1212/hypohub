@@ -1,9 +1,9 @@
 <?php
 /**
- * Hypohub — Vue vérificateur (admin interne).
- * Réservée aux comptes est_admin=1 (employés). Affiche les demandes en
- * attente : vérifications de certificats AMF et demandes d'accès créancier.
- * Les actions passent par l'API api/demandes_admin.php (JSON) puis rechargent.
+ * Hypohub — Panneau admin (employé vérificateur).
+ * Réservé aux comptes est_admin=1. Layout « espace connecté » : une carte Zone
+ * Admin avec 3 colonnes — sections (gauche), liste des ID/entités (centre),
+ * zone de travail (droite, éditer/accepter). Data via api/demandes_admin.php.
  */
 
 // Garde de sécurité redondante (le routeur vérifie déjà)
@@ -11,49 +11,47 @@ if (empty($__admin_u) || empty($__admin_u['est_admin'])) {
     redirect('index.php?page=espace');
 }
 ?>
-<section class="page-banner">
-    <div class="page-banner-inner">
-        <h1><?php echo htmlspecialchars(t('admin.title'), ENT_QUOTES, 'UTF-8'); ?></h1>
-        <p class="page-banner-sub"><?php echo htmlspecialchars(t('admin.intro'), ENT_QUOTES, 'UTF-8'); ?></p>
-    </div>
-</section>
-
 <section class="section page-content">
     <div class="section-inner wide">
-        <div class="card">
-            <h2><?php echo htmlspecialchars(t('admin.amf.title'), ENT_QUOTES, 'UTF-8'); ?></h2>
-            <ul class="accords">
-                <li data-admin-panel="amf">
-                    <h3 class="toggle-title"><?php echo htmlspecialchars(t('admin.amf.list'), ENT_QUOTES, 'UTF-8'); ?></h3>
-                    <div class="toggle-content" style="display:none;"><div class="block">
-                        <p class="note"><?php echo htmlspecialchars(t('admin.loading'), ENT_QUOTES, 'UTF-8'); ?></p>
-                    </div></div>
-                </li>
-            </ul>
-        </div>
+        <div class="card admin-shell">
+            <div class="admin-shell-head">
+                <h1><?php echo htmlspecialchars(t('admin.zone.title'), ENT_QUOTES, 'UTF-8'); ?></h1>
+                <a class="btn btn-outline" href="index.php?page=espace"><?php echo htmlspecialchars(t('admin.back.sp'), ENT_QUOTES, 'UTF-8'); ?></a>
+            </div>
 
-        <div class="card">
-            <h2><?php echo htmlspecialchars(t('admin.creancier.title'), ENT_QUOTES, 'UTF-8'); ?></h2>
-            <ul class="accords">
-                <li data-admin-panel="creancier">
-                    <h3 class="toggle-title"><?php echo htmlspecialchars(t('admin.creancier.list'), ENT_QUOTES, 'UTF-8'); ?></h3>
-                    <div class="toggle-content" style="display:none;"><div class="block">
-                        <p class="note"><?php echo htmlspecialchars(t('admin.loading'), ENT_QUOTES, 'UTF-8'); ?></p>
-                    </div></div>
-                </li>
-            </ul>
-        </div>
+            <div class="admin-shell-body">
+                <!-- Colonne 1 — sections -->
+                <nav class="admin-sections" aria-label="Sections admin">
+                    <button type="button" class="admin-sec" data-admin-sec="amf">
+                        <span class="admin-sec-ic" aria-hidden="true">A
+                            <span class="admin-sec-badge" data-badge="amf" hidden></span>
+                        </span>
+                        <span class="admin-sec-label"><?php echo htmlspecialchars(t('admin.amf.title'), ENT_QUOTES, 'UTF-8'); ?></span>
+                    </button>
+                    <button type="button" class="admin-sec" data-admin-sec="creancier">
+                        <span class="admin-sec-ic" aria-hidden="true">C
+                            <span class="admin-sec-badge" data-badge="creancier" hidden></span>
+                        </span>
+                        <span class="admin-sec-label"><?php echo htmlspecialchars(t('admin.creancier.title'), ENT_QUOTES, 'UTF-8'); ?></span>
+                    </button>
+                    <button type="button" class="admin-sec" data-admin-sec="utilisateurs">
+                        <span class="admin-sec-ic" aria-hidden="true">U
+                            <span class="admin-sec-badge" data-badge="utilisateurs" hidden></span>
+                        </span>
+                        <span class="admin-sec-label"><?php echo htmlspecialchars(t('admin.users.title'), ENT_QUOTES, 'UTF-8'); ?></span>
+                    </button>
+                </nav>
 
-        <div class="card">
-            <h2><?php echo htmlspecialchars(t('admin.users.title'), ENT_QUOTES, 'UTF-8'); ?></h2>
-            <ul class="accords">
-                <li data-admin-panel="utilisateurs">
-                    <h3 class="toggle-title"><?php echo htmlspecialchars(t('admin.users.list'), ENT_QUOTES, 'UTF-8'); ?></h3>
-                    <div class="toggle-content" style="display:none;"><div class="block">
-                        <p class="note"><?php echo htmlspecialchars(t('admin.loading'), ENT_QUOTES, 'UTF-8'); ?></p>
-                    </div></div>
-                </li>
-            </ul>
+                <!-- Colonne 2 — liste des entités de la section -->
+                <div class="admin-list" id="admin_list">
+                    <p class="note"><?php echo htmlspecialchars(t('admin.select'), ENT_QUOTES, 'UTF-8'); ?></p>
+                </div>
+
+                <!-- Colonne 3 — zone de travail (détails + actions) -->
+                <div class="admin-work" id="admin_work">
+                    <p class="note"><?php echo htmlspecialchars(t('admin.select'), ENT_QUOTES, 'UTF-8'); ?></p>
+                </div>
+            </div>
         </div>
     </div>
 </section>
@@ -62,11 +60,26 @@ if (empty($__admin_u) || empty($__admin_u['est_admin'])) {
 (function () {
     'use strict';
     var CSRF = <?php echo json_encode(csrf_token()); ?>;
-    var LABEL_OK = <?php echo json_encode(t('admin.ok_label')); ?>;
-    var LABEL_NO = <?php echo json_encode(t('admin.refuser')); ?>;
-    var LABEL_EMPTY = <?php echo json_encode(t('admin.empty')); ?>;
-    var LABEL_TEMP = <?php echo json_encode(t('admin.users.temp')); ?>;
-    var LABEL_TEMP_DONE = <?php echo json_encode(t('admin.users.temp_done')); ?>;
+    var L = {};
+    L.EMPTY   = <?php echo json_encode(t('admin.empty')); ?>;
+    L.LOAD    = <?php echo json_encode(t('admin.loading')); ?>;
+    L.OK      = <?php echo json_encode(t('admin.ok_label')); ?>;
+    L.NO      = <?php echo json_encode(t('admin.refuser')); ?>;
+    L.SELECT  = <?php echo json_encode(t('admin.select')); ?>;
+    L.AMF_NUM = <?php echo json_encode(t('admin.amf.num')); ?>;
+    L.JUSTIF  = <?php echo json_encode(t('admin.justif')); ?>;
+    L.AMF     = <?php echo json_encode(t('admin.users.amf')); ?>;
+    L.ADMIN   = <?php echo json_encode(t('admin.users.admin')); ?>;
+    L.CRE     = <?php echo json_encode(t('admin.users.creancier')); ?>;
+    L.PROP    = <?php echo json_encode(t('admin.users.proprietaire')); ?>;
+    L.TEMP    = <?php echo json_encode(t('admin.users.temp')); ?>;
+    L.TEMP_DONE = <?php echo json_encode(t('admin.users.temp_done')); ?>;
+    L.PROMOTE = <?php echo json_encode(t('admin.users.promote')); ?>;
+    L.DEMOTE  = <?php echo json_encode(t('admin.users.demote')); ?>;
+
+    var data = null;          // réponse GET complète
+    var current = null;       // section active ('amf' | 'creancier' | 'utilisateurs')
+    var selectedId = null;    // entité sélectionnée
 
     function esc(s) {
         var d = document.createElement('div');
@@ -74,131 +87,173 @@ if (empty($__admin_u) || empty($__admin_u['est_admin'])) {
         return d.innerHTML;
     }
 
-    function decis(type, id, decision) {
-        var action = (type === 'amf') ? 'verif' : 'creancier';
+    function el(tag, cls, html) {
+        var e = document.createElement(tag);
+        if (cls) e.className = cls;
+        if (html !== undefined) e.innerHTML = html;
+        return e;
+    }
+
+    var listEl = document.getElementById('admin_list');
+    var workEl = document.getElementById('admin_work');
+
+    /* ---------- Apps Admin ---------- */
+    function post(body, done) {
         return fetch('api/demandes_admin.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: action, decision: decision, user_id: id, csrf: CSRF })
+            body: JSON.stringify(body)
         })
         .then(function (r) { return r.json(); })
         .then(function (res) {
-            if (res.ok) window.location.reload();
-            else if (res.error && res.error !== '') alert(res.error);
+            if (res.ok) { if (done) done(res); }
+            else if (res.error) { alert(res.error); }
         });
     }
 
-    document.querySelectorAll('[data-admin-panel]').forEach(function (li) {
-        var type = li.getAttribute('data-admin-panel');
-        var loaded = false;
-        li.querySelector('.toggle-title').addEventListener('click', function () {
-            if (loaded) return;
-            loaded = true;
-            var block = li.querySelector('.toggle-content .block');
-            fetch('api/demandes_admin.php')
-                .then(function (r) { return r.json(); })
-                .then(function (res) {
-                    if (!res.ok) return;
-                    var rows = res[type] || [];
-                    if (!rows.length) {
-                        block.innerHTML = '<p class="note">' + esc(LABEL_EMPTY) + '</p>';
-                        return;
+    function reload() {
+        fetch('api/demandes_admin.php')
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+                if (!res.ok) return;
+                data = res;
+                updateBadges();
+                if (current) renderList(current);
+            })
+            .catch(function () {});
+    }
+
+    /* --- Badges de comptage sur les sections --- */
+    function updateBadges() {
+        [['amf', data.amf.length], ['creancier', data.creancier.length], ['utilisateurs', data.utilisateurs.length]].forEach(function (p) {
+            var b = document.querySelector('[data-badge="' + p[0] + '"]');
+            if (b) {
+                b.hidden = (p[1] <= 0);
+                b.textContent = p[1];
+            }
+        });
+    }
+
+    /* --- Section active (highlight) --- */
+    function setActiveSec(sec) {
+        document.querySelectorAll('[data-admin-sec]').forEach(function (b) {
+            b.classList.toggle('active', b.getAttribute('data-admin-sec') === sec);
+        });
+        current = sec;
+    }
+
+    /* --- Colonne 2 : liste d'une section --- */
+    function renderList(sec) {
+        listEl.innerHTML = '';
+        var rows = data[sec] || [];
+        if (!rows.length) {
+            listEl.appendChild(el('p', 'note', esc(L.EMPTY)));
+            workEl.innerHTML = '<p class="note">' + esc(L.SELECT) + '</p>';
+            selectedId = null;
+            return;
+        }
+        rows.forEach(function (row) {
+            var b = el('button', 'admin-list-item',
+                '<strong>' + esc(row.nom_complet || row.username || row.email) + '</strong>' +
+                '<em>' + esc(row.email || '') + '</em>');
+            b.type = 'button';
+            b.dataset.id = row.id;
+            b.addEventListener('click', function () {
+                document.querySelectorAll('.admin-list-item').forEach(function (x) { x.classList.remove('selected'); });
+                b.classList.add('selected');
+                selectedId = row.id;
+                renderWork(sec, row);
+            });
+            listEl.appendChild(b);
+        });
+    }
+
+    /* --- Colonne 3 : zone de travail (détails + actions) --- */
+    function renderWork(sec, row) {
+        workEl.innerHTML = '';
+
+        // En-tête : identité
+        workEl.appendChild(el('h2', 'admin-work-title', esc(row.nom_complet || row.username || row.email)));
+
+        var lines = workEl.appendChild(el('div', 'admin-work-detail'));
+        if (row.email) lines.appendChild(el('p', null, '<strong>Courriel</strong> · ' + esc(row.email)));
+
+        if (sec === 'amf') {
+            lines.appendChild(el('p', null, '<strong>' + esc(L.AMF_NUM) + '</strong> · ' + esc(row.certificat_amf || '')));
+        }
+        if (sec === 'creancier') {
+            lines.appendChild(el('p', null, '<strong>' + esc(L.JUSTIF) + '</strong>'));
+            lines.appendChild(el('p', null, esc(row.demande_creancier_justification || '')));
+        }
+        if (sec === 'utilisateurs') {
+            var badges = [];
+            if (row.est_admin) badges.push(L.ADMIN);
+            if (row.acces_creancier) badges.push(L.CRE);
+            if (row.acces_proprietaire) badges.push(L.PROP);
+            lines.appendChild(el('p', null, '<strong>' + esc(L.AMF) + '</strong> ' + esc(row.certificat_amf_statut || '') +
+                (badges.length ? ' · ' + esc(badges.join(' · ')) : '')));
+        }
+
+        // Actions
+        var actions = workEl.appendChild(el('div', 'admin-work-actions'));
+        if (sec === 'amf' || sec === 'creancier') {
+            var ok = el('button', 'btn btn-primary', esc(L.OK));
+            ok.type = 'button';
+            var no = el('button', 'btn btn-outline', esc(L.NO));
+            no.type = 'button';
+            ok.addEventListener('click', function () {
+                post({ action: sec === 'amf' ? 'verif' : 'creancier', decision: sec === 'amf' ? 'verifie' : 'approuve', user_id: row.id, csrf: CSRF }, function () { reload(); });
+            });
+            no.addEventListener('click', function () {
+                post({ action: sec === 'amf' ? 'verif' : 'creancier', decision: 'refuse', user_id: row.id, csrf: CSRF }, function () { reload(); });
+            });
+            actions.appendChild(ok);
+            actions.appendChild(no);
+        }
+        if (sec === 'utilisateurs') {
+            var bTemp = el('button', 'btn btn-outline', esc(L.TEMP));
+            bTemp.type = 'button';
+            bTemp.addEventListener('click', function () {
+                bTemp.disabled = true;
+                post({ action: 'reset_mdp', user_id: row.id, csrf: CSRF }, function (res) {
+                    bTemp.disabled = false;
+                    if (res.temp) {
+                        alert(L.TEMP_DONE.replace('{nom}', res.nom || '') + '\n\n' + res.temp);
                     }
-                    var container = block;
-                    container.innerHTML = '';
+                });
+            });
+            actions.appendChild(bTemp);
 
-                    // Panneau « utilisateurs » : liste complète + mot de passe temporaire.
-                    if (type === 'utilisateurs') {
-                        rows.forEach(function (row) {
-                            var card = document.createElement('div');
-                            card.className = 'admin-item';
+            var bPromo = el('button', 'btn btn-outline', esc(row.est_admin ? L.DEMOTE : L.PROMOTE));
+            bPromo.type = 'button';
+            bPromo.addEventListener('click', function () {
+                post({ action: row.est_admin ? 'revoquer' : 'promote', user_id: row.id, csrf: CSRF }, function () { reload(); });
+            });
+            actions.appendChild(bPromo);
+        }
+    }
 
-                            var head = document.createElement('p');
-                            head.innerHTML = '<strong>' + esc(row.nom_complet || row.username || row.email) + '</strong> '
-                                + '<em>' + esc(row.email || '') + '</em>';
-
-                            var info = document.createElement('p');
-                            var badges = [];
-                            if (row.est_admin) badges.push('<?php echo htmlspecialchars(t('admin.users.admin'), ENT_QUOTES, 'UTF-8'); ?>');
-                            if (row.acces_creancier) badges.push('<?php echo htmlspecialchars(t('admin.users.creancier'), ENT_QUOTES, 'UTF-8'); ?>');
-                            if (row.acces_proprietaire) badges.push('<?php echo htmlspecialchars(t('admin.users.proprietaire'), ENT_QUOTES, 'UTF-8'); ?>');
-                            if (row.mdp_temporaire) badges.push('<?php echo htmlspecialchars(t('admin.users.temp_flag'), ENT_QUOTES, 'UTF-8'); ?>');
-                            info.innerHTML = '<?php echo htmlspecialchars(t('admin.users.amf'), ENT_QUOTES, 'UTF-8'); ?> '
-                                + esc(row.certificat_amf_statut || '') + (badges.length ? ' · ' + badges.join(' · ') : '');
-
-                            var btnTemp = document.createElement('button');
-                            btnTemp.type = 'button';
-                            btnTemp.className = 'btn btn-outline';
-                            btnTemp.textContent = LABEL_TEMP;
-                            btnTemp.onclick = function () {
-                                var b = btnTemp;
-                                b.disabled = true;
-                                fetch('api/demandes_admin.php', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ action: 'reset_mdp', user_id: row.id, csrf: CSRF })
-                                })
-                                .then(function (r) { return r.json(); })
-                                .then(function (res) {
-                                    b.disabled = false;
-                                    if (res.ok && res.temp) {
-                                        alert(LABEL_TEMP_DONE.replace('{nom}', res.nom || '') + '\n\n' + res.temp);
-                                    } else if (res.error) {
-                                        alert(res.error);
-                                    }
-                                });
-                            };
-
-                            card.appendChild(head);
-                            card.appendChild(info);
-                            card.appendChild(btnTemp);
-                            container.appendChild(card);
-                        });
-                        return;
-                    }
-
-                    rows.forEach(function (row) {
-                        var card = document.createElement('div');
-                        card.className = 'admin-item';
-
-                        var head = document.createElement('p');
-                        head.innerHTML = '<strong>' + esc(row.nom_complet || row.username || row.email) + '</strong> '
-                            + '<em>' + esc(row.email || '') + '</em>';
-
-                        var info = document.createElement('p');
-                        if (type === 'amf') {
-                            info.innerHTML = '<strong><?php echo htmlspecialchars(t('admin.amf.num'), ENT_QUOTES, 'UTF-8'); ?></strong> '
-                                + esc(row.certificat_amf || '');
-                        } else {
-                            info.innerHTML = '<strong><?php echo htmlspecialchars(t('admin.justif'), ENT_QUOTES, 'UTF-8'); ?></strong> '
-                                + esc(row.demande_creancier_justification || '');
-                        }
-
-                        var btnOk = document.createElement('button');
-                        btnOk.type = 'button';
-                        btnOk.className = 'btn btn-primary';
-                        btnOk.textContent = LABEL_OK;
-                        btnOk.onclick = function () {
-                            decis(type, row.id, type === 'amf' ? 'verifie' : 'approuve');
-                        };
-
-                        var btnNo = document.createElement('button');
-                        btnNo.type = 'button';
-                        btnNo.className = 'btn btn-outline';
-                        btnNo.textContent = LABEL_NO;
-                        btnNo.onclick = function () {
-                            decis(type, row.id, type === 'amf' ? 'refuse' : 'refuse');
-                        };
-
-                        card.appendChild(head);
-                        card.appendChild(info);
-                        card.appendChild(btnOk);
-                        card.appendChild(btnNo);
-                        container.appendChild(card);
-                    });
-                })
-                .catch(function () {});
+    /* --- Clic section : charger la liste --- */
+    document.querySelectorAll('[data-admin-sec]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var sec = btn.getAttribute('data-admin-sec');
+            setActiveSec(sec);
+            if (data) { renderList(sec); }
+            else {
+                listEl.innerHTML = '<p class="note">' + esc(L.LOAD) + '</p>';
+            }
         });
     });
+
+    /* --- Démarrage : chargement des données + rafraîchissement des badges --- */
+    fetch('api/demandes_admin.php')
+        .then(function (r) { return r.json(); })
+        .then(function (res) {
+            if (!res.ok) return;
+            data = res;
+            updateBadges();
+            if (current) renderList(current);
+        })
+        .catch(function () {});
 })();
 </script>

@@ -228,6 +228,9 @@ return array(
     // Vue vérificateur (admin interne)
     'admin.title'         => 'Demandes de vérification',
     'admin.intro'         => 'Traitement des certificats AMF et des demandes d\'accès créancier.',
+    'admin.zone.title'    => 'Zone Admin',
+    'admin.select'        => 'Sélectionnez un élément…',
+    'admin.back.sp'       => 'Retour à l\'espace',
     'admin.amf.title'     => 'Certificats AMF',
     'admin.amf.list'      => 'Vérifications AMF en attente',
     'admin.amf.num'       => 'N° de certificat',
@@ -250,6 +253,8 @@ return array(
     'admin.users.proprietaire' => 'propriétaire',
     'admin.users.temp_flag' => 'mdp temporaire',
     'admin.users.temp'    => 'Mot de passe temporaire',
+    'admin.users.promote'  => 'Promouvoir admin',
+    'admin.users.demote'   => 'Retirer admin',
     'admin.users.temp_done' => 'Mot de passe temporaire généré pour {nom} (valable une seule connexion) :',
 
     // Création d'items (modales de l'espace membre)

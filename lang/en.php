@@ -229,6 +229,9 @@ return array(
     // Verifier view (internal admin)
     'admin.title'         => 'Verification requests',
     'admin.intro'         => 'Handle AMF certificates and lender-view access requests.',
+    'admin.zone.title'    => 'Admin Zone',
+    'admin.select'        => 'Select an item…',
+    'admin.back.sp'       => 'Back to the space',
     'admin.amf.title'     => 'AMF certificates',
     'admin.amf.list'      => 'Pending AMF verifications',
     'admin.amf.num'       => 'Certificate number',
@@ -251,6 +254,8 @@ return array(
     'admin.users.proprietaire' => 'owner',
     'admin.users.temp_flag' => 'temp password',
     'admin.users.temp'    => 'Temporary password',
+    'admin.users.promote'  => 'Promote to admin',
+    'admin.users.demote'   => 'Remove admin',
     'admin.users.temp_done' => 'Temporary password generated for {nom} (valid for a single login):',
 
     // Creating items (space modals)
