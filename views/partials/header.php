@@ -22,7 +22,7 @@ $__nav = array(
 <title><?php echo htmlspecialchars(t('app.name'), ENT_QUOTES, 'UTF-8'); ?> :: <?php echo htmlspecialchars(t($__title_key), ENT_QUOTES, 'UTF-8'); ?></title>
 <link rel="stylesheet" href="static/css/style.css">
 </head>
-<body<?php echo $__page === 'espace' ? ' class="page-espace"' : ''; ?>>
+<body<?php echo $__page === 'espace' ? ' class="page-espace"' : ($__page === 'admin' ? ' class="page-admin"' : ''); ?>>
 <header class="site-header">
     <div class="site-header-inner">
         <a class="logo" href="index.php"><?php echo htmlspecialchars(t('app.name'), ENT_QUOTES, 'UTF-8'); ?></a>

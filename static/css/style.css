@@ -880,14 +880,16 @@ ul.accords .block h4:not(.toggle-title) {
 /* La carte occupe TOUT l'espace vertical disponible (sans scroll de page) :
    la section s'étire (stretch), le section-inner et la carte suivent, et le
    scroll se fait dans les colonnes (overflow-y auto). */
-.admin-page {
-    /* Le contenu ne doit jamais agrandir la page : hauteur bornée = viewport
-       moins en-tête (53px) et pied de page (70px + marge 8px). Le scroll se
-       fait dans les colonnes de la carte, jamais sur la page. */
-    height: calc(100vh - 53px - 78px);
+/* ---------- Page admin : layout pleine hauteur sans scroll ----------
+   Le body est gelé à la hauteur de l'écran (plus de scroll de page) et le
+   main devient un conteneur flex qui remplit exactement l'espace restant
+   (sans pixels magiques : le header/footer peuvent changer de hauteur). */
+body.page-admin { height: 100vh; overflow: hidden; }
+body.page-admin .site-main { flex: 1 1 0%; min-height: 0; }
+body.page-admin .site-main--page .page-content {
+    flex: 1 1 0%;
     min-height: 0;
-    overflow: hidden;
-    justify-content: stretch !important;
+    justify-content: stretch;
 }
 .admin-page > .section-inner {
     display: flex;
